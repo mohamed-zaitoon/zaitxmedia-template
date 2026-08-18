@@ -1,7 +1,7 @@
 # 🌟 ZaitXMedia Store Template (Open Source Example)
 
 > This repository is a **clean, open-source template** designed as an architectural example for developers building Next.js 15 digital stores, TikTok coin calculation platforms, and multi-country payment management engines.
-> **All production keys, credentials, and live data have been replaced with example placeholders.**
+> **All production keys, credentials, phone numbers, and live data have been completely removed or replaced with generic placeholders.**
 
 ---
 
@@ -41,4 +41,4 @@ npm run dev
 ---
 
 ## 🌐 Arabic Note / ملاحظة باللغة العربية
-هذا المشروع هو **نسخة قالب مفتوحة المصدر (Open-Source Template)** تم فيها استبدال كافة مفاتيح الربط والبيانات الحقيقية بقيم توضيحية لتعمل كمثال هندسي لمصممي ومطوري تطبيقات Next.js و Python.
+هذا المشروع هو **نسخة قالب مفتوحة المصدر (Open-Source Template)** تم فيها استبدال كافة مفاتيح الربط والبيانات الحقيقية وأرقام الهواتف بقيم توضيحية لتعمل كمثال هندسي لمصممي ومطوري تطبيقات Next.js و Python.
