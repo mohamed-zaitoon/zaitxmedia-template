@@ -1,0 +1,4978 @@
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../lib/auth-context";
+import { MAX_WALLET_BALANCE_EGP, grossDepositRequiredForNet } from "@/lib/money/wallet";
+
+import { db } from "../lib/firebase";
+
+import {
+  setDoc,
+  getDoc,
+  doc,
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  addDoc,
+  deleteDoc,
+  onSnapshot,
+  where,
+  limit,
+} from "firebase/firestore";
+import {
+  LogOut,
+  Save,
+  Settings,
+  Package,
+  Users,
+  Layers,
+  DollarSign,
+  Phone,
+  Wallet,
+  TrendingUp,
+  Shield,
+  ShieldAlert,
+  X,
+  Plus,
+  Trash2,
+  BarChart3,
+  Bell,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Search,
+  RefreshCw,
+  Home,
+  Zap,
+  Ban,
+  UserCheck,
+  Key,
+  Mail,
+  Database,
+  Calculator,
+  Edit3,
+  Filter,
+  EyeOff,
+  Menu,
+} from "lucide-react";
+import Swal from "sweetalert2";
+import { FinancialTab } from "./FinancialTab";
+import { calculateTikTokPriceEgp, calculateTikTokOriginalPriceEgp, ceilTo2Decimals, type TikTokPricingTier } from "@/lib/pricing/tiktok";
+import { calculateManualServicePriceEgp, getManualServicePriceUsd, calculateManualServiceOriginalPriceEgp } from "@/lib/pricing/manual-service";
+import { isGlobalUsdDiscountActive } from "@/lib/pricing/pricing-discount";
+
+function calculateExactRemainingTimeText(expiresAt?: string | null): string {
+  if (!expiresAt) return "فترة محدودة";
+  const expireTime = new Date(expiresAt).getTime();
+  if (!Number.isFinite(expireTime)) return "فترة محدودة";
+  const diffMs = expireTime - Date.now();
+  if (diffMs <= 0) return "فترة محدودة";
+
+  const totalSecs = Math.floor(diffMs / 1000);
+  const days = Math.floor(totalSecs / (3600 * 24));
+  const hours = Math.floor((totalSecs % (3600 * 24)) / 3600);
+  const mins = Math.floor((totalSecs % 3600) / 60);
+
+  const parts: string[] = [];
+  if (days > 0) parts.push(`${days} يوم`);
+  if (hours > 0) parts.push(`${hours} ساعة`);
+  if (mins > 0 || (days === 0 && hours === 0)) parts.push(`${mins} دقيقة`);
+
+  return parts.join(" و ");
+}
+
+const tabs = [
+  { id: "dashboard", label: "الرئيسية", icon: <BarChart3 size={16} /> },
+  { id: "settings", label: "الإعدادات", icon: <Settings size={16} /> },
+  { id: "pricing", label: "الأسعار", icon: <DollarSign size={16} /> },
+  { id: "wallets", label: "المحافظ", icon: <Wallet size={16} /> },
+  { id: "users", label: "المستخدمون", icon: <Users size={16} /> },
+  { id: "orders", label: "الطلبات", icon: <Package size={16} /> },
+  { id: "calculator", label: "حاسبة الأرباح", icon: <Calculator size={16} /> },
+  { id: "recharges", label: "طلبات الشحن", icon: <DollarSign size={16} /> },
+  { id: "sms_review", label: "مراجعة SMS", icon: <Phone size={16} /> },
+  { id: "manual_svcs", label: "الخدمات اليدوية", icon: <Zap size={16} /> },
+  { id: "financial", label: "المالية والتغطية", icon: <TrendingUp size={16} /> },
+];
+
+async function fetchAdminData(resource: string) {
+  const response = await fetch(
+    `/api/admin/data?resource=${encodeURIComponent(resource)}`,
+    { credentials: "include", cache: "no-store" },
+  );
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || !result.success) {
+    throw new Error(result?.error?.message || result?.error || "تعذر تحميل البيانات");
+  }
+  return result;
+}
+
+async function writeAdminData(body: Record<string, unknown>) {
+  const response = await fetch("/api/admin/data", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(body),
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || !result.success) {
+    throw new Error(result?.error?.message || result?.error || "تعذر حفظ البيانات");
+  }
+}
+
+export default function AdminPage() {
+  const router = useRouter();
+  const { user, loading, signOutUser } = useAuth();
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const [pin, setPin] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setIsAdmin(user?.role === "admin");
+    setChecking(false);
+  }, [user]);
+
+  const handleLogin = (e: any) => {
+    e.preventDefault();
+    router.push("/login");
+  };
+
+  if (checking)
+    return (
+      <div className="premium-loader-container">
+        <span className="premium-loader-text">جاري التحقق...</span>
+      </div>
+    );
+  if (!isAdmin)
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#0a0a0a",
+          color: "#fff",
+        }}
+        dir="rtl"
+      >
+        <form onSubmit={handleLogin} style={{ background: "#111", padding: 40, borderRadius: 16, border: "1px solid #222", textAlign: "center", maxWidth: 400, width: "90%" }}>
+          <Shield size={48} color="#38bdf8" style={{ marginBottom: 20 }} />
+          <h2 style={{ color: "#fff", marginBottom: 20 }}>تسجيل دخول الإدارة</h2>
+          <input 
+            type="password" 
+            value={pin} 
+            onChange={(e) => setPin(e.target.value)} 
+            placeholder="أدخل رمز المرور (PIN)" 
+            style={{ width: "100%", padding: 12, borderRadius: 8, background: "#1a1a1a", color: "#fff", border: "1px solid #333", marginBottom: 20, textAlign: "center", letterSpacing: 4 }}
+          />
+          <button type="submit" style={{ width: "100%", padding: 12, background: "#38bdf8", color: "#000", fontWeight: "bold", borderRadius: 8, border: "none", cursor: "pointer" }}>
+            دخول
+          </button>
+        </form>
+      </div>
+    );
+
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#060606",
+        color: "#fff",
+        display: "flex",
+      }}
+      dir="rtl"
+    >
+      {/* Mobile Sidebar Overlay */}
+      {mobileMenuOpen && (
+        <div 
+          onClick={() => setMobileMenuOpen(false)}
+          style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", zIndex: 99 }}
+        />
+      )}
+      
+      {/* Sidebar */}
+      <div
+        style={{
+          width: 240,
+          background: "#0b0b0b",
+          borderLeft: "1px solid #181818",
+          padding: "24px 0",
+          display: "flex",
+          flexDirection: "column",
+          flexShrink: 0,
+          position: mobileMenuOpen ? "fixed" : "relative",
+          top: 0,
+          bottom: 0,
+          right: mobileMenuOpen ? 0 : "auto",
+          zIndex: 100,
+          transition: "transform 0.3s ease",
+        }}
+        className={mobileMenuOpen ? "" : "hide-mobile"}
+      >
+        <div
+          style={{
+            padding: "0 24px 24px",
+            borderBottom: "1px solid #181818",
+            marginBottom: 8,
+          }}
+        >
+          <h2
+            style={{
+              color: "#38bdf8",
+              fontSize: 20,
+              margin: "0 0 4px 0",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              fontWeight: 800,
+            }}
+          >
+            <Zap size={22} /> ZAITX MEDIA
+          </h2>
+          <span style={{ fontSize: 11, color: "#555" }}>
+            لوحة التحكم - Admin
+          </span>
+        </div>
+        <nav style={{ padding: "0 12px", flex: 1 }}>
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => { setActiveTab(tab.id); setMobileMenuOpen(false); }}
+              style={{
+                width: "100%",
+                padding: "12px 16px",
+                marginBottom: 2,
+                border: "none",
+                borderRadius: 10,
+                cursor: "pointer",
+                textAlign: "right",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                fontSize: 14,
+                background:
+                  activeTab === tab.id
+                    ? "rgba(56,189,248,0.12)"
+                    : "transparent",
+                color: activeTab === tab.id ? "#38bdf8" : "#888",
+                transition: "all 0.15s",
+                fontWeight: activeTab === tab.id ? 600 : 400,
+              }}
+            >
+              {tab.icon} {tab.label}
+            </button>
+          ))}
+        </nav>
+        <div style={{ padding: "16px 24px", borderTop: "1px solid #181818" }}>
+          <div style={{ fontSize: 12, color: "#555", marginBottom: 8 }}>
+            {user?.email}
+          </div>
+          <button
+            onClick={async () => {
+              await signOutUser();
+            }}
+            style={{
+              width: "100%",
+              padding: 10,
+              borderRadius: 8,
+              background: "rgba(255,68,68,0.08)",
+              border: "1px solid rgba(255,68,68,0.2)",
+              color: "#ff4444",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 6,
+              fontSize: 13,
+            }}
+          >
+            <LogOut size={14} /> تسجيل الخروج
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "32px 20px" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", width: "100%" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 28,
+            flexWrap: "wrap",
+            gap: 12,
+          }}
+        >
+          <h1
+            style={{
+              fontSize: 24,
+              margin: 0,
+              fontWeight: 800,
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+            }}
+          >
+            {tabs.find((t) => t.id === activeTab)?.icon}
+            <span>{tabs.find((t) => t.id === activeTab)?.label}</span>
+          </h1>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="show-mobile"
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "#fff",
+                cursor: "pointer",
+                padding: 4
+              }}
+            >
+              <Menu size={24} />
+            </button>
+            <button
+              onClick={async () => {
+                await signOutUser();
+              }}
+              style={{
+                ...btnSm,
+                color: "#ff4444",
+                borderColor: "rgba(255,68,68,0.3)",
+              }}
+            >
+              <LogOut size={14} />
+            </button>
+          </div>
+        </div>
+
+
+
+        {activeTab === "dashboard" && <DashboardTab />}
+        {activeTab === "settings" && <SettingsTab />}
+        {activeTab === "pricing" && <PricingTab />}
+        {activeTab === "wallets" && <WalletsTab />}
+        {activeTab === "users" && <UsersTab />}
+        {activeTab === "orders" && <OrdersTab />}
+        {activeTab === "calculator" && <CalculatorTab />}
+        {activeTab === "recharges" && <RechargesTab />}
+        {activeTab === "sms_review" && <SmsReviewTab />}
+        {activeTab === "manual_svcs" && <ManualServicesTab />}
+        {activeTab === "financial" && <FinancialTab />}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Dashboard ───────────────────────────────────────────────────────────────
+
+export function DashboardTab() {
+  const [stats, setStats] = useState({
+    users: 0,
+    orders: 0,
+    admins: 0,
+    pending: 0,
+  });
+  const [statsError, setStatsError] = useState("");
+  useEffect(() => {
+    let active = true;
+    fetch("/api/admin/dashboard", { credentials: "include", cache: "no-store" })
+      .then(async (response) => {
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.success) {
+          throw new Error(result?.error?.message || result?.error || "تعذر تحميل الإحصائيات");
+        }
+        if (active) setStats(result.stats);
+      })
+      .catch((error) => {
+        if (active) {
+          setStatsError(
+            error instanceof Error ? error.message : "تعذر تحميل الإحصائيات",
+          );
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  return (
+    <div>
+      <div className="mb-7 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <span className="text-xs font-bold text-primary">نظرة عامة</span>
+          <h1 className="mt-1 text-2xl font-black text-white md:text-3xl">مرحبًا بك في مركز الإدارة</h1>
+          <p className="mt-2 text-sm text-muted-foreground">تابع المستخدمين والطلبات والعمليات المعلقة من مكان واحد.</p>
+        </div>
+        <div className="w-fit rounded-xl border border-emerald-500/20 bg-emerald-500/[0.08] px-4 py-2 text-xs font-bold text-emerald-400">
+          ● النظام يعمل
+        </div>
+      </div>
+      {statsError && <p className="mb-4 text-red-400">{statsError}</p>}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          gap: 20,
+          marginBottom: 32,
+        }}
+      >
+        {[
+          {
+            label: "المستخدمون",
+            value: stats.users,
+            icon: <Users size={24} />,
+            color: "#38bdf8",
+            bg: "rgba(56,189,248,0.08)",
+          },
+          {
+            label: "الطلبات",
+            value: stats.orders,
+            icon: <Package size={24} />,
+            color: "#a78bfa",
+            bg: "rgba(167,139,250,0.08)",
+          },
+          {
+            label: "طلبات معلقة",
+            value: stats.pending,
+            icon: <Clock size={24} />,
+            color: "#fbbf24",
+            bg: "rgba(251,191,36,0.08)",
+          },
+          {
+            label: "المدراء",
+            value: stats.admins,
+            icon: <Shield size={24} />,
+            color: "#34d399",
+            bg: "rgba(52,211,153,0.08)",
+          },
+        ].map((c, i) => (
+          <div
+            key={i}
+            style={{
+              background: "linear-gradient(145deg, rgba(15,25,43,.92), rgba(8,14,26,.96))",
+              padding: 24,
+              borderRadius: 18,
+              border: "1px solid rgba(255,255,255,0.075)",
+              boxShadow: "0 18px 45px rgba(0,0,0,0.2)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+              }}
+            >
+              <div
+                style={{
+                  color: c.color,
+                  background: c.bg,
+                  padding: 10,
+                  borderRadius: 10,
+                }}
+              >
+                {c.icon}
+              </div>
+              <div style={{ textAlign: "left" }}>
+                <div style={{ fontSize: 26, fontWeight: 800 }}>{c.value}</div>
+                <div style={{ color: "#8899b4", fontSize: 12, marginTop: 4 }}>
+                  {c.label}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+
+function isoToDatetimeLocal(isoStr?: string | null): string {
+  if (!isoStr) return "";
+  const d = new Date(isoStr);
+  if (isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const year = d.getFullYear();
+  const month = pad(d.getMonth() + 1);
+  const day = pad(d.getDate());
+  const hours = pad(d.getHours());
+  const minutes = pad(d.getMinutes());
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+function datetimeLocalToIso(localStr: string): string {
+  if (!localStr) return "";
+  const d = new Date(localStr);
+  if (isNaN(d.getTime())) return "";
+  return d.toISOString();
+}
+
+function getRemainingTimeString(isoStr?: string | null): string {
+  if (!isoStr) return "";
+  const expireTime = new Date(isoStr).getTime();
+  if (isNaN(expireTime)) return "";
+  const diffMs = expireTime - Date.now();
+  if (diffMs <= 0) return "منتهي الآن ⚠️";
+
+  const totalMinutes = Math.floor(diffMs / (1000 * 60));
+  const days = Math.floor(totalMinutes / (60 * 24));
+  const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+  const minutes = totalMinutes % 60;
+
+  const parts: string[] = [];
+  if (days > 0) parts.push(`${days} يوم`);
+  if (hours > 0) parts.push(`${hours} ساعة`);
+  if (minutes > 0 || parts.length === 0) parts.push(`${minutes} دقيقة`);
+
+  return `متبقي: ${parts.join(" و ")}`;
+}
+
+// ─── Settings ────────────────────────────────────────────────────────────────
+
+export function SettingsTab() {
+  const [form, setForm] = useState({
+    whatsapp: "",
+    usdRate: "55",
+    tiktokCostUsd: "10.3",
+    minCoins: "30",
+    maxCoins: "2500000",
+    depositFeePercent: "0.57",
+    walletFeePercent: "0.57",
+    instapayFeePercent: "0.57",
+    bankFeePercent: "0.57",
+    barqFeePercent: "0.57",
+    depositFeeMinEgp: "0.5",
+    depositFeeMaxEgp: "20",
+    maxWalletBalanceUsd: "20000",
+    globalUsdDiscountEnabled: false,
+    globalUsdDiscountPercent: "10",
+    globalUsdDiscountMaxAmount: "0",
+    globalUsdDiscountExpiresAt: "",
+    sarRateOverride: "13.33",
+    sarMinDeposit: "10",
+    sarMaxDeposit: "10000",
+    supportedCountries: ["EG", "SA", "AE", "KW", "QA", "GLOBAL"],
+    defaultUiStyle: "glass",
+    defaultUiTheme: "cyber",
+    defaultFloatingBar: true,
+  });
+  const [customCountries, setCustomCountries] = useState<any[]>([
+    { code: "AE", name: "الإمارات", currency: "AED", flag: "🇦🇪" },
+    { code: "KW", name: "الكويت", currency: "KWD", flag: "🇰🇼" },
+    { code: "QA", name: "قطر", currency: "QAR", flag: "🇶🇦" },
+    { code: "OM", name: "عُمان", currency: "OMR", flag: "🇴🇲" },
+    { code: "BH", name: "البحرين", currency: "BHD", flag: "🇧🇭" },
+  ]);
+  const [newCountry, setNewCountry] = useState({ name: "", code: "", currency: "", flag: "🌍" });
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [siteEnabled, setSiteEnabled] = useState(true);
+  const [siteToggleBusy, setSiteToggleBusy] = useState(false);
+
+  useEffect(() => {
+    fetchAdminData("settings/pricing").then((result) => {
+      if (result.exists) {
+        const v = result.data;
+        if (Array.isArray(v.custom_countries) && v.custom_countries.length > 0) {
+          setCustomCountries(v.custom_countries);
+        }
+        setForm((f) => ({
+          ...f,
+          usdRate: String(v.usd_rate || v.tiktok_usd_rate || "55"),
+          tiktokCostUsd: String(v.tiktok_cost_usd || "10.3"),
+          minCoins: String(v.tiktok_min_coins || "30"),
+          maxCoins: String(v.tiktok_max_coins || "2500000"),
+          depositFeePercent: String(v.deposit_fee_percent ?? v.depositFeePercent ?? 0.57),
+          walletFeePercent: String(v.wallet_fee_percent ?? v.walletFeePercent ?? v.vodafone_fee_percent ?? v.deposit_fee_percent ?? v.depositFeePercent ?? 0.57),
+          instapayFeePercent: String(v.instapay_fee_percent ?? v.instapayFeePercent ?? v.deposit_fee_percent ?? v.depositFeePercent ?? 0.57),
+          bankFeePercent: String(v.bank_fee_percent ?? v.bankFeePercent ?? v.deposit_fee_percent ?? v.depositFeePercent ?? 0.57),
+          barqFeePercent: String(v.barq_fee_percent ?? v.barqFeePercent ?? v.deposit_fee_percent ?? v.depositFeePercent ?? 0.57),
+          depositFeeMinEgp: String(v.deposit_fee_min_egp ?? v.depositFeeMinEgp ?? 0.5),
+          depositFeeMaxEgp: String(v.deposit_fee_max_egp ?? v.depositFeeMaxEgp ?? 20),
+          maxWalletBalanceUsd: String(v.max_wallet_balance_usd ?? v.maxWalletBalanceUsd ?? 20000),
+          sarRateOverride: String(v.sar_rate_override || "13.33"),
+          sarMinDeposit: String(v.sar_min_deposit || "10"),
+          sarMaxDeposit: String(v.sar_max_deposit || "10000"),
+          supportedCountries: Array.isArray(v.supported_countries) ? v.supported_countries : ["EG", "SA", "AE", "KW", "QA", "GLOBAL"],
+          globalUsdDiscountEnabled: Boolean(v.global_usd_discount_enabled ?? v.globalUsdDiscountEnabled ?? false),
+          globalUsdDiscountPercent: String(v.global_usd_discount_percent ?? v.globalUsdDiscountPercent ?? 10),
+          globalUsdDiscountMaxAmount: String(v.global_usd_discount_max_amount ?? v.globalUsdDiscountMaxAmount ?? 0),
+          globalUsdDiscountExpiresAt: String(v.global_usd_discount_expires_at ?? v.globalUsdDiscountExpiresAt ?? ""),
+        }));
+      }
+    }).catch(console.error);
+    fetchAdminData("settings/site").then((result) => {
+      if (result.exists) {
+        const v = result.data;
+        setForm((f) => ({
+          ...f,
+          whatsapp: v.whatsapp || "",
+          defaultUiStyle: v.defaultUiStyle || v.default_ui_style || "glass",
+          defaultUiTheme: v.defaultUiTheme || v.default_ui_theme || "cyber",
+          defaultFloatingBar: v.defaultFloatingBar !== false,
+        }));
+        setSiteEnabled(v.site_enabled !== false);
+      }
+    }).catch(console.error);
+  }, []);
+
+  const save = async () => {
+    setBusy(true);
+    setMsg("");
+    const feePercent = Number(form.depositFeePercent);
+    const walletFee = Number(form.walletFeePercent);
+    const instapayFee = Number(form.instapayFeePercent);
+    const bankFee = Number(form.bankFeePercent);
+    const barqFee = Number(form.barqFeePercent);
+    const feeMin = Number(form.depositFeeMinEgp);
+    const feeMax = Number(form.depositFeeMaxEgp);
+    const maxBalanceUsd = Number(form.maxWalletBalanceUsd);
+
+    if (isNaN(feePercent) || feePercent < 0) {
+      setMsg("❌ نسبة رسوم الإيداع يجب أن تكون رقم أكبر من أو يساوي 0");
+      setBusy(false);
+      return;
+    }
+    if (isNaN(feeMin) || feeMin < 0) {
+      setMsg("❌ الحد الأدنى لخصم الرسوم يجب أن يكون رقم أكبر من أو يساوي 0");
+      setBusy(false);
+      return;
+    }
+    if (isNaN(feeMax) || feeMax < 0) {
+      setMsg("❌ الحد الأقصى لخصم الرسوم يجب أن يكون رقم أكبر من أو يساوي 0");
+      setBusy(false);
+      return;
+    }
+    if (feeMax > 0 && feeMax < feeMin) {
+      setMsg("❌ الحد الأقصى يجب أن يكون أكبر من أو يساوي الحد الأدنى (أو 0 بدون حد أقصى)");
+      setBusy(false);
+      return;
+    }
+    if (isNaN(maxBalanceUsd) || maxBalanceUsd <= 0) {
+      setMsg("❌ الحد الأقصى لرصيد المحفظة يجب أن يكون رقم أكبر من 0");
+      setBusy(false);
+      return;
+    }
+
+    const pricing = {
+      usd_rate: +form.usdRate,
+      tiktok_cost_usd: +form.tiktokCostUsd,
+      tiktok_min_coins: +form.minCoins,
+      tiktok_max_coins: +form.maxCoins,
+      deposit_fee_percent: feePercent,
+      wallet_fee_percent: Number.isFinite(walletFee) && walletFee >= 0 ? walletFee : feePercent,
+      walletFeePercent: Number.isFinite(walletFee) && walletFee >= 0 ? walletFee : feePercent,
+      instapay_fee_percent: Number.isFinite(instapayFee) && instapayFee >= 0 ? instapayFee : feePercent,
+      instapayFeePercent: Number.isFinite(instapayFee) && instapayFee >= 0 ? instapayFee : feePercent,
+      bank_fee_percent: Number.isFinite(bankFee) && bankFee >= 0 ? bankFee : feePercent,
+      bankFeePercent: Number.isFinite(bankFee) && bankFee >= 0 ? bankFee : feePercent,
+      barq_fee_percent: Number.isFinite(barqFee) && barqFee >= 0 ? barqFee : feePercent,
+      barqFeePercent: Number.isFinite(barqFee) && barqFee >= 0 ? barqFee : feePercent,
+      deposit_fee_min_egp: feeMin,
+      deposit_fee_max_egp: feeMax,
+      max_wallet_balance_usd: maxBalanceUsd,
+      maxWalletBalanceUsd: maxBalanceUsd,
+      global_usd_discount_enabled: form.globalUsdDiscountEnabled,
+      global_usd_discount_percent: Number(form.globalUsdDiscountPercent) || 0,
+      global_usd_discount_max_amount: Number(form.globalUsdDiscountMaxAmount) || 0,
+      global_usd_discount_expires_at: form.globalUsdDiscountExpiresAt || null,
+      sar_rate_override: Number(form.sarRateOverride) || 13.33,
+      sar_min_deposit: Number(form.sarMinDeposit) || 10,
+      sar_max_deposit: Number(form.sarMaxDeposit) || 10000,
+      supported_countries: form.supportedCountries,
+      custom_countries: customCountries,
+    };
+    const site = {
+      whatsapp: form.whatsapp.trim(),
+      defaultUiStyle: form.defaultUiStyle,
+      default_ui_style: form.defaultUiStyle,
+      defaultUiTheme: form.defaultUiTheme,
+      default_ui_theme: form.defaultUiTheme,
+      defaultFloatingBar: form.defaultFloatingBar,
+      default_floating_bar: form.defaultFloatingBar,
+    };
+    await Promise.all([
+      writeAdminData({ action: "setDocument", resource: "settings/pricing", data: pricing }),
+      writeAdminData({ action: "setDocument", resource: "settings/site", data: site }),
+    ]);
+    setMsg("✅ تم الحفظ");
+    setBusy(false);
+    setTimeout(() => setMsg(""), 4000);
+  };
+
+  const toggleSite = async () => {
+    const nextEnabled = !siteEnabled;
+    const { isConfirmed } = await Swal.fire({
+      title: nextEnabled ? "تشغيل الموقع للمستخدمين؟" : "إيقاف الموقع للمستخدمين؟",
+      text: nextEnabled
+        ? "سيتمكن المستخدمون من فتح الموقع وتنفيذ طلبات جديدة."
+        : "ستظهر شاشة الصيانة ولن يتم قبول طلبات أو عمليات شحن جديدة.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: nextEnabled ? "تشغيل الموقع" : "إيقاف الموقع",
+      cancelButtonText: "إلغاء",
+      background: "#111827",
+      color: "#fff",
+      confirmButtonColor: nextEnabled ? "#10b981" : "#ef4444",
+    });
+    if (!isConfirmed) return;
+    setSiteToggleBusy(true);
+    try {
+      await writeAdminData({
+        action: "setDocument",
+        resource: "settings/site",
+        data: { site_enabled: nextEnabled },
+      });
+      setSiteEnabled(nextEnabled);
+      setMsg(nextEnabled ? "✅ تم تشغيل الموقع للمستخدمين" : "✅ تم إيقاف الموقع للمستخدمين");
+    } finally {
+      setSiteToggleBusy(false);
+    }
+  };
+
+  return (
+    <div style={{ width: "100%" }}>
+      <Card title="🛠️ حالة الموقع للمستخدمين">
+        <div className={`mb-4 rounded-2xl border p-4 text-center font-bold ${siteEnabled ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-400" : "border-red-500/25 bg-red-500/10 text-red-400"}`}>
+          {siteEnabled ? "الموقع يعمل حاليًا للمستخدمين" : "الموقع متوقف حاليًا وتظهر شاشة الصيانة"}
+        </div>
+        <button
+          type="button"
+          onClick={toggleSite}
+          disabled={siteToggleBusy}
+          className={`h-12 w-full rounded-xl font-black text-white disabled:opacity-50 ${siteEnabled ? "bg-red-600 hover:bg-red-500" : "bg-emerald-600 hover:bg-emerald-500"}`}
+        >
+          {siteToggleBusy ? "جاري التنفيذ..." : siteEnabled ? "⛔ إيقاف الموقع للمستخدمين" : "✅ تشغيل الموقع للمستخدمين"}
+        </button>
+      </Card>
+
+
+
+      <Card title="📱 معلومات التواصل">
+        <div>
+          <label style={lbl}>رقم الواتساب</label>
+          <input
+            value={form.whatsapp}
+            onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
+            style={inp}
+            placeholder="2010xxxxxxx"
+            dir="ltr"
+          />
+        </div>
+      </Card>
+
+      <Card title="💵 أسعار الدولار ورسوم الإيداع والحد الأقصى">
+        <div
+          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}
+        >
+      {[
+        ["🌐 سعر الدولار الرئيسي للموقع (ج.م)", "usdRate"],
+        ["🎞️ تكلفة 1000 تيك توك ($)", "tiktokCostUsd"],
+        ["📱 نسبة رسوم المحافظ / فودافون كاش (%)", "walletFeePercent"],
+        ["⚡ نسبة رسوم انستاباي InstaPay (%)", "instapayFeePercent"],
+        ["🏦 نسبة رسوم التحويل البنكي (%)", "bankFeePercent"],
+        ["🇸🇦 نسبة رسوم تحويل برق (Barq) (%)", "barqFeePercent"],
+        ["💸 نسبة رسوم الإيداع العامة (افتراضي %)", "depositFeePercent"],
+        ["🔻 الحد الأدنى لخصم الرسوم (ج.م)", "depositFeeMinEgp"],
+        ["🔺 الحد الأقصى لخصم الرسوم (ج.م)", "depositFeeMaxEgp"],
+        ["💰 الحد الأقصى لرصيد المحفظة لكل مستخدم ($)", "maxWalletBalanceUsd"],
+      ].map(([l, k]) => (
+            <div key={k}>
+              <label style={lbl}>{l}</label>
+              <input
+                type="number"
+                step="0.01"
+                value={(form as any)[k]}
+                onChange={(e) => setForm({ ...form, [k]: e.target.value })}
+                style={inp}
+              />
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-6 pt-4 border-t border-border/50">
+          <div className="mb-4 bg-gradient-to-r from-emerald-950/20 via-slate-900/40 to-slate-900/40 p-4.5 rounded-2xl border border-emerald-500/30 shadow-lg backdrop-blur-md">
+            <div className="flex items-center gap-4 justify-start flex-wrap">
+              <button
+                type="button"
+                onClick={() =>
+                  setForm((f) => {
+                    const nextEnabled = !f.globalUsdDiscountEnabled;
+                    const defaultExpiry = nextEnabled && !f.globalUsdDiscountExpiresAt
+                      ? new Date(Date.now() + 24 * 3600 * 1000).toISOString()
+                      : f.globalUsdDiscountExpiresAt;
+                    return {
+                      ...f,
+                      globalUsdDiscountEnabled: nextEnabled,
+                      globalUsdDiscountExpiresAt: defaultExpiry,
+                    };
+                  })
+                }
+                className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all duration-300 flex items-center gap-2 shadow-md cursor-pointer shrink-0 ${
+                  form.globalUsdDiscountEnabled
+                    ? "bg-gradient-to-r from-emerald-400 via-emerald-500 to-teal-500 text-slate-950 shadow-emerald-500/25 ring-2 ring-emerald-400/40 hover:brightness-110 active:scale-95"
+                    : "bg-slate-800/80 text-slate-400 border border-slate-700 hover:bg-slate-700/80 hover:text-slate-200 active:scale-95"
+                }`}
+              >
+                <span className={`w-2.5 h-2.5 rounded-full ${form.globalUsdDiscountEnabled ? "bg-slate-950 animate-pulse" : "bg-slate-500"}`} />
+                {form.globalUsdDiscountEnabled ? "✅ الخصم العام مفعل" : "❌ الخصم العام معطل"}
+              </button>
+
+              <div className="min-w-0 flex-1">
+                <div className="font-bold text-sm text-foreground flex items-center gap-2">
+                  <span>🔥 تفعيل الخصم العام على أسعار الدولار (Global USD Discount)</span>
+                </div>
+                <div className="text-xs text-muted-foreground/80 mt-0.5">
+                  تطبيق نسبة خصم عامة على الخدمات والسلع بقيمة 10$ دولار (أو ما يعادلها بالجنيه/الريال) فأكثر
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {form.globalUsdDiscountEnabled && (
+            <div className="space-y-4">
+              <div>
+                <label style={lbl}>نسبة الخصم العامة على أسعار الدولار (%)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  value={form.globalUsdDiscountPercent}
+                  onChange={(e) => setForm({ ...form, globalUsdDiscountPercent: e.target.value })}
+                  style={inp}
+                  placeholder="10"
+                />
+              </div>
+
+              <div>
+                <label style={lbl}>🛑 الحد الأقصى لمبلغ الخصم بالدولار ($) [0 تعني بدون حد أقصى]</label>
+                <input
+                  type="number"
+                  step="1"
+                  min="0"
+                  value={form.globalUsdDiscountMaxAmount}
+                  onChange={(e) => setForm({ ...form, globalUsdDiscountMaxAmount: e.target.value })}
+                  style={inp}
+                  placeholder="مثال: 20 (أو 0 لعدم التحديد)"
+                />
+              </div>
+
+              <div>
+                <label style={lbl}>⏳ مدة وتوقيت الخصم المؤقت (تاريخ وساعة الانتهاء تلقائياً)</label>
+                <div className="flex items-center gap-2 flex-wrap mb-3 mt-1">
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, globalUsdDiscountExpiresAt: "" }))}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                      !form.globalUsdDiscountExpiresAt
+                        ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/40 shadow-sm"
+                        : "bg-card text-muted-foreground border-border hover:bg-muted"
+                    }`}
+                  >
+                    ♾️ خصم دائم (بدون انتهاء)
+                  </button>
+                  {[
+                    ["⏱️ ساعة 1", 1],
+                    ["⏱️ 6 ساعات", 6],
+                    ["⏱️ 12 ساعة", 12],
+                    ["⏱️ 24 ساعة (يوم)", 24],
+                    ["⏱️ 48 ساعة (يومان)", 48],
+                    ["⏱️ 72 ساعة (3 أيام)", 72],
+                    ["⏱️ 7 أيام (أسبوع)", 168],
+                    ["⏱️ 30 يوم (شهر)", 720],
+                  ].map(([label, hours]) => {
+                    const targetTime = new Date(Date.now() + (hours as number) * 3600 * 1000).toISOString();
+                    return (
+                      <button
+                        key={hours}
+                        type="button"
+                        onClick={() => setForm((f) => ({ ...f, globalUsdDiscountExpiresAt: targetTime }))}
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition-all cursor-pointer"
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-3 flex items-center gap-3 flex-wrap bg-background/60 p-3 rounded-xl border border-border">
+                  <div className="flex-1 min-w-[220px]">
+                    <span className="block text-xs text-muted-foreground mb-1 font-bold">📅 تحديد التاريخ والوقت المخصص:</span>
+                    <input
+                      type="datetime-local"
+                      value={isoToDatetimeLocal(form.globalUsdDiscountExpiresAt)}
+                      onChange={(e) => setForm({ ...form, globalUsdDiscountExpiresAt: datetimeLocalToIso(e.target.value) })}
+                      className="w-full bg-input border border-border rounded-xl px-3 py-2 text-xs font-mono text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    />
+                  </div>
+                  {form.globalUsdDiscountExpiresAt && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setForm({ ...form, globalUsdDiscountExpiresAt: "" })}
+                        className="px-3 py-2 rounded-xl text-xs font-bold bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 transition-all"
+                      >
+                        🗑️ إلغاء التوقيت
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {form.globalUsdDiscountExpiresAt && (
+                  <div className="text-xs text-emerald-400 font-bold bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/20 flex items-center justify-between flex-wrap gap-2 mt-3">
+                    <span>⏳ سينتهي الخصم تلقائياً في: <strong>{new Date(form.globalUsdDiscountExpiresAt).toLocaleString("ar-EG")}</strong></span>
+                    <span className="font-mono bg-emerald-500/20 px-2.5 py-1 rounded-lg border border-emerald-500/30 text-emerald-300">
+                      {getRemainingTimeString(form.globalUsdDiscountExpiresAt)}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </Card>
+
+      <Card title="🎯 حدود تيك توك">
+        <div
+          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}
+        >
+          <div>
+            <label style={lbl}>الحد الأدنى</label>
+            <input
+              type="number"
+              value={form.minCoins}
+              onChange={(e) => setForm({ ...form, minCoins: e.target.value })}
+              style={inp}
+            />
+          </div>
+          <div>
+            <label style={lbl}>الحد الأقصى</label>
+            <input
+              type="number"
+              value={form.maxCoins}
+              onChange={(e) => setForm({ ...form, maxCoins: e.target.value })}
+              style={inp}
+            />
+          </div>
+        </div>
+      </Card>
+
+      <Card title="🇸🇦 إعدادات المملكة العربية السعودية (الريال السعودي SAR)">
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <div>
+            <label style={lbl}>🇸🇦 سعر الريال مقابل الجنيه (ج.م / 1 ر.س)</label>
+            <input
+              type="number"
+              step="0.01"
+              value={form.sarRateOverride}
+              onChange={(e) => setForm({ ...form, sarRateOverride: e.target.value })}
+              style={inp}
+              placeholder="13.33"
+            />
+          </div>
+          <div>
+            <label style={lbl}>🇸🇦 سعر صرف الدولار بالريال (ر.س / 1$)</label>
+            <input
+              type="number"
+              step="0.01"
+              value="3.75"
+              disabled
+              style={inp}
+            />
+          </div>
+          <div>
+            <label style={lbl}>🔻 الحد الأدنى للشحن بالريال (ر.س)</label>
+            <input
+              type="number"
+              value={form.sarMinDeposit}
+              onChange={(e) => setForm({ ...form, sarMinDeposit: e.target.value })}
+              style={inp}
+              placeholder="10"
+            />
+          </div>
+          <div>
+            <label style={lbl}>🔺 الحد الأقصى للشحن بالريال (ر.س)</label>
+            <input
+              type="number"
+              value={form.sarMaxDeposit}
+              onChange={(e) => setForm({ ...form, sarMaxDeposit: e.target.value })}
+              style={inp}
+              placeholder="10000"
+            />
+          </div>
+        </div>
+      </Card>
+
+      <Card
+        title="🌍 إدارة الدول وطرق الدفع والعملات المخصصة (Country Manager)"
+        action={
+          <button
+            type="button"
+            onClick={() => {
+              document.getElementById("add-country-section")?.scrollIntoView({ behavior: "smooth" });
+            }}
+            style={addBtn}
+          >
+            <Plus size={14} /> إضافة دولة
+          </button>
+        }
+      >
+        <p className="text-xs text-muted-foreground mb-4">
+          اختر الدول المفعلة لتظهر للمستخدمين، أو انقر على "إضافة دولة" لإضافة دولة جديدة مخصصة بالكامل مع عملتها وطرق الدفع الخاصة بها:
+        </p>
+
+        {/* Dynamic List of Active/Custom Countries */}
+        <div className="flex flex-wrap gap-2.5 mb-6">
+          {[
+            { code: "EG", name: "🇪🇬 مصر (EGP)" },
+            { code: "SA", name: "🇸🇦 السعودية (SAR)" },
+            ...customCountries.map((c) => ({ code: c.code, name: `${c.flag || "🌍"} ${c.name} (${c.currency || c.code})` })),
+            { code: "GLOBAL", name: "🌐 باقي دول العالم (USD)" },
+          ].map((country) => {
+            const isSelected = form.supportedCountries.includes(country.code);
+            return (
+              <button
+                type="button"
+                key={country.code}
+                onClick={() => {
+                  setForm((f) => {
+                    const exists = f.supportedCountries.includes(country.code);
+                    const next = exists
+                      ? f.supportedCountries.filter((c) => c !== country.code)
+                      : [...f.supportedCountries, country.code];
+                    return { ...f, supportedCountries: next };
+                  });
+                }}
+                className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                  isSelected
+                    ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-sm"
+                    : "bg-slate-900/60 text-slate-400 border-slate-700 hover:bg-slate-800"
+                }`}
+              >
+                {isSelected ? "✅ " : "➕ "}{country.name}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Add New Custom Country Form */}
+        <div id="add-country-section" className="p-4 rounded-2xl border border-cyan-500/30 bg-cyan-500/5 text-right space-y-3">
+          <h4 className="text-xs font-extrabold text-cyan-400 flex items-center gap-2">
+            <span>➕ إضافة دولة جديدة مخصصة للموقع:</span>
+          </h4>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <div>
+              <label style={lbl}>اسم الدولة</label>
+              <input
+                type="text"
+                placeholder="مثال: الإمارات"
+                value={newCountry.name}
+                onChange={(e) => setNewCountry({ ...newCountry, name: e.target.value })}
+                style={inp}
+              />
+            </div>
+            <div>
+              <label style={lbl}>رمز الدولة (ISO Code)</label>
+              <input
+                type="text"
+                placeholder="مثال: AE"
+                value={newCountry.code}
+                onChange={(e) => setNewCountry({ ...newCountry, code: e.target.value.toUpperCase().trim() })}
+                style={inp}
+              />
+            </div>
+            <div>
+              <label style={lbl}>رمز العملة</label>
+              <input
+                type="text"
+                placeholder="مثال: AED"
+                value={newCountry.currency}
+                onChange={(e) => setNewCountry({ ...newCountry, currency: e.target.value.toUpperCase().trim() })}
+                style={inp}
+              />
+            </div>
+            <div>
+              <label style={lbl}>علم الدولة (Emoji Flag)</label>
+              <input
+                type="text"
+                placeholder="مثال: 🇦🇪"
+                value={newCountry.flag}
+                onChange={(e) => setNewCountry({ ...newCountry, flag: e.target.value.trim() })}
+                style={inp}
+              />
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (!newCountry.name || !newCountry.code) return;
+              const exists = customCountries.some((c) => c.code === newCountry.code);
+              if (exists) return;
+              const updated = [...customCountries, newCountry];
+              setCustomCountries(updated);
+              setForm((f) => ({
+                ...f,
+                supportedCountries: Array.from(new Set([...f.supportedCountries, newCountry.code])),
+              }));
+              setNewCountry({ name: "", code: "", currency: "", flag: "🌍" });
+            }}
+            className="px-5 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-black text-xs cursor-pointer shadow-md transition-all mt-1"
+          >
+            ➕ إضافة دولة
+          </button>
+        </div>
+      </Card>
+
+      <FloatingSaveBar onClick={save} busy={busy} label="حفظ جميع الإعدادات" msg={msg} />
+    </div>
+  );
+}
+
+// ─── Pricing Tiers ───────────────────────────────────────────────────────────
+
+export function PricingTab() {
+  const [tiers, setTiers] = useState<any[]>([]);
+  const [usdRate, setUsdRate] = useState(0);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+  useEffect(() => {
+    Promise.all([
+      fetchAdminData("tiers"),
+      fetchAdminData("settings/pricing"),
+    ]).then(([tiersResult, pricingResult]) => {
+      const rate = Number(
+        pricingResult.data?.usd_rate || pricingResult.data?.tiktok_usd_rate || 0,
+      );
+      setUsdRate(rate);
+      const data: any[] = (tiersResult.items || []).map((tier: any) => ({
+        ...tier,
+        pricePer1000Usd:
+          tier.price_per_1000_usd
+          ?? (rate > 0 ? Number(tier.price_per_1000 || 0) / rate : ""),
+      }));
+      data.sort((a, b) => Number(a.min) - Number(b.min));
+      setTiers(data);
+    }).catch(console.error);
+  }, []);
+
+  const save = async () => {
+    setBusy(true);
+    await writeAdminData({ action: "saveTiers", tiers });
+    const result = await fetchAdminData("tiers");
+    const data: any[] = (result.items || []).map((tier: any) => ({
+      ...tier,
+      pricePer1000Usd: tier.price_per_1000_usd,
+    }));
+    data.sort((a, b) => Number(a.min) - Number(b.min));
+    setTiers(data);
+    setMsg("✅ تم حفظ الشرائح");
+    setBusy(false);
+    setTimeout(() => setMsg(""), 3000);
+  };
+
+  const handleDelete = async (i: number, id: string) => {
+    const { isConfirmed } = await Swal.fire({
+      title: "تأكيد الحذف",
+      text: "هل أنت متأكد من حذف هذه الشريحة؟",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "نعم، احذف",
+      cancelButtonText: "إلغاء",
+      background: "#111",
+      color: "#fff",
+      confirmButtonColor: "#ff4444"
+    });
+    if (isConfirmed) {
+      if (id) {
+        setBusy(true);
+        await writeAdminData({ action: "deleteTier", id });
+        setBusy(false);
+      }
+      setTiers(tiers.filter((_, idx) => idx !== i));
+    }
+  };
+
+  const handleExportTikTokPriceList = async () => {
+    let depositFeePercent = 0.57;
+    let minFeeEgp = 0.57;
+    let maxFeeEgp = 180;
+    let globalDiscountConfig: any = null;
+    try {
+      const pSnap = await getDoc(doc(db, "settings", "pricing"));
+      if (pSnap.exists()) {
+        const d = pSnap.data();
+        const f = Number(d?.deposit_fee_percent ?? d?.depositFeePercent ?? d?.feePercent);
+        if (Number.isFinite(f) && f >= 0) depositFeePercent = f;
+        const minF = Number(d?.minDepositFee ?? d?.minFeeEgp);
+        if (Number.isFinite(minF) && minF >= 0) minFeeEgp = minF;
+        const maxF = Number(d?.maxDepositFee ?? d?.maxFeeEgp);
+        if (Number.isFinite(maxF) && maxF > 0) maxFeeEgp = maxF;
+        globalDiscountConfig = {
+          enabled: Boolean(d?.global_usd_discount_enabled ?? d?.globalUsdDiscountEnabled),
+          discountPercent: Number(d?.global_usd_discount_percent ?? d?.globalUsdDiscountPercent ?? 0),
+          maxDiscountUsd: Number(d?.global_usd_discount_max_amount ?? d?.globalUsdDiscountMaxAmount ?? d?.max_discount_usd ?? d?.maxDiscountUsd ?? 0),
+          expiresAt: d?.global_usd_discount_expires_at ?? d?.globalUsdDiscountExpiresAt ?? null,
+        };
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    const today = new Date();
+    const d = String(today.getDate()).padStart(2, "0");
+    const m = String(today.getMonth() + 1).padStart(2, "0");
+    const y = today.getFullYear();
+    const hh = String(today.getHours()).padStart(2, "0");
+    const mm = String(today.getMinutes()).padStart(2, "0");
+    const ss = String(today.getSeconds()).padStart(2, "0");
+    const dateStr = `${d}/${m}/${y} ${hh}:${mm}:${ss}`;
+
+    const coinAmounts = [
+      30, 50, 70, 100, 150, 200, 250, 300, 400, 500, 600, 700, 800, 900, 1000,
+      2150, 3000, 3500, 4000, 5000, 6000, 7000, 8000, 9000, 10000,
+      15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000,
+      60000, 70000, 80000, 90000, 100000,
+      200000, 300000, 400000, 500000, 600000, 700000, 800000, 900000, 1000000,
+      1500000, 2000000, 2500000
+    ];
+
+    const roundTo0Or5 = (price: number): number => {
+      if (!Number.isFinite(price) || price <= 0) return 0;
+      const intVal = Math.ceil(price);
+      const rem = intVal % 10;
+      let rounded = intVal;
+      if (rem === 1) rounded = intVal - 1;
+      else if (rem === 2) rounded = intVal - 2;
+      else if (rem === 3) rounded = intVal + 2;
+      else if (rem === 4) rounded = intVal + 1;
+      else if (rem === 6) rounded = intVal - 1;
+      else if (rem === 7) rounded = intVal - 2;
+      else if (rem === 8) rounded = intVal + 2;
+      else if (rem === 9) rounded = intVal + 1;
+      return Math.max(5, rounded);
+    };
+
+    const generateText = (includeFee: boolean) => {
+      let text = `قائمة أسعار عملات تيك توك\n📅 الأسعار بتاريخ: ${dateStr}\n\n`;
+      if (isGlobalUsdDiscountActive(globalDiscountConfig)) {
+        const durationText = calculateExactRemainingTimeText(globalDiscountConfig.expiresAt);
+        const capNote = globalDiscountConfig.maxDiscountUsd && globalDiscountConfig.maxDiscountUsd > 0
+          ? ` (بحد أقصى ${globalDiscountConfig.maxDiscountUsd}$ خصم)`
+          : "";
+        text += `🔥 عرض خاص: خصم ${globalDiscountConfig.discountPercent}% متاح لمدة ${durationText}!${capNote}\n(على جميع الخدمات التي بقيمة 10$ او اكثر)\n\n`;
+      }
+      text += `⚠️ ملاحظة:\nالأسعار الموضحة أدناه سارية بتاريخ اليوم فقط، وقد ترتفع أو تنخفض في أي وقت حسب تغير سعر الصرف وتكلفة الشحن.\n\n`;
+
+      const lines = coinAmounts.map((coins) => {
+        const origNetEgp = calculateTikTokOriginalPriceEgp(coins, tiers, usdRate);
+        const discNetEgp = calculateTikTokPriceEgp(coins, tiers, usdRate, globalDiscountConfig);
+
+        const calcGross = (net: number) => {
+          if (includeFee) {
+            const rawFee = net * (depositFeePercent / 100);
+            const clampedFee = Math.max(minFeeEgp, Math.min(maxFeeEgp, rawFee));
+            return Math.ceil(net + clampedFee);
+          }
+          return Math.ceil(net);
+        };
+
+        const origGross = calcGross(origNetEgp);
+        const discGross = calcGross(discNetEgp);
+        const hasDiscount = isGlobalUsdDiscountActive(globalDiscountConfig) && origGross > discGross;
+
+        const formattedCoins = coins >= 1000 ? coins.toLocaleString("en-US") : String(coins);
+        const formattedDisc = discGross.toLocaleString("en-US");
+        const formattedOrig = origGross.toLocaleString("en-US");
+
+        if (hasDiscount) {
+          return `${formattedCoins} = ${formattedDisc} ج (بدلاً من ~${formattedOrig} ج~) 🔥`;
+        }
+        return `${formattedCoins} = ${formattedDisc} ج`;
+      });
+
+      let fullText = text + lines.join("\n");
+      fullText += `\n\n🔗 ملاحظة هامة:\nتعتبر هذه القائمة لفترة مؤقتة، ونرجو منكم التعامل المباشر عبر موقعنا الرسمي لسهولة وسرعة الطلب والمتابعة:\n🌐 https://zaitxmedia.com`;
+      return fullText;
+    };
+
+    const textWithFee = generateText(true);
+    const htmlWithFeePreview = textWithFee.replace(/~([^~]+)~/g, '<s style="text-decoration: line-through; color: #ef4444; font-weight: bold;">$1</s>');
+
+    const sample1kOrigNet = calculateTikTokOriginalPriceEgp(1000, tiers, usdRate);
+    const sample1kDiscNet = calculateTikTokPriceEgp(1000, tiers, usdRate, globalDiscountConfig);
+    const calcSampleGross = (net: number) => {
+      const rawFee = net * (depositFeePercent / 100);
+      const clampedFee = Math.max(minFeeEgp, Math.min(maxFeeEgp, rawFee));
+      return Math.ceil(net + clampedFee);
+    };
+    const sample1kOrigGross = calcSampleGross(sample1kOrigNet);
+    const sample1kDiscGross = calcSampleGross(sample1kDiscNet);
+
+    const isDisc = isGlobalUsdDiscountActive(globalDiscountConfig) && sample1kOrigGross > sample1kDiscGross;
+    const sampleHeaderNote = isDisc
+      ? `(1000 عملة = ${sample1kDiscGross.toLocaleString("en-US")} ج بعد الخصم / بدلاً من ${sample1kOrigGross.toLocaleString("en-US")} ج)`
+      : `(1000 عملة = ${sample1kOrigGross.toLocaleString("en-US")} ج)`;
+
+    const { isConfirmed } = await Swal.fire({
+      title: "📋 قائمة أسعار عملات تيك توك (شاملة رسوم التحويل والخصم)",
+      showCloseButton: true,
+      html: `
+        <div style="text-align: right; direction: rtl; margin-bottom: 10px; font-size: 13px; color: #38bdf8;">
+          ✨ الأسعار أدناه شاملة رسوم التحويل الإيداع (${depositFeePercent}%) ومطابقة 100% لمبلغ التحويل من المحفظة ${sampleHeaderNote}.
+        </div>
+        <div style="width: 100%; height: 340px; background: #070d18; color: #4ade80; border: 1px solid #1e293b; border-radius: 12px; padding: 12px; font-family: monospace; font-size: 13px; direction: rtl; text-align: right; white-space: pre-wrap; line-height: 1.6; overflow-y: auto;">${htmlWithFeePreview}</div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: "📋 نسخ القائمة الحالية للحافظة",
+      cancelButtonText: "إغلاق",
+      background: "#0c1322",
+      color: "#fff",
+      confirmButtonColor: "#38bdf8",
+      cancelButtonColor: "#475569",
+    });
+
+    if (isConfirmed) {
+      navigator.clipboard.writeText(textWithFee);
+      Swal.fire({
+        icon: "success",
+        title: "تم نسخ قائمة الأسعار بنجاح! 📋",
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 2500,
+        background: "#0c1322",
+        color: "#fff",
+      });
+    }
+  };
+
+  return (
+    <div style={{ width: "100%" }}>
+    <Card
+      title="📊 شرائح أسعار تيك توك"
+      action={
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+          <button
+            onClick={handleExportTikTokPriceList}
+            style={{
+              ...addBtn,
+              background: "linear-gradient(135deg, #059669, #10b981)",
+              color: "#fff",
+              border: "1px solid #059669",
+            }}
+          >
+            📋 استخراج قائمة الأسعار
+          </button>
+          <button
+            onClick={() =>
+              setTiers([...tiers, { min: "", max: "", pricePer1000Usd: "" }])
+            }
+            style={addBtn}
+          >
+            <Plus size={14} /> إضافة
+          </button>
+        </div>
+      }
+    >
+      <div
+        style={{
+          marginBottom: 16,
+          padding: 12,
+          borderRadius: 10,
+          background: "rgba(56,189,248,0.08)",
+          border: "1px solid rgba(56,189,248,0.18)",
+          color: "#7dd3fc",
+          fontSize: 13,
+        }}
+      >
+        سعر الصرف المستخدم تلقائيًا: 1 USD = {usdRate || "—"} EGP
+      </div>
+      {tiers.map((t, i) => (
+        <div
+          key={i}
+            style={{
+              display: "flex",
+              gap: 12,
+              marginBottom: 12,
+              alignItems: "center",
+              flexWrap: "wrap",
+              background: "rgba(255,255,255,0.02)",
+              padding: 16,
+              borderRadius: 12,
+              border: "1px solid rgba(255,255,255,0.05)"
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 150 }}>
+              <span style={{ color: "#888", fontSize: 13, fontWeight: 600 }}>من</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                value={t.min}
+                onChange={(e) => {
+                  const n = [...tiers];
+                  n[i].min = e.target.value;
+                  setTiers(n);
+                }}
+                style={{ ...inp, flex: 1 }}
+              />
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 150 }}>
+              <span style={{ color: "#888", fontSize: 13, fontWeight: 600 }}>إلى</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                value={t.max}
+                onChange={(e) => {
+                  const n = [...tiers];
+                  n[i].max = e.target.value;
+                  setTiers(n);
+                }}
+                style={{ ...inp, flex: 1 }}
+              />
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 240 }}>
+              <span style={{ color: "#888", fontSize: 13, fontWeight: 600 }}>سعر/1000 USD:</span>
+              <input
+                type="number"
+                step="0.0001"
+                min="0"
+                value={t.pricePer1000Usd ?? ""}
+                onChange={(e) => {
+                  const n = [...tiers];
+                  n[i].pricePer1000Usd = e.target.value;
+                  setTiers(n);
+                }}
+                style={{ ...inp, flex: 1 }}
+              />
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 230 }}>
+              <span style={{ color: "#888", fontSize: 13, fontWeight: 600 }}>بالجنيه:</span>
+              <div
+                style={{
+                  ...inp,
+                  flex: 1,
+                  color: "#34d399",
+                  background: "rgba(16,185,129,0.08)",
+                  cursor: "not-allowed",
+                }}
+              >
+                {usdRate > 0 && Number(t.pricePer1000Usd) > 0
+                  ? `${ceilTo2Decimals(Number(t.pricePer1000Usd) * usdRate)} EGP`
+                  : "—"}
+              </div>
+              <button
+                onClick={() => handleDelete(i, t.id)}
+                style={{ ...delBtn, padding: "14px 16px" }}
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
+          </div>
+        ))}
+      <FloatingSaveBar onClick={save} busy={busy} label="حفظ جدول الشرائح" msg={msg} />
+    </Card>
+    </div>
+  );
+}
+
+// ─── Wallets ─────────────────────────────────────────────────────────────────
+
+export function WalletsTab() {
+  const [wallets, setWallets] = useState<any[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [availableCountries, setAvailableCountries] = useState<any[]>([
+    { id: "EG", label: "🇪🇬 مصر (EGP)" },
+    { id: "SA", label: "🇸🇦 السعودية (SAR)" },
+    { id: "AE", label: "🇦🇪 الإمارات (AED)" },
+    { id: "KW", label: "🇰🇼 الكويت (KWD)" },
+    { id: "QA", label: "🇶🇦 قطر (QAR)" },
+    { id: "GLOBAL", label: "🌐 متاحة لكل الدول (عامة)" },
+  ]);
+
+  useEffect(() => {
+    fetchAdminData("settings/site").then((result) => {
+      if (result.exists) {
+        try {
+          const raw = result.data.wallets || [];
+          const normalized = raw.map((w: any) => ({
+            ...w,
+            countryCode: w.countryCode || (w.type === "barq" ? "SA" : w.type === "bank" ? "GLOBAL" : "EG"),
+          }));
+
+          // Ensure Barq (SA) and Bank (GLOBAL) exist so SA and other countries are never empty!
+          const hasBarq = normalized.some((w: any) => w.type === "barq");
+          const hasBank = normalized.some((w: any) => w.type === "bank");
+
+          if (!hasBarq) {
+            normalized.push({
+              type: "barq",
+              countryCode: "SA",
+              number: "تطبيق برق",
+              name: "تحويل برق (السعودية)",
+              min: 10,
+              max: 10000,
+              isActive: true,
+            });
+          }
+
+          if (!hasBank) {
+            normalized.push({
+              type: "bank",
+              countryCode: "GLOBAL",
+              number: "059102533916",
+              holderName: "مستفيد التحويل البنكي",
+              bankName: "البنك الأهلي / الراجحي",
+              min: 10,
+              max: 50000,
+              isActive: true,
+            });
+          }
+
+          setWallets(normalized);
+        } catch {}
+      }
+    }).catch(console.error);
+
+    fetchAdminData("settings/pricing").then((res) => {
+      if (res.exists && Array.isArray(res.data.custom_countries) && res.data.custom_countries.length > 0) {
+        const list = res.data.custom_countries.map((c: any) => ({
+          id: c.code,
+          label: `${c.flag || "🌍"} ${c.name} (${c.currency || c.code})`,
+        }));
+        setAvailableCountries([
+          { id: "EG", label: "🇪🇬 مصر (EGP)" },
+          { id: "SA", label: "🇸🇦 السعودية (SAR)" },
+          ...list,
+          { id: "GLOBAL", label: "🌐 متاحة لكل الدول (عامة)" },
+        ]);
+      }
+    }).catch(console.error);
+  }, []);
+
+  const [countryFilter, setCountryFilter] = useState("ALL");
+
+  const save = async () => {
+    setBusy(true);
+    await writeAdminData({
+      action: "setDocument",
+      resource: "settings/site",
+      data: { wallets },
+    });
+    setMsg("✅ تم الحفظ");
+    setBusy(false);
+    setTimeout(() => setMsg(""), 3000);
+  };
+
+  const add = () =>
+    setWallets([
+      ...wallets,
+      { type: "vodafone", countryCode: countryFilter === "SA" ? "SA" : countryFilter === "ALL" ? "EG" : countryFilter, number: "", name: "", min: 0, max: 100000, isActive: true },
+    ]);
+  const upd = (i: number, f: string, v: any) => {
+    const w = [...wallets];
+    w[i] = { ...w[i], [f]: v };
+    setWallets(w);
+  };
+  const del = (i: number) => setWallets(wallets.filter((_, idx) => idx !== i));
+
+  const filteredWallets = wallets.filter((w) => {
+    if (countryFilter === "ALL") return true;
+    const c = w.countryCode || (w.type === "barq" ? "SA" : w.type === "bank" ? "GLOBAL" : "EG");
+    return c === countryFilter;
+  });
+
+  return (
+    <Card
+      title="💳 المحافظ وحسابات البنوك حسب الدولة"
+      action={
+        <button onClick={add} style={addBtn}>
+          <Plus size={14} /> إضافة حساب جديد
+        </button>
+      }
+    >
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
+        <span className="text-xs text-muted-foreground font-bold">تصفية حسب الدولة:</span>
+        {[{ id: "ALL", label: "🌐 جميع الدول" }, ...availableCountries].map((f) => (
+          <button
+            key={f.id}
+            type="button"
+            onClick={() => setCountryFilter(f.id)}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+              countryFilter === f.id
+                ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/40 shadow-sm"
+                : "bg-slate-900/60 text-slate-400 border-slate-700 hover:bg-slate-800"
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      {filteredWallets.map((w, i) => {
+        const actualIndex = wallets.indexOf(w);
+        return (
+        <div
+          key={actualIndex}
+          style={{
+            display: "flex",
+            gap: 8,
+            marginBottom: 8,
+            alignItems: "center",
+            flexWrap: "wrap",
+            background: "#0a0a0a",
+            padding: 10,
+            borderRadius: 8,
+          }}
+        >
+          <select
+            value={w.countryCode || (w.type === "barq" ? "SA" : w.type === "bank" ? "GLOBAL" : "EG")}
+            onChange={(e) => upd(actualIndex, "countryCode", e.target.value)}
+            style={{ ...inp, minWidth: 140, background: "#111827", color: "#38bdf8", fontWeight: "bold" }}
+          >
+            {availableCountries.map((c) => (
+              <option key={c.id} value={c.id} style={{ color: "#000" }}>
+                {c.label}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={w.type || "vodafone"}
+            onChange={(e) => upd(actualIndex, "type", e.target.value)}
+            style={{ ...inp, flex: 1, minWidth: 120 }}
+          >
+            <option value="vodafone" style={{ color: "#000" }}>فودافون كاش / محافظ</option>
+            <option value="instapay" style={{ color: "#000" }}>انستاباي (InstaPay)</option>
+            <option value="barq" style={{ color: "#000" }}>برق (Barq - السعودية)</option>
+            <option value="bank" style={{ color: "#000" }}>حساب بنكي (Bank Transfer)</option>
+          </select>
+          <input
+            value={w.number}
+            onChange={(e) => upd(actualIndex, "number", e.target.value)}
+            style={{ ...inp, flex: 2, minWidth: w.type === "bank" ? 150 : 180 }}
+            placeholder={w.type === "bank" ? "رقم الحساب" : w.type === "instapay" ? "رقم الهاتف / الحساب" : "الرقم / اليوزر"}
+            dir="ltr"
+          />
+          {w.type === "instapay" && (
+            <input
+              value={w.username || w.ipa || ""}
+              onChange={(e) => upd(actualIndex, "username", e.target.value)}
+              style={{ ...inp, flex: 2, minWidth: 180 }}
+              placeholder="اسم المستخدم IPA (مثال: name@instapay)"
+              dir="ltr"
+            />
+          )}
+          {w.type === "bank" ? (
+            <>
+              <input
+                value={w.bankName || ""}
+                onChange={(e) => upd(actualIndex, "bankName", e.target.value)}
+                style={{ ...inp, flex: 2, minWidth: 120 }}
+                placeholder="اسم البنك"
+              />
+              <input
+                value={w.holderName || ""}
+                onChange={(e) => upd(actualIndex, "holderName", e.target.value)}
+                style={{ ...inp, flex: 2, minWidth: 120 }}
+                placeholder="اسم صاحب الحساب"
+              />
+            </>
+          ) : (
+            <input
+              value={w.name || ""}
+              onChange={(e) => upd(actualIndex, "name", e.target.value)}
+              style={{ ...inp, flex: 2, minWidth: 150 }}
+              placeholder="اسم صاحب الحساب / المستفيد"
+            />
+          )}
+          <input
+            value={w.link || ""}
+            onChange={(e) => upd(actualIndex, "link", e.target.value)}
+            style={{ ...inp, flex: 2, minWidth: 150 }}
+            placeholder={w.type === "bank" ? "رقم الحساب الدولي (IBAN)" : "رابط التحويل المباشر"}
+            dir="ltr"
+          />
+          {w.type === "bank" && (
+            <input
+              value={w.swift || ""}
+              onChange={(e) => upd(actualIndex, "swift", e.target.value)}
+              style={{ ...inp, flex: 1.5, minWidth: 120 }}
+              placeholder="السويفت كود (Swift Code)"
+              dir="ltr"
+            />
+          )}
+          {w.type === "instapay" && (
+            <div style={{ display: "flex", gap: 6, alignItems: "center", minWidth: 180, flex: 2 }}>
+              <input
+                type="text"
+                value={w.qr || ""}
+                onChange={(e) => upd(actualIndex, "qr", e.target.value)}
+                style={{ ...inp, flex: 1, minWidth: 100 }}
+                placeholder="رابط الـ QR أو ارفع ملف"
+              />
+              <label style={{
+                background: "#333",
+                color: "#fff",
+                padding: "8px 12px",
+                borderRadius: 8,
+                cursor: "pointer",
+                fontSize: 12,
+                fontWeight: "bold",
+                whiteSpace: "nowrap",
+                border: "1px solid #444",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 4
+              }}>
+                📁 رفع ملف
+                <input
+                  type="file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      upd(actualIndex, "qr", "جاري الرفع...");
+                      const formData = new FormData();
+                      formData.append("file", file);
+                      
+                      const response = await fetch("/api/admin/upload", {
+                        method: "POST",
+                        body: formData,
+                      });
+                      
+                      if (!response.ok) {
+                        throw new Error(await response.text());
+                      }
+                      
+                      const res = await response.json();
+                      if (res.success && res.url) {
+                        upd(actualIndex, "qr", res.url);
+                      } else {
+                        throw new Error(res.error || "Failed upload");
+                      }
+                    } catch (err) {
+                      console.error(err);
+                      upd(actualIndex, "qr", "");
+                      alert("فشل رفع الملف");
+                    }
+                  }}
+                />
+              </label>
+            </div>
+          )}
+          <input
+            type="number"
+            value={w.min}
+            onChange={(e) => upd(actualIndex, "min", +e.target.value)}
+            style={{ ...inp, flex: 1, minWidth: 100 }}
+            placeholder="الحد الأدنى"
+          />
+          <input
+            type="number"
+            value={w.max}
+            onChange={(e) => upd(actualIndex, "max", +e.target.value)}
+            style={{ ...inp, flex: 1, minWidth: 100 }}
+            placeholder="الأقصى"
+          />
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              fontSize: 14,
+              fontWeight: 600,
+              minWidth: 80,
+              color: w.isActive ? "#00ff80" : "#ff4444",
+              cursor: "pointer",
+            }}
+          >
+            <input
+              type="checkbox"
+              style={{ width: 18, height: 18, accentColor: "#38bdf8" }}
+              checked={w.isActive !== false}
+              onChange={(e) => upd(actualIndex, "isActive", e.target.checked)}
+            />
+            {w.isActive !== false ? "مفعل" : "معطل"}
+          </label>
+          <button onClick={() => del(actualIndex)} style={{ ...delBtn, padding: "14px 16px" }}>
+            <Trash2 size={16} />
+          </button>
+        </div>
+      );
+      })}
+      <FloatingSaveBar onClick={save} busy={busy} label="حفظ المحافظ ووسائل الإيداع" msg={msg} />
+    </Card>
+  );
+}
+
+// ─── Users ───────────────────────────────────────────────────────────────────
+
+export function UsersTab() {
+  const [users, setUsers] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
+  const [refresh, setRefresh] = useState(0);
+  const [loadingUsers, setLoadingUsers] = useState(true);
+  const [usersError, setUsersError] = useState("");
+  useEffect(() => {
+    let active = true;
+    setLoadingUsers(true);
+    setUsersError("");
+    fetch("/api/admin/users", { credentials: "include", cache: "no-store" })
+      .then(async (response) => {
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.success) {
+          throw new Error(result?.error?.message || result?.error || "تعذر تحميل المستخدمين");
+        }
+        if (active) setUsers(Array.isArray(result.users) ? result.users : []);
+      })
+      .catch((error) => {
+        if (active) {
+          setUsersError(
+            error instanceof Error ? error.message : "تعذر تحميل المستخدمين",
+          );
+        }
+      })
+      .finally(() => {
+        if (active) setLoadingUsers(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [refresh]);
+
+  const filtered = users.filter(
+    (u) => (u.email || "").includes(search) || (u.name || "").includes(search),
+  );
+
+  const ban = async (u: any) => {
+    const { value: reason } = await Swal.fire({
+      title: "سبب الحظر",
+      input: "text",
+      background: "#111",
+      color: "#fff",
+      showCancelButton: true,
+      confirmButtonText: "تأكيد الحظر",
+    });
+    if (reason === undefined) return;
+    const response = await fetch("/api/admin/users", {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: u.id, banned: !u.banned, ban_reason: reason }),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return Swal.fire({ icon: "error", title: "تعذر التعديل", text: result.error || "حدث خطأ", background: "#111", color: "#fff" });
+    }
+    setRefresh((r) => r + 1);
+  };
+
+  const setRole = async (u: any) => {
+    const { value: role } = await Swal.fire({
+      title: "تغيير الدور",
+      input: "select",
+      inputOptions: { user: "مستخدم", admin: "مدير", finance: "مالية" },
+      inputValue: u.role || "user",
+      background: "#111",
+      color: "#fff",
+      showCancelButton: true,
+    });
+    if (!role || role === u.role) return;
+    const response = await fetch("/api/admin/users", {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: u.id, role }),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return Swal.fire({ icon: "error", title: "تعذر تغيير الدور", text: result.error || "حدث خطأ", background: "#111", color: "#fff" });
+    }
+    setRefresh((r) => r + 1);
+  };
+
+  const editBalance = async (u: any) => {
+    const { value: formValues } = await Swal.fire({
+      title: "💰 تعديل رصيد الحساب",
+      html: `
+        <div class="text-right text-sm space-y-3 mb-3" dir="rtl">
+          <div><strong class="text-primary">المستخدم:</strong> ${u.name || u.email}</div>
+          <div><strong class="text-emerald-400">الرصيد الحالي:</strong> $${ceilTo2Decimals(Number(u.balance || 0))} USD</div>
+          <div class="mt-3">
+            <label class="block text-xs font-bold text-slate-300 mb-1">نوع الإجراء:</label>
+            <select id="swal-balance-action" class="w-full h-10 px-3 rounded-lg bg-slate-900 border border-slate-700 text-white text-sm outline-none">
+              <option value="add_balance">➕ إضافة رصيد للرصيد الحالي</option>
+              <option value="deduct_balance">➖ خصم مبلغ من الرصيد الحالي</option>
+              <option value="set_balance">🎯 تحديد رصيد جديد ثابت</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">المبلغ بالدولار ($ USD):</label>
+            <input id="swal-balance-amount" type="number" step="0.01" min="0" placeholder="0.00" class="w-full h-10 px-3 rounded-lg bg-slate-900 border border-slate-700 text-white text-sm outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">سبب التعديل:</label>
+            <input id="swal-balance-reason" type="text" placeholder="مثال: تسوية رصيد / شحن مباشر من الإدارة" class="w-full h-10 px-3 rounded-lg bg-slate-900 border border-slate-700 text-white text-sm outline-none" />
+          </div>
+        </div>
+      `,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: "تأكيد وتحديث الرصيد",
+      cancelButtonText: "إلغاء",
+      background: "#111",
+      color: "#fff",
+      confirmButtonColor: "#10b981",
+      preConfirm: () => {
+        const action = (document.getElementById("swal-balance-action") as HTMLSelectElement)?.value;
+        const amount = Number((document.getElementById("swal-balance-amount") as HTMLInputElement)?.value);
+        const reason = (document.getElementById("swal-balance-reason") as HTMLInputElement)?.value;
+        if (!Number.isFinite(amount) || amount <= 0) {
+          Swal.showValidationMessage("يرجى إدخال مبلغ صحيح أكبر من 0");
+          return false;
+        }
+        return { action, amount, reason };
+      },
+    });
+
+    if (!formValues) return;
+    try {
+      const response = await fetch("/api/admin/users", {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: u.id,
+          balance_action: formValues.action,
+          amountUsd: formValues.amount,
+          reason: formValues.reason,
+        }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "تعذر تعديل الرصيد");
+      }
+      await Swal.fire({
+        icon: "success",
+        title: "تم تعديل رصيد حساب المستخدم بنجاح ✅",
+        timer: 1500,
+        showConfirmButton: false,
+        background: "#111",
+        color: "#fff",
+      });
+      setRefresh((r) => r + 1);
+    } catch (err: any) {
+      await Swal.fire({
+        icon: "error",
+        title: "تعذر تعديل الرصيد",
+        text: err.message || "حدث خطأ أثناء تعديل الرصيد",
+        background: "#111",
+        color: "#fff",
+      });
+    }
+  };
+
+  const banIp = async (u: any) => {
+    const defaultIp = u.last_ip || u.banned_ip || u.ip || "";
+    const { value: ip, isConfirmed } = await Swal.fire({
+      title: "🌐 حظر عنوان IP للمستخدم",
+      text: defaultIp
+        ? `عنوان الـ IP المسجّل للجهاز هو (${defaultIp}). تأكيد حظر هذا الـ IP وتجميد حسابه:`
+        : "أدخل عنوان الـ IP لحظره وتجميد الحساب ومنعه نهائياً من دخول الموقع:",
+      input: "text",
+      inputValue: defaultIp,
+      inputPlaceholder: "مثال: 197.35.42.100",
+      showCancelButton: true,
+      confirmButtonText: "حظر الـ IP والتجميد فوراً",
+      cancelButtonText: "إلغاء",
+      background: "#111",
+      color: "#fff",
+      confirmButtonColor: "#ef4444",
+      inputValidator: (val) => {
+        if (!val || !val.trim()) return "يرجى كتابة عنوان IP صحيح";
+      },
+    });
+
+    if (!isConfirmed || !ip) return;
+    try {
+      const response = await fetch("/api/admin/users", {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: u.id,
+          ban_ip: ip.trim(),
+          ban_reason: `حظر IP للمستخدم ${u.name || u.email}`,
+        }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.success) throw new Error(result.error || "تعذر حظر IP");
+      await Swal.fire({
+        icon: "success",
+        title: `تم حظر IP (${ip.trim()}) وحسابه بنجاح ✅`,
+        timer: 1500,
+        showConfirmButton: false,
+        background: "#111",
+        color: "#fff",
+      });
+      setRefresh((r) => r + 1);
+    } catch (err: any) {
+      await Swal.fire({
+        icon: "error",
+        title: "تعذر حظر الـ IP",
+        text: err.message || "حدث خطأ أثناء حظر الـ IP",
+        background: "#111",
+        color: "#fff",
+      });
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card title={`👥 المستخدمون (${users.length})`}>
+        <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
+          <div style={{ position: "relative", flex: 1 }}>
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{ ...inp, paddingRight: 36 }}
+              placeholder="بحث باسم أو بريد..."
+            />
+            <Search
+              size={16}
+              color="#666"
+              style={{
+                position: "absolute",
+                right: 10,
+                top: "50%",
+                transform: "translateY(-50%)",
+              }}
+            />
+          </div>
+          <button onClick={() => setRefresh((r) => r + 1)} style={btnSm}>
+            <RefreshCw size={14} />
+          </button>
+        </div>
+        {loadingUsers && <p className="mb-4 text-muted-foreground">جاري تحميل المستخدمين...</p>}
+        {usersError && <p className="mb-4 text-red-400">{usersError}</p>}
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse min-w-[850px] text-sm">
+            <thead>
+              <tr className="border-b border-border/50 bg-muted/5">
+                {[
+                  "المستخدم",
+                  "البريد",
+                  "الدولة",
+                  "الواتساب",
+                  "عنوان IP المسجّل",
+                  "الدور",
+                  "الرصيد ($)",
+                  "الحالة",
+                  "إجراءات التحكم",
+                ].map((h) => (
+                  <th
+                    key={h}
+                    className="p-4 text-right text-muted-foreground font-semibold whitespace-nowrap"
+                  >
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((u) => (
+                <tr key={u.id} className="border-b border-border/30 hover:bg-white/5 transition-colors">
+                  <td className="p-4 font-bold text-foreground">
+                    {u.name || "—"}
+                  </td>
+                  <td className="p-4 text-xs text-muted-foreground font-mono text-right" dir="ltr">
+                    {u.email}
+                  </td>
+                  <td className="p-4">
+                    {u.country_code === "SA"
+                      ? "🇸🇦"
+                      : u.country_code === "EG"
+                        ? "🇪🇬"
+                        : "—"}
+                  </td>
+                  <td className="p-4 text-xs text-muted-foreground font-mono text-right" dir="ltr">
+                    {u.whatsapp
+                      ? (u.country_code === "SA" ? "+966" : "+20") + u.whatsapp
+                      : "—"}
+                  </td>
+                  <td className="p-4 text-xs font-mono text-purple-400 text-right" dir="ltr">
+                    {u.last_ip || u.banned_ip || u.ip ? (
+                      <span className="bg-purple-500/10 border border-purple-500/20 px-2 py-1 rounded-md font-bold">
+                        {u.last_ip || u.banned_ip || u.ip}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground/60 font-sans text-[11px]">لم يُسجّل بعد</span>
+                    )}
+                  </td>
+                  <td className="p-4">
+                    <span
+                      className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap ${
+                        u.role === "admin"
+                          ? "bg-primary/10 text-primary"
+                          : u.role === "finance"
+                            ? "bg-orange-500/10 text-orange-500"
+                            : "bg-white/5 text-muted-foreground"
+                      }`}
+                    >
+                      {u.role || "user"}
+                    </span>
+                  </td>
+                  <td className="p-4 font-bold text-emerald-400 font-mono text-right" dir="ltr">
+                    ${ceilTo2Decimals(Number(u.balance || 0))}
+                  </td>
+                  <td className="p-4">
+                    <span
+                      className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap ${
+                        u.banned
+                          ? "bg-destructive/10 text-destructive border border-destructive/20"
+                          : "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+                      }`}
+                    >
+                      {u.banned ? "محظور" : "نشط"}
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <button
+                        onClick={() => editBalance(u)}
+                        title="تعديل الرصيد المباشر"
+                        className="bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                      >
+                        <DollarSign size={13} /> الرصيد
+                      </button>
+                      <button
+                        onClick={() => banIp(u)}
+                        title="حظر IP المستخدم"
+                        className="bg-purple-500/15 hover:bg-purple-500/25 text-purple-400 border border-purple-500/30 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                      >
+                        <ShieldAlert size={13} /> حظر IP
+                      </button>
+                      <button
+                        onClick={() => setRole(u)}
+                        title="تغيير الدور"
+                        className="bg-white/5 hover:bg-white/10 text-muted-foreground border border-border p-1.5 rounded-lg transition-colors cursor-pointer"
+                      >
+                        <Key size={14} />
+                      </button>
+                      <button
+                        onClick={() => ban(u)}
+                        title={u.banned ? "إلغاء الحظر" : "حظر الحساب"}
+                        className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                          u.banned
+                            ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border-emerald-500/20"
+                            : "bg-destructive/10 hover:bg-destructive/20 text-destructive border-destructive/20"
+                        }`}
+                      >
+                        <Ban size={14} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+
+      <BannedIpsCard />
+    </div>
+  );
+}
+
+function BannedIpsCard() {
+  const [bannedIps, setBannedIps] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [newIp, setNewIp] = useState("");
+  const [adding, setAdding] = useState(false);
+
+  const fetchIps = () => {
+    setLoading(true);
+    fetch("/api/admin/banned-ips", { credentials: "include", cache: "no-store" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) setBannedIps(data.ips || []);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchIps();
+  }, []);
+
+  const handleAddIp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newIp.trim()) return;
+    setAdding(true);
+    try {
+      const res = await fetch("/api/admin/banned-ips", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ip: newIp.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "تعذر حظر الـ IP");
+      await Swal.fire({
+        icon: "success",
+        title: data.message || "تم حظر IP بنجاح ✅",
+        timer: 1500,
+        showConfirmButton: false,
+        background: "#111",
+        color: "#fff",
+      });
+      setNewIp("");
+      fetchIps();
+    } catch (err: any) {
+      await Swal.fire({
+        icon: "error",
+        title: "تعذر حظر IP",
+        text: err.message || "حدث خطأ",
+        background: "#111",
+        color: "#fff",
+      });
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  const handleRemoveIp = async (ip: string) => {
+    try {
+      const res = await fetch(`/api/admin/banned-ips?ip=${encodeURIComponent(ip)}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "تعذر إلغاء الحظر");
+      await Swal.fire({
+        icon: "success",
+        title: data.message || "تم إلغاء حظر IP بنجاح ✅",
+        timer: 1500,
+        showConfirmButton: false,
+        background: "#111",
+        color: "#fff",
+      });
+      fetchIps();
+    } catch (err: any) {
+      await Swal.fire({
+        icon: "error",
+        title: "تعذر إلغاء حظر IP",
+        text: err.message || "حدث خطأ",
+        background: "#111",
+        color: "#fff",
+      });
+    }
+  };
+
+  return (
+    <Card title={`🛡️ عناوين الـ IP المحظورة من الموقع (${bannedIps.length})`}>
+      <p className="text-xs text-muted-foreground mb-4">
+        العناوين المسجلة هنا يُحظر دخول أصحابها للموقع أو تنفيذ أي عمليات أو فتح أي صفحات.
+      </p>
+
+      <form onSubmit={handleAddIp} className="flex gap-3 mb-5">
+        <input
+          type="text"
+          value={newIp}
+          onChange={(e) => setNewIp(e.target.value)}
+          placeholder="إضافة IP جديد للحظر (مثال: 197.35.42.100)..."
+          className="flex-1 h-11 px-4 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm outline-none"
+        />
+        <button
+          type="submit"
+          disabled={adding || !newIp.trim()}
+          className="h-11 px-6 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-white text-sm disabled:opacity-50 transition-all cursor-pointer flex items-center gap-2 shrink-0"
+        >
+          <ShieldAlert size={16} /> حظر IP جديد
+        </button>
+      </form>
+
+      {loading ? (
+        <p className="text-xs text-muted-foreground">جاري تحميل القائمة...</p>
+      ) : bannedIps.length === 0 ? (
+        <p className="text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-xl">
+          ✅ لا توجد عناوين IP محظورة حالياً.
+        </p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+          {bannedIps.map((ip) => (
+            <div key={ip} className="flex items-center justify-between p-3 rounded-xl border border-destructive/30 bg-destructive/10 text-xs font-mono">
+              <span className="font-bold text-rose-300" dir="ltr">{ip}</span>
+              <button
+                type="button"
+                onClick={() => handleRemoveIp(ip)}
+                className="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/40 text-rose-200 text-[11px] font-bold transition-all cursor-pointer"
+              >
+                إلغاء الحظر
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </Card>
+  );
+}
+
+// ─── Orders ──────────────────────────────────────────────────────────────────
+
+export function OrdersTab() {
+  const [orders, setOrders] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("all");
+  const [refresh, setRefresh] = useState(0);
+  const [loadingOrders, setLoadingOrders] = useState(true);
+  const [ordersError, setOrdersError] = useState("");
+  useEffect(() => {
+    let active = true;
+    setLoadingOrders(true);
+    setOrdersError("");
+    fetch("/api/admin/orders", { credentials: "include", cache: "no-store" })
+      .then(async (response) => {
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.success) {
+          throw new Error(result?.error?.message || result?.error || "تعذر تحميل الطلبات");
+        }
+        if (active) setOrders(Array.isArray(result.orders) ? result.orders : []);
+      })
+      .catch((error) => {
+        if (active) {
+          setOrdersError(error instanceof Error ? error.message : "تعذر تحميل الطلبات");
+        }
+      })
+      .finally(() => {
+        if (active) setLoadingOrders(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [refresh]);
+
+  const filtered = orders.filter((o) => {
+    if (filter !== "all" && o.status !== filter) return false;
+    if (
+      search &&
+      !(o.service_name || "").includes(search) &&
+      !(o.user_id || "").includes(search)
+    )
+      return false;
+    return true;
+  });
+
+  const notifyOrderUser = async (orderId: string, email: string, status: string, serviceName: string) => {
+    if (!email) return;
+    try {
+      await fetch("/api/admin/notify-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email, orderId, status, serviceName })
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const updateOrderViaApi = async (
+    id: string,
+    payload: Record<string, unknown>,
+  ): Promise<Record<string, any> | null> => {
+    try {
+      const response = await fetch(
+        `/api/admin/orders/${encodeURIComponent(id)}/status`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(payload),
+        },
+      );
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.success) {
+        const rawMessage = result?.error?.message || result?.error;
+        const message =
+          rawMessage === "INSUFFICIENT_BALANCE"
+            ? "رصيد العميل غير كافٍ لإكمال الطلب"
+            : rawMessage === "ORDER_NOT_FOUND"
+              ? "الطلب غير موجود"
+              : rawMessage || "تعذر تحديث الطلب";
+        throw new Error(message);
+      }
+      return result.update || {};
+    } catch (error) {
+      await Swal.fire({
+        title: "تعذر تحديث الطلب",
+        text: error instanceof Error ? error.message : "حدث خطأ غير متوقع",
+        icon: "error",
+        background: "#111",
+        color: "#fff",
+      });
+      return null;
+    }
+  };
+
+  const update = async (id: string, status: string, currentOrder?: any) => {
+    if (status === "provide_link") {
+      const requestedChoice = currentOrder?.options?.tiktokChoice;
+      const needsQr = requestedChoice === "qr";
+      const { value: formValues } = await Swal.fire({
+        title: needsQr ? 'رفع رمز QR للعميل' : 'إرسال رابط الشحن للعميل',
+        html: `
+          <div style="text-align: right; direction: rtl;">
+            <div style="margin-bottom: 14px; color: #38bdf8; font-weight: 700;">
+              طريقة التنفيذ التي اختارها العميل: ${needsQr ? "QR Code" : "رابط شحن"}
+            </div>
+            <label style="display: block; margin-bottom: 8px;">رابط التسليم</label>
+            <input id="swal-input-link" class="swal2-input" placeholder="رابط الدخول..." ${needsQr ? 'style="display:none"' : ""}>
+            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #333;">
+            <label style="display: block; margin-bottom: 8px;">صورة QR</label>
+            <input type="file" id="swal-input-file" class="swal2-file" accept="image/*" ${needsQr ? "" : 'style="display:none"'}>
+          </div>
+        `,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'إرسال',
+        cancelButtonText: 'إلغاء',
+        background: '#1a1a1a',
+        color: '#fff',
+        preConfirm: () => {
+          const linkVal = (document.getElementById('swal-input-link') as HTMLInputElement).value;
+          const fileInput = document.getElementById('swal-input-file') as HTMLInputElement;
+          const file = fileInput.files?.[0];
+          if ((needsQr && !file) || (!needsQr && !linkVal.trim())) {
+            Swal.showValidationMessage(needsQr ? "ارفع صورة QR أولاً" : "أدخل رابط التسليم أولاً");
+            return false;
+          }
+          return { link: linkVal, file };
+        }
+      });
+
+      if (!formValues) return;
+      
+      let updateData: any = {};
+      if (formValues.link) {
+        updateData.delivered_link = formValues.link;
+        updateData.authLink = formValues.link;
+      }
+      
+      if (formValues.file) {
+        await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(formValues.file);
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = error => reject(error);
+        }).then((base64) => {
+          updateData.qr_image = base64;
+          updateData.qr_expires_at = Date.now() + 30000;
+        });
+      }
+
+      if (Object.keys(updateData).length > 0) {
+        updateData.fulfillmentStatus = "delivered";
+        const savedUpdate = await updateOrderViaApi(id, {
+          status: "provide_link",
+          delivery: updateData,
+        });
+        if (!savedUpdate) return;
+        setOrders((previous) => previous.map((order) => (
+          order.id === id ? { ...order, ...updateData, ...savedUpdate } : order
+        )));
+        Swal.fire({ title: 'تم!', text: 'تم إرسال البيانات للمستخدم بنجاح.', icon: 'success', background: '#1a1a1a', color: '#fff' });
+        await notifyOrderUser(id, currentOrder?.user_email, "provide_link", currentOrder?.service_name || "خدمة");
+      } else {
+        Swal.fire({ title: 'خطأ', text: 'لم تقم بإدخال رابط أو رفع صورة!', icon: 'error', background: '#1a1a1a', color: '#fff' });
+      }
+      return;
+    }
+
+    if (status === "completed") {
+      const { value: supplierPrice, isConfirmed: costConfirmed } = await Swal.fire({
+        title: "سعر المورد (بالدولار)",
+        input: 'number',
+        inputAttributes: { step: '0.0001', min: '0' },
+        text: "أدخل سعر المورد الفعلي. سيحسب النظام إجمالي التكلفة والربح ويثبتهما على الطلب.",
+        showCancelButton: true,
+        confirmButtonText: "إكمال الطلب",
+        cancelButtonText: "إلغاء",
+        background: "#111",
+        color: "#fff",
+        confirmButtonColor: "#10b981"
+      });
+
+      if (!costConfirmed) return;
+      
+      const price = Number(supplierPrice);
+      if (!Number.isFinite(price) || price < 0) return;
+      if (currentOrder?.status === "pending_action" && !currentOrder.balance_deducted) {
+        const { isConfirmed: deductConfirmed } = await Swal.fire({
+          title: "تنبيه",
+          text: "هذا الطلب لم يتم خصم رصيده مسبقاً. هل تريد خصم الرصيد الآن وتحويله إلى مكتمل؟",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "نعم، خصم وإكمال",
+          cancelButtonText: "إلغاء",
+          background: "#111",
+          color: "#fff",
+          confirmButtonColor: "#38bdf8"
+        });
+        if (!deductConfirmed) return;
+      }
+
+      const savedUpdate = await updateOrderViaApi(id, {
+        status: "completed",
+        supplierPriceUsd: price,
+      });
+      if (!savedUpdate) return;
+      setOrders((prev) => prev.map((o) => (
+        o.id === id ? { ...o, ...savedUpdate } : o
+      )));
+      await Swal.fire({
+        title: "تم!",
+        text: "تم قبول الطلب وإكماله بنجاح",
+        icon: "success",
+        background: "#111",
+        color: "#fff",
+      });
+      await notifyOrderUser(id, currentOrder?.user_email, status, currentOrder?.service_name || "خدمة");
+      return;
+    }
+
+    if (status === "rejected") {
+      const { value: formValues, isConfirmed } = await Swal.fire({
+        title: "رفض الطلب",
+        html: `
+          <div style="text-align: right; direction: rtl;">
+            <label style="display: block; margin-bottom: 8px; color: #ccc; font-weight: 600;">سبب الرفض</label>
+            <textarea id="swal-reject-reason" class="swal2-textarea" placeholder="أدخل سبب رفض الطلب..." style="min-height: 100px; text-align: right;"></textarea>
+          </div>
+        `,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "نعم، ارفض",
+        cancelButtonText: "إلغاء",
+        background: "#111",
+        color: "#fff",
+        confirmButtonColor: "#ff4444",
+        preConfirm: () => {
+          const reason = (document.getElementById('swal-reject-reason') as HTMLTextAreaElement).value.trim();
+          if (!reason) {
+            Swal.showValidationMessage('يجب إدخال سبب رفض الطلب');
+            return false;
+          }
+          return { reason };
+        }
+      });
+      if (!isConfirmed || !formValues) return;
+
+      try {
+        const response = await fetch(`/api/admin/orders/${encodeURIComponent(id)}/reject`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            reason: formValues.reason,
+          })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          throw new Error(
+            (typeof result?.error === "string" ? result.error : result?.error?.message)
+              || "تعذر رفض الطلب"
+          );
+        }
+        setOrders((prev) => prev.map((o) => (
+          o.id === id
+            ? {
+                ...o,
+                status: "rejected",
+                rejection_reason: formValues.reason,
+                refunded: Number(result.refundedUsd) > 0,
+              }
+            : o
+        )));
+        Swal.fire({ title: "تم!", text: "تم رفض الطلب بنجاح", icon: "success", background: "#111", color: "#fff" });
+        await notifyOrderUser(id, currentOrder?.user_email, "rejected", currentOrder?.service_name || "خدمة");
+      } catch (networkErr: any) {
+        const msg = typeof networkErr?.message === "string" ? networkErr.message : "تعذر رفض الطلب";
+        await Swal.fire({ title: "تعذر رفض الطلب", text: msg, icon: "error", background: "#111", color: "#fff" });
+      }
+      return;
+    }
+
+    if (status === "cancelled") {
+      const { isConfirmed } = await Swal.fire({
+        title: "تأكيد الإلغاء",
+        text: "هل أنت متأكد من إلغاء الطلب؟",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "نعم، ألغِ",
+        cancelButtonText: "إلغاء",
+        background: "#111",
+        color: "#fff",
+        confirmButtonColor: "#ff4444"
+      });
+      if (!isConfirmed) return;
+      const savedUpdate = await updateOrderViaApi(id, { status: "cancelled" });
+      if (!savedUpdate) return;
+      setOrders((prev) => prev.map((o) => (
+        o.id === id ? { ...o, ...savedUpdate } : o
+      )));
+      await notifyOrderUser(id, currentOrder?.user_email, "cancelled", currentOrder?.service_name || "خدمة");
+      return;
+    }
+
+    const savedUpdate = await updateOrderViaApi(id, { status });
+    if (!savedUpdate) return;
+    setOrders((prev) => prev.map((o) => (
+      o.id === id ? { ...o, ...savedUpdate } : o
+    )));
+    await notifyOrderUser(id, currentOrder?.user_email, status, currentOrder?.service_name || "خدمة");
+  };
+
+  const showDetails = (o: any) => {
+    const choiceLabels: Record<string, string> = {
+      link: "رابط شحن",
+      qr: "QR Code",
+      userpass: "يوزر وباسورد",
+    };
+    let text = `الرابط / آيدي اللاعب: ${o.link || "لا يوجد"}\n`;
+    if (o.whatsapp) text += `واتساب: ${o.whatsapp}\n`;
+    if (o.options) {
+      if (o.options.tiktokChoice) text += `طريقة الشحن: ${choiceLabels[o.options.tiktokChoice] || o.options.tiktokChoice}\n`;
+      if (o.options.username) text += `اليوزر: ${o.options.username}\n`;
+      if (o.options.password) text += `كلمة السر: ${o.options.password}\n`;
+      if (o.options.googleAccount) text += `حساب جوجل: ${o.options.googleAccount}\n`;
+      if (o.options.verificationCode) text += `رمز التحقق: ${o.options.verificationCode}\n`;
+      if (o.options.whatsapp && o.options.whatsapp !== o.whatsapp) {
+        text += `واتساب QR: ${o.options.whatsapp}\n`;
+      }
+    }
+
+    if (o.service_name?.includes("Telegram") || o.service_name?.includes("تليجرام")) {
+      const is1Yr = o.service_name?.includes("1") || o.service_id?.includes("1yr");
+      const is6Mo = o.service_name?.includes("6") || o.service_id?.includes("6mo");
+      const rawUsdCost = is1Yr ? 28.99 : is6Mo ? 15.99 : 11.99;
+      const estTon = (rawUsdCost / 3.30).toFixed(2);
+      text += `\n💎 تكلفة الشحن بمحفظة TON للآدمن:\n• تكلفة تليجرام بالدولار: $${rawUsdCost}\n• سعر صرف 1 TON التقريبي: $3.30 USD\n• الكمية المطلوبة بالتحويل من محفظة TON: ~${estTon} TON\n`;
+    }
+    Swal.fire({
+      title: "تفاصيل الطلب",
+      text,
+      icon: "info",
+      background: "#111",
+      color: "#fff",
+      confirmButtonText: "حسناً",
+      confirmButtonColor: "#38bdf8"
+    });
+  };
+
+  return (
+    <Card title={`📦 الطلبات (${filtered.length})`}>
+      <div
+        style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap" }}
+      >
+        <div style={{ position: "relative", flex: 1, minWidth: 150 }}>
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ ...inp, paddingRight: 36 }}
+            placeholder="بحث..."
+          />
+          <Search
+            size={16}
+            color="#666"
+            style={{
+              position: "absolute",
+              right: 10,
+              top: "50%",
+              transform: "translateY(-50%)",
+            }}
+          />
+        </div>
+        <select
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          style={{ ...inp, width: 130, cursor: "pointer" }}
+        >
+          <option value="all" style={{ color: "#000" }}>الكل</option>
+          <option value="pending" style={{ color: "#000" }}>معلق</option>
+          <option value="pending_action" style={{ color: "#000" }}>بانتظار إجراء</option>
+          <option value="completed" style={{ color: "#000" }}>مكتمل</option>
+          <option value="rejected" style={{ color: "#000" }}>مرفوض</option>
+        </select>
+        <button onClick={() => setRefresh((r) => r + 1)} style={btnSm}>
+          <RefreshCw size={14} />
+        </button>
+      </div>
+      {loadingOrders && <p className="mb-4 text-muted-foreground">جاري تحميل الطلبات...</p>}
+      {ordersError && <p className="mb-4 text-red-400">{ordersError}</p>}
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse min-w-[800px] text-sm">
+          <thead>
+            <tr className="border-b border-border/50 bg-muted/5">
+              {[
+                "الخدمة",
+                "المستخدم",
+                "المبلغ",
+                "الكمية",
+                "الحالة",
+                "الدفع",
+                "التاريخ",
+                "إجراء",
+              ].map((h) => (
+                <th
+                  key={h}
+                  className="p-4 text-right text-muted-foreground font-semibold whitespace-nowrap"
+                >
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((o) => (
+              <tr key={o.id} className="border-b border-border/30 hover:bg-white/5 transition-colors">
+                <td className="p-4 max-w-[140px] truncate whitespace-nowrap text-foreground">
+                  {o.service_name}
+                </td>
+                <td className="p-4 text-xs text-muted-foreground font-mono text-right" dir="ltr">
+                  {o.user_id?.slice(0, 8)}
+                </td>
+                <td className="p-4 font-bold text-primary text-right whitespace-nowrap" dir="ltr">
+                  {o.price} {o.currency}
+                </td>
+                <td className="p-4 text-foreground font-mono">{o.quantity}</td>
+                <td className="p-4">
+                  <span
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap ${
+                      o.status === "completed"
+                        ? "bg-emerald-500/10 text-emerald-500"
+                        : o.status === "rejected"
+                          ? "bg-destructive/10 text-destructive"
+                          : o.status === "pending_action"
+                            ? "bg-orange-500/10 text-orange-500"
+                            : "bg-primary/10 text-primary"
+                    }`}
+                  >
+                    {o.status === "completed"
+                      ? "مكتمل"
+                      : o.status === "rejected"
+                        ? "مرفوض"
+                        : o.status === "pending_action"
+                          ? "إجراء مطلوب"
+                          : "معلق"}
+                  </span>
+                </td>
+                <td className="p-4">
+                  <span
+                    className={`px-3 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap ${
+                      o.paymentStatus === "paid"
+                        ? "bg-emerald-500/10 text-emerald-500"
+                        : o.paymentStatus === "verifying"
+                          ? "bg-blue-500/10 text-blue-500"
+                          : o.paymentStatus === "awaiting_payment"
+                            ? "bg-orange-500/10 text-orange-500"
+                            : "bg-gray-500/10 text-gray-500"
+                    }`}
+                  >
+                    {o.paymentStatus === "paid"
+                      ? "مدفوع"
+                      : o.paymentStatus === "verifying"
+                        ? "جاري التحقق"
+                        : o.paymentStatus === "awaiting_payment"
+                          ? "بانتظار الدفع"
+                          : "محفظة/مسبق"}
+                  </span>
+                  <VerificationCountdown item={o} />
+                </td>
+                <td className="p-4 text-xs text-muted-foreground whitespace-nowrap">
+                  {o.created_at
+                    ? new Date(
+                      typeof o.created_at === "object" && o.created_at._seconds
+                        ? o.created_at._seconds * 1000
+                        : o.created_at,
+                    ).toLocaleDateString("en-US")
+                    : "—"}
+                </td>
+                <td className="p-4">
+                    <div className="flex gap-2 flex-wrap">
+                      <button
+                        onClick={() => showDetails(o)}
+                        className="bg-white/5 hover:bg-white/10 text-foreground border border-border px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                      >
+                        تفاصيل
+                      </button>
+
+                      {o.status === "pending_action" && !o.authLink && !o.qr_image && (
+                        <button
+                          onClick={() => update(o.id, "provide_link", o)}
+                          className="bg-orange-500/10 hover:bg-orange-500/20 text-orange-500 border border-orange-500/20 px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                        >
+                          🔗 ضع الرابط / الصورة
+                        </button>
+                      )}
+
+                      {o.status !== "completed" && o.status !== "rejected" && (
+                        <>
+                        <button
+                          onClick={() => update(o.id, "completed", o)}
+                          className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border border-emerald-500/20 px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                        >
+                          ✅ قبول
+                        </button>
+                        <button
+                          onClick={() => update(o.id, "rejected", o)}
+                          className="bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20 px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                        >
+                          ❌ رفض
+                        </button>
+                        </>
+                      )}
+                    </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </Card>
+  );
+}
+
+// ─── Calculator Tab ──────────────────────────────────────────────────────────
+
+export function CalculatorTab() {
+  const [costUsd, setCostUsd] = useState("10.3");
+  const [usdRate, setUsdRate] = useState("55");
+  const [coins, setCoins] = useState("1000");
+  const [tiers, setTiers] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchAdminData("settings/pricing").then((result) => {
+      if (result.exists) {
+        const v = result.data;
+        setCostUsd(String(v.tiktok_cost_usd || "10.3"));
+        setUsdRate(String(v.usd_rate || "55"));
+      }
+    }).catch(console.error);
+    fetchAdminData("tiers").then((result) => {
+      const data: any[] = result.items || [];
+      data.sort((a, b) => Number(a.min) - Number(b.min));
+      setTiers(data);
+    }).catch(console.error);
+  }, []);
+
+  const cost = ceilTo2Decimals(
+    (((+coins || 0) * (+costUsd || 0)) / 1000) * (+usdRate || 0),
+  );
+
+  let suggestedPrice = cost;
+  let profit = 0;
+  
+  if (tiers.length > 0) {
+    const cNum = +coins || 0;
+    suggestedPrice = calculateTikTokPriceEgp(cNum, tiers, Number(usdRate));
+    profit = ceilTo2Decimals(suggestedPrice - cost);
+  }
+
+  return (
+    <div style={{ maxWidth: 800 }}>
+      <Card title="🧮 حاسبة أرباح تيك توك">
+        <div style={{ display: "grid", gap: 20 }}>
+          <div
+            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}
+          >
+            <div>
+              <label style={lbl}>تكلفة الألف ($)</label>
+              <input
+                type="number"
+                step="0.01"
+                value={costUsd}
+                onChange={(e) => setCostUsd(e.target.value)}
+                style={inp}
+              />
+            </div>
+            <div>
+              <label style={lbl}>سعر الدولار (ج.م)</label>
+              <input
+                type="number"
+                step="0.01"
+                value={usdRate}
+                onChange={(e) => setUsdRate(e.target.value)}
+                style={inp}
+              />
+            </div>
+          </div>
+          <div>
+            <label style={lbl}>عدد العملات للعميل</label>
+            <input
+              type="number"
+              value={coins}
+              onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
+              onChange={(e) => {
+                let val = e.target.value;
+                if (val.includes('.')) {
+                  val = val.split('.')[0];
+                  e.target.value = val;
+                }
+                setCoins(val);
+              }}
+              style={{ ...inp, fontSize: 18, fontWeight: 'bold' }}
+            />
+          </div>
+          <div
+            style={{
+              background: "rgba(255,255,255,0.02)",
+              padding: 24,
+              borderRadius: 16,
+              border: "1px solid rgba(255,255,255,0.05)",
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 20,
+            }}
+          >
+            <div>
+              <div style={{ color: "#888", fontSize: 13, marginBottom: 4 }}>
+                التكلفة بالدولار
+              </div>
+              <div style={{ fontSize: 24, fontWeight: 800, color: "#38bdf8" }}>
+                ≈ {ceilTo2Decimals((((+coins || 0) * (+costUsd || 0)) / 1000))} $
+              </div>
+            </div>
+            <div>
+              <div style={{ color: "#888", fontSize: 13, marginBottom: 4 }}>التكلفة بالجنيه</div>
+              <div style={{ fontSize: 24, fontWeight: 800, color: "#ff4444" }}>
+                {cost} ج.م
+              </div>
+            </div>
+            <div>
+              <div style={{ color: "#888", fontSize: 13, marginBottom: 4 }}>
+                السعر المقترح (حسب الشريحة)
+              </div>
+              <div style={{ fontSize: 24, fontWeight: 800, color: "#00ff80" }}>
+                {tiers.length > 0 ? `${suggestedPrice} ج.م` : "لا توجد شرائح أسعار"}
+              </div>
+            </div>
+            <div>
+              <div style={{ color: "#888", fontSize: 13, marginBottom: 4 }}>الربح المتوقع</div>
+              <div style={{ fontSize: 24, fontWeight: 800, color: "#fbbf24" }}>
+                {tiers.length > 0 ? `${profit} ج.م` : "-"}
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+// ─── External Customer Calculator ─────────────────────────────────────
+
+export function ExternalCustomerCalculatorTab() {
+  const [coins, setCoins] = useState("1000");
+  const [selectedServiceId, setSelectedServiceId] = useState("tiktok_coins");
+  const [services, setServices] = useState<any[]>([]);
+  const [usdRate, setUsdRate] = useState(0);
+  const [smmRate, setSmmRate] = useState(0);
+  const [fazerRate, setFazerRate] = useState(0);
+  const [tiers, setTiers] = useState<TikTokPricingTier[]>([]);
+  const [depositFeePercent, setDepositFeePercent] = useState(0.75);
+  const [loading, setLoading] = useState(true);
+  const [priceTable, setPriceTable] = useState("");
+  const [copyMessage, setCopyMessage] = useState("");
+
+  useEffect(() => {
+    Promise.all([
+      fetchAdminData("settings/pricing"),
+      fetchAdminData("tiers"),
+      fetchAdminData("settings/manual_services"),
+      fetchAdminData("calculator_services"),
+    ]).then(([pricingResult, tiersResult, manualSettingsResult, calculatorServicesResult]) => {
+      const pricing = pricingResult.data || {};
+      const currentUsdRate = Number(pricing.usd_rate || pricing.tiktok_usd_rate || 0);
+      setUsdRate(currentUsdRate);
+      setSmmRate(Number(pricing.smm_usd_rate || 0));
+      setFazerRate(Number(pricing.fazer_usd_rate || 0));
+      const configuredFee = Number(pricing.deposit_fee_percent ?? pricing.depositFeePercent ?? 0.75);
+      setDepositFeePercent(Number.isFinite(configuredFee) && configuredFee >= 0 ? configuredFee : 0.75);
+      const loadedTiers = (tiersResult.items || []).sort(
+        (a: TikTokPricingTier, b: TikTokPricingTier) => Number(a.min) - Number(b.min),
+      );
+      setTiers(loadedTiers);
+
+      const configuredManual = Array.isArray(manualSettingsResult.data?.services)
+        ? manualSettingsResult.data.services
+        : [];
+      const defaultManual = [
+        { id: "tiktok_promo", name: "ترويج تيك توك", price: 0.5, min: 10, max: 50_000 },
+        { id: "instagram_promo", name: "ترويج انستجرام", price: 0.5, min: 10, max: 50_000 },
+        { id: "facebook_promo", name: "ترويج فيسبوك", price: 0.5, min: 10, max: 50_000 },
+        { id: "tiktok_superfan", name: "اشتراك سوبر فان - شهري", price: 150, min: 1, max: 1 },
+        { id: "tiktok_hidden_w", name: "اشتراك مخفي - اسبوعي", price: 0, min: 1, max: 1 },
+        { id: "tiktok_hidden_m", name: "اشتراك مخفي - شهري", price: 0, min: 1, max: 1 },
+      ];
+      const mergedManual = Array.from(new Map(
+        [...defaultManual, ...configuredManual].map((service: any) => [String(service.id), service]),
+      ).values());
+      const fixedServices = mergedManual.map((service: any) => {
+        const linkedCoinQuantity = service.id === "tiktok_hidden_w"
+          ? 13_000
+          : service.id === "tiktok_hidden_m"
+            ? 26_000
+            : 0;
+        const initialUsdPrice = service.priceUsd ?? service.price_usd ?? (service.price && currentUsdRate > 0 ? (Number(service.price) / currentUsdRate).toFixed(2) : "0");
+        return {
+          ...service,
+          service: service.id,
+          category: service.category || "الخدمات اليدوية",
+          isManual: true,
+          priceUsd: String(initialUsdPrice),
+          price_usd: String(initialUsdPrice),
+          price: linkedCoinQuantity > 0
+            ? calculateTikTokPriceEgp(linkedCoinQuantity, loadedTiers, currentUsdRate)
+            : Number(initialUsdPrice) > 0 && currentUsdRate > 0
+              ? Math.round(Number(initialUsdPrice) * currentUsdRate * 100) / 100
+              : Number(service.price || 0),
+        };
+      });
+      const firestoreServices = (calculatorServicesResult.manualItems || []).map((data: any) => {
+        return {
+          id: data.id,
+          ...data,
+          service: data.service || data.id,
+          isManual: true,
+        };
+      });
+      const allServices = [
+        { service: "tiktok_coins", name: "شحن عملات تيك توك", category: "تيك توك", min: 1, max: 1_000_000, isTikTokCoins: true },
+        ...fixedServices,
+        ...firestoreServices,
+      ];
+      setServices(Array.from(new Map(allServices.map((service: any) => [String(service.service), service])).values()));
+    }).catch(console.error).finally(() => setLoading(false));
+  }, []);
+
+  const quantity = Math.max(0, Math.trunc(Number(coins) || 0));
+  const selectedService = services.find((service) => String(service.service) === selectedServiceId);
+  const isTikTokCoins = selectedServiceId === "tiktok_coins";
+  const matchingTier = isTikTokCoins
+    ? tiers.find((tier) => quantity >= Number(tier.min) && quantity <= Number(tier.max))
+    : undefined;
+  const serviceMin = Number(selectedService?.min || 1);
+  const serviceMax = Number(selectedService?.max || 1_000_000);
+  const validQuantity = quantity >= serviceMin && quantity <= serviceMax;
+  const serviceUnitPrice = selectedService?.isManual
+    ? Number(selectedService.price || 0)
+    : Number(selectedService?.rate || 0) * (usdRate + 4) * 1.005;
+  let sitePrice = 0;
+  if (quantity > 0 && validQuantity) {
+    if (isTikTokCoins && matchingTier) {
+      sitePrice = calculateTikTokPriceEgp(quantity, tiers, usdRate);
+    } else if (selectedService?.isManual || selectedService?.type === "Package") {
+      sitePrice = ceilTo2Decimals(quantity * serviceUnitPrice);
+    } else {
+      sitePrice = ceilTo2Decimals((quantity * serviceUnitPrice) / 1000);
+    }
+  }
+  const outsidePrice = ceilTo2Decimals(sitePrice * (1 + depositFeePercent / 100));
+  const addedAmount = outsidePrice - sitePrice;
+
+  const randomUniqueQuantities = (min: number, max: number, count: number) => {
+    const values = new Set<number>();
+    while (values.size < count) {
+      values.add(Math.floor(Math.random() * (max - min + 1)) + min);
+    }
+    return Array.from(values).sort((a, b) => a - b);
+  };
+
+  const generatePriceTable = () => {
+    const groups = [
+      { title: "فئة 30 إلى 99", min: 30, max: 99, count: 5 },
+      { title: "فئة 100", min: 100, max: 249, count: 10 },
+      { title: "فئة 250", min: 250, max: 499, count: 10 },
+      { title: "فئة 500", min: 500, max: 999, count: 10 },
+      { title: "فئة 1000 إلى 2.5 مليون", min: 1000, max: 2_500_000, count: 35 },
+    ];
+
+    const lines = [
+      `جدول أسعار عملاء خارج الموقع (+${depositFeePercent}%)`,
+      "عدد العملات | السعر بالجنيه",
+      "-----------------------------",
+    ];
+
+    for (const group of groups) {
+      lines.push("", `【 ${group.title} 】`);
+      for (const amount of randomUniqueQuantities(group.min, group.max, group.count)) {
+        const tier = tiers.find(
+          (item) => amount >= Number(item.min) && amount <= Number(item.max),
+        );
+        if (!tier) continue;
+        const customerPrice = calculateTikTokPriceEgp(amount, tiers, usdRate);
+        const externalPrice = ceilTo2Decimals(customerPrice * (1 + depositFeePercent / 100));
+        lines.push(`${amount} عملة | ${externalPrice} ج.م`);
+      }
+    }
+
+    setPriceTable(lines.join("\n"));
+    setCopyMessage("");
+  };
+
+  const copyPriceTable = async () => {
+    if (!priceTable) return;
+    await navigator.clipboard.writeText(priceTable);
+    setCopyMessage("✅ تم نسخ جدول الأسعار");
+    window.setTimeout(() => setCopyMessage(""), 2500);
+  };
+
+  return (
+    <div style={{ maxWidth: 800 }}>
+      <Card title="🧮 حاسبة كل خدمات الموقع لعملاء الخارج">
+        <div style={{ display: "grid", gap: 20 }}>
+          <div>
+            <label style={lbl}>الخدمة</label>
+            <select
+              value={selectedServiceId}
+              onChange={(event) => {
+                setSelectedServiceId(event.target.value);
+                const service = services.find((item) => String(item.service) === event.target.value);
+                setCoins(String(Math.max(1, Number(service?.min || 1))));
+              }}
+              style={inp}
+            >
+              {services.map((service) => (
+                <option key={String(service.service)} value={String(service.service)}>
+                  {service.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label style={lbl}>{isTikTokCoins ? "عدد العملات" : "الكمية"}</label>
+            <input
+              type="number"
+              min="1"
+              step="1"
+              inputMode="numeric"
+              value={coins}
+              onKeyDown={(event) => {
+                if (event.key === "." || event.key === "," || event.key === "-") event.preventDefault();
+              }}
+              onChange={(event) => setCoins(event.target.value.replace(/\D/g, ""))}
+              style={{ ...inp, fontSize: 18, fontWeight: 800 }}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="rounded-2xl border border-sky-500/20 bg-sky-500/[0.06] p-5">
+              <div className="mb-2 text-xs font-semibold text-muted-foreground">سعر عميل الموقع</div>
+              <div className="text-2xl font-black text-sky-400">{sitePrice} ج.م</div>
+            </div>
+            <div className="rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] p-5">
+              <div className="mb-2 text-xs font-semibold text-muted-foreground">زيادة عميل الخارج ({depositFeePercent}%)</div>
+              <div className="text-2xl font-black text-amber-400">+{addedAmount} ج.م</div>
+            </div>
+            <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.06] p-5">
+              <div className="mb-2 text-xs font-semibold text-muted-foreground">السعر المطلوب</div>
+              <div className="text-2xl font-black text-emerald-400">{outsidePrice} ج.م</div>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-border bg-muted/20 p-4 text-sm text-muted-foreground">
+            {loading
+              ? "جاري تحميل خدمات وأسعار الموقع..."
+              : !validQuantity || (isTikTokCoins && !matchingTier)
+                ? `الكمية المسموحة من ${serviceMin} إلى ${serviceMax}.`
+                : isTikTokCoins && matchingTier
+                  ? `الشريحة المستخدمة: من ${matchingTier.min} إلى ${matchingTier.max} عملة. كل النتائج بالجنيه مقربة لأعلى لأقرب جنيه.`
+                  : `سعر خدمة «${selectedService?.name || "-"}» محسوب بنفس تسعير الموقع ومقرب لأعلى لأقرب جنيه.`}
+          </div>
+        </div>
+      </Card>
+
+      <Card title="📋 مولّد جدول أسعار عملاء الخارج">
+        <div style={{ display: "grid", gap: 16 }}>
+          <p className="m-0 text-sm leading-7 text-muted-foreground">
+            ينشئ 60 سعرًا عشوائيًا: 10 من فئة 100، و10 من فئة 250،
+            و10 من فئة 500، و30 من فئة 1000 حتى مليون عملة.
+            جميع الأسعار تشمل زيادة {depositFeePercent}% ومقربة لأعلى لأقرب جنيه.
+          </p>
+          <div>
+            <button
+              type="button"
+              onClick={generatePriceTable}
+              disabled={loading || tiers.length === 0 || usdRate <= 0}
+              style={saveBtn}
+            >
+              <RefreshCw size={16} /> توليد جدول عشوائي جديد
+            </button>
+            <button
+              type="button"
+              onClick={copyPriceTable}
+              disabled={!priceTable}
+              style={{
+                ...saveBtn,
+                background: priceTable ? "#10b981" : "#334155",
+                color: "#fff",
+              }}
+            >
+              نسخ الجدول كنص
+            </button>
+          </div>
+
+          <textarea
+            readOnly
+            dir="rtl"
+            value={priceTable}
+            placeholder="اضغط «توليد جدول عشوائي جديد» لعرض الأسعار هنا..."
+            style={{
+              ...inp,
+              minHeight: 560,
+              resize: "vertical",
+              fontFamily: "monospace",
+              lineHeight: 1.9,
+              whiteSpace: "pre",
+            }}
+          />
+          {copyMessage && <StatusMsg msg={copyMessage} />}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+// ─── TikTok Services ─────────────────────────────────────────────────────────
+
+export function ManualServicesTab() {
+  const [svcs, setSvcs] = useState<any[]>([]);
+  const [usdRate, setUsdRate] = useState(0);
+  const [depositFeePercent, setDepositFeePercent] = useState(0.5);
+  const [tiers, setTiers] = useState<TikTokPricingTier[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+  useEffect(() => {
+    Promise.all([
+      fetchAdminData("settings/manual_services"),
+      fetchAdminData("settings/pricing"),
+      fetchAdminData("tiers"),
+    ]).then(([servicesResult, pricingResult, tiersResult]) => {
+      const rate = Number(
+        pricingResult.data?.usd_rate || pricingResult.data?.tiktok_usd_rate || 0,
+      );
+      setUsdRate(rate);
+      const feeP = Number(pricingResult.data?.deposit_fee_percent ?? pricingResult.data?.depositFeePercent ?? 0.5);
+      if (Number.isFinite(feeP) && feeP >= 0) setDepositFeePercent(feeP);
+      setTiers((tiersResult.items || []).sort(
+        (a: TikTokPricingTier, b: TikTokPricingTier) => Number(a.min) - Number(b.min),
+      ));
+      const services =
+        servicesResult.exists && servicesResult.data.services
+          ? servicesResult.data.services
+          : [
+          {
+            id: "tiktok_promo",
+            name: "ترويج تيك توك",
+            price: "0.5",
+            min: "10",
+            max: "50000",
+            desc: "سعر ترويج تيك توك",
+          },
+          {
+            id: "instagram_promo",
+            name: "ترويج انستجرام",
+            price: "0.5",
+            min: "10",
+            max: "50000",
+            desc: "سعر ترويج انستجرام",
+          },
+          {
+            id: "facebook_promo",
+            name: "ترويج فيسبوك",
+            price: "0.5",
+            min: "10",
+            max: "50000",
+            desc: "سعر ترويج فيسبوك",
+          },
+          {
+            id: "tiktok_superfan",
+            name: "سوبر فان - شهري",
+            price: "150",
+            min: "1",
+            max: "1",
+            desc: "سعر الاشتراك الشهري",
+          },
+          {
+            id: "tiktok_hidden_w",
+            name: "اشتراك مخفي - اسبوعي",
+            price: "30",
+            min: "1",
+            max: "1",
+            desc: "سعر الاشتراك الاسبوعي",
+          },
+          {
+            id: "tiktok_hidden_m",
+            name: "اشتراك مخفي - شهري",
+            price: "100",
+            min: "1",
+            max: "1",
+            desc: "سعر الاشتراك الشهري",
+          },
+        ];
+      setSvcs(services.map((service: any) => ({
+        ...service,
+        price: service.price || (rate > 0 && service.price_usd ? Math.ceil(((Number(service.price_usd) * rate) - 1e-9) * 100) / 100 : ""),
+        // Keep legacy packages tied to their original USD value, using the
+        // rate stored when they were created rather than today's rate.
+        priceUsd: getManualServicePriceUsd(service) || "",
+      })));
+    }).catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    // Keep the admin price preview in sync with any USD rate change.
+    const pricingRef = doc(db, "settings", "pricing");
+    return onSnapshot(pricingRef, (snapshot) => {
+      const pricing = snapshot.data() as Record<string, unknown> | undefined;
+      const rate = Number(pricing?.usd_rate || pricing?.tiktok_usd_rate || 0);
+      if (Number.isFinite(rate) && rate > 0) setUsdRate(rate);
+    }, console.error);
+  }, []);
+
+  const addGameCategory = async () => {
+    const { value: gameName } = await Swal.fire({
+      title: "🕹️ إضافة لعبة / قسم جديد",
+      input: "text",
+      inputLabel: "أدخل اسم اللعبة أو القسم الجديد",
+      inputPlaceholder: "مثال: PUBG MOBILE أو Honor of Kings",
+      showCancelButton: true,
+      confirmButtonText: "إضافة اللعبة",
+      cancelButtonText: "إلغاء",
+      background: "#0c1322",
+      color: "#fff",
+      confirmButtonColor: "#38bdf8",
+      inputValidator: (val) => {
+        if (!val || !val.trim()) return "يرجى كتابة اسم اللعبة أو القسم!";
+      },
+    });
+
+    if (gameName && gameName.trim()) {
+      addManualPackage(gameName.trim(), "الباقة الأولى (مثال: 60 شدة)");
+    }
+  };
+
+  const addManualPackage = (presetCategory?: string, presetName?: string) => {
+    const newId = `manual_pkg_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    setSvcs((prev) => [
+      ...prev,
+      {
+        id: newId,
+        name: presetName || "خدمة / اشتراك جديد",
+        category: presetCategory || "أخرى",
+        price: "100",
+        priceUsd: usdRate > 0 ? (Math.round((100 / usdRate) * 100) / 100).toString() : "2",
+        min: "1",
+        max: "1",
+        desc: "خدمة أو اشتراك يدوي",
+      },
+    ]);
+  };
+
+  const removeManualPackage = (index: number) => {
+    setSvcs((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const save = async () => {
+    setBusy(true);
+    const sanitizedServices = svcs.map((s) => {
+      const linkedCoins = s.id === "tiktok_hidden_w" ? 13_000 : s.id === "tiktok_hidden_m" ? 26_000 : 0;
+      const automaticEgp = linkedCoins > 0 && tiers.length > 0
+        ? calculateTikTokPriceEgp(linkedCoins, tiers, usdRate)
+        : 0;
+
+      const isAutoLocked = linkedCoins > 0 && tiers.length > 0;
+
+      if (isAutoLocked) {
+        return {
+          ...s,
+          price: automaticEgp.toString(),
+          price_usd: usdRate > 0 ? (automaticEgp / usdRate).toFixed(2) : "0",
+        };
+      }
+
+      const usdPrice = Number(s.priceUsd ?? s.price_usd ?? 0);
+      const discountPercent = usdPrice > 10 ? Math.min(100, Math.max(0, Number(s.discountPercent || 0))) : 0;
+      const computedEgp = usdRate > 0 && usdPrice > 0 ? Math.round(usdPrice * usdRate * 100) / 100 : Number(s.price || 0);
+      const usdStr = usdPrice ? usdPrice.toString() : String(s.priceUsd || s.price_usd || "0");
+      const minVal = Number(s.min || s.min_quantity || 1);
+      const maxVal = Number(s.max || s.max_quantity || 1);
+      return {
+        ...s,
+        min: minVal.toString(),
+        max: maxVal.toString(),
+        min_quantity: minVal,
+        max_quantity: maxVal,
+        price: computedEgp ? computedEgp.toString() : s.price || "0",
+        priceUsd: usdStr,
+        price_usd: usdStr,
+        discountPercent: discountPercent > 0 ? discountPercent.toString() : "",
+      };
+    });
+
+    await writeAdminData({
+      action: "saveManualServices",
+      services: sanitizedServices,
+    });
+    setSvcs(sanitizedServices.map((s) => ({
+      ...s,
+      priceUsd: s.price_usd || s.priceUsd,
+    })));
+    setMsg("✅ تم حفظ باقات الألعاب والخدمات اليدوية بنجاح");
+    setBusy(false);
+    setTimeout(() => setMsg(""), 3000);
+  };
+
+  const handleExportSingleService = (serviceItem: any) => {
+    handleExportItemsList(serviceItem.name || "خدمة يدوية", [serviceItem]);
+  };
+
+  const handleExportItemsList = async (categoryTitle: string, items: any[]) => {
+    if (!items || items.length === 0) {
+      Swal.fire({
+        title: "تنبيه",
+        text: "لا توجد خدمات متاحة لاستخراج أسعارها.",
+        icon: "warning",
+        background: "#111",
+        color: "#fff",
+      });
+      return;
+    }
+
+    let depositFeePercent = 0.57;
+    let minFeeEgp = 0.57;
+    let maxFeeEgp = 180;
+    let globalDiscountConfig: any = null;
+    try {
+      const pSnap = await getDoc(doc(db, "settings", "pricing"));
+      if (pSnap.exists()) {
+        const d = pSnap.data();
+        const f = Number(d?.deposit_fee_percent ?? d?.depositFeePercent ?? d?.feePercent);
+        if (Number.isFinite(f) && f >= 0) depositFeePercent = f;
+        const minF = Number(d?.minDepositFee ?? d?.minFeeEgp);
+        if (Number.isFinite(minF) && minF >= 0) minFeeEgp = minF;
+        const maxF = Number(d?.maxDepositFee ?? d?.maxFeeEgp);
+        if (Number.isFinite(maxF) && maxF > 0) maxFeeEgp = maxF;
+        globalDiscountConfig = {
+          enabled: Boolean(d?.global_usd_discount_enabled ?? d?.globalUsdDiscountEnabled),
+          discountPercent: Number(d?.global_usd_discount_percent ?? d?.globalUsdDiscountPercent ?? 0),
+          maxDiscountUsd: Number(d?.global_usd_discount_max_amount ?? d?.globalUsdDiscountMaxAmount ?? d?.max_discount_usd ?? d?.maxDiscountUsd ?? 0),
+          expiresAt: d?.global_usd_discount_expires_at ?? d?.globalUsdDiscountExpiresAt ?? null,
+        };
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    const roundTo0Or5 = (price: number): number => {
+      if (!Number.isFinite(price) || price <= 0) return 0;
+      const intVal = Math.ceil(price);
+      const rem = intVal % 10;
+      let rounded = intVal;
+      if (rem === 1) rounded = intVal - 1;
+      else if (rem === 2) rounded = intVal - 2;
+      else if (rem === 3) rounded = intVal + 2;
+      else if (rem === 4) rounded = intVal + 1;
+      else if (rem === 6) rounded = intVal - 1;
+      else if (rem === 7) rounded = intVal - 2;
+      else if (rem === 8) rounded = intVal + 2;
+      else if (rem === 9) rounded = intVal + 1;
+      return Math.max(5, rounded);
+    };
+
+    const calcExportGross = (netEgp: number): number => {
+      if (!Number.isFinite(netEgp) || netEgp <= 0) return 0;
+      const rawFee = netEgp * (depositFeePercent / 100);
+      const clampedFee = Math.max(minFeeEgp, Math.min(maxFeeEgp, rawFee));
+      const gross = Math.ceil(netEgp + clampedFee);
+      return roundTo0Or5(gross);
+    };
+
+    const now = new Date();
+    const d = String(now.getDate()).padStart(2, "0");
+    const m = String(now.getMonth() + 1).padStart(2, "0");
+    const y = now.getFullYear();
+    const hh = String(now.getHours()).padStart(2, "0");
+    const mm = String(now.getMinutes()).padStart(2, "0");
+    const ss = String(now.getSeconds()).padStart(2, "0");
+    const todayStr = `${d}/${m}/${y} ${hh}:${mm}:${ss}`;
+
+    let listText = `📅 الأسعار بتاريخ: ${todayStr}\n📌 الخدمة: ${categoryTitle}\n\n`;
+    if (isGlobalUsdDiscountActive(globalDiscountConfig)) {
+      const durationText = calculateExactRemainingTimeText(globalDiscountConfig.expiresAt);
+      const capNote = globalDiscountConfig.maxDiscountUsd && globalDiscountConfig.maxDiscountUsd > 0
+        ? ` (بحد أقصى ${globalDiscountConfig.maxDiscountUsd}$ خصم)`
+        : "";
+      listText += `🔥 عرض خاص: خصم ${globalDiscountConfig.discountPercent}% متاح لمدة ${durationText}!${capNote}\n(على جميع الخدمات التي بقيمة 10$ او اكثر)\n\n`;
+    }
+    listText += `⚠️ ملاحظة:\nالأسعار الموضحة أدناه سارية بتاريخ اليوم فقط، وقد ترتفع أو تنخفض في أي وقت حسب تغير سعر الصرف وتكلفة الشحن.\n\n`;
+
+    let count = 0;
+    items.forEach((s: any) => {
+      const isTgStars = s.id === "tg_stars_custom" || s.name?.includes("نجوم تليجرام") || s.name?.includes("Telegram Stars");
+
+      if (isTgStars) {
+        listText += `\n⭐ أسعار نجوم تليجرام (Telegram Stars):\n`;
+        const starQuantities: number[] = [
+          50, 60, 70, 80, 90,
+          100, 200, 300, 400, 500, 600, 700, 800, 900,
+          1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000,
+          10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000,
+          100000, 200000, 300000, 400000, 500000, 600000, 700000, 800000, 900000,
+          1000000
+        ];
+
+        starQuantities.forEach((q) => {
+          const usd = (q / 50) * 0.92;
+          const sellingEgp = Math.ceil(((usd * usdRate) - 1e-9) * 100) / 100;
+          const finalPriceEgp = calcExportGross(sellingEgp);
+
+          const formattedQ = q >= 1000 ? q.toLocaleString("en-US") : String(q);
+          const formattedPrice = finalPriceEgp.toLocaleString("en-US");
+          listText += `✨ ${formattedQ} نجمة تليجرام = ${formattedPrice} ج\n`;
+          count++;
+        });
+        return;
+      }
+
+      const sellingEgp = calculateManualServicePriceEgp(s, usdRate, globalDiscountConfig);
+      if (sellingEgp <= 0) return;
+
+      const originalSellingEgp = calculateManualServiceOriginalPriceEgp(s, usdRate);
+      const hasDiscount = originalSellingEgp > sellingEgp;
+
+      const rawName = String(s.name || s.id);
+      let cleanName = rawName.replace(/\s*\([^)]*من[^)]*إلى[^)]*\)/g, "").trim();
+
+      if (cleanName.includes("ChatGPT")) {
+        cleanName = "اشتراك شهر ChatGPT Plus";
+      } else if (cleanName.includes("Telegram Premium") && (cleanName.includes("3") || cleanName.includes("ثلاثة"))) {
+        cleanName = "اشتراك 3 أشهر Telegram Premium";
+      }
+      const minQ = Number(s.min || s.min_quantity || 1);
+      const maxQ = Number(s.max || s.max_quantity || 1);
+
+      if (maxQ > 1 || minQ > 1) {
+        const minNetOriginal = minQ * originalSellingEgp;
+        const maxNetOriginal = maxQ * originalSellingEgp;
+        const minGrossOriginal = calcExportGross(minNetOriginal);
+        const maxGrossOriginal = calcExportGross(maxNetOriginal);
+
+        const minNetDiscounted = minQ * sellingEgp;
+        const maxNetDiscounted = maxQ * sellingEgp;
+        const minGrossDiscounted = calcExportGross(minNetDiscounted);
+        const maxGrossDiscounted = calcExportGross(maxNetDiscounted);
+
+        if (hasDiscount) {
+          listText += `${cleanName} = من ${minGrossDiscounted.toLocaleString("en-US")} ج إلى ${maxGrossDiscounted.toLocaleString("en-US")} ج (بدلاً من ~من ${minGrossOriginal.toLocaleString("en-US")} ج إلى ${maxGrossOriginal.toLocaleString("en-US")} ج~) 🔥\n`;
+        } else {
+          listText += `${cleanName} = من ${minGrossDiscounted.toLocaleString("en-US")} ج إلى ${maxGrossDiscounted.toLocaleString("en-US")} ج\n`;
+        }
+      } else {
+        const originalGross = calcExportGross(originalSellingEgp);
+        const discountedGross = calcExportGross(sellingEgp);
+        if (hasDiscount) {
+          listText += `${cleanName} = ${discountedGross.toLocaleString("en-US")} ج (بدلاً من ~${originalGross.toLocaleString("en-US")} ج~) 🔥\n`;
+        } else {
+          listText += `${cleanName} = ${discountedGross.toLocaleString("en-US")} ج\n`;
+        }
+      }
+      count++;
+    });
+
+    if (count === 0) {
+      Swal.fire({
+        title: "تنبيه",
+        text: "لم يتم العثور على أسعار صالحة للخدمات المختارة.",
+        icon: "warning",
+        background: "#111",
+        color: "#fff",
+      });
+      return;
+    }
+
+    listText += `\n🔗 ملاحظة هامة:\nتعتبر هذه القائمة لفترة مؤقتة، ونرجو منكم التعامل المباشر عبر موقعنا الرسمي لسهولة وسرعة الطلب والمتابعة:\n🌐 https://zaitxmedia.com`;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(listText).catch(console.error);
+    }
+
+    const htmlServicesPreview = listText.replace(/~([^~]+)~/g, '<s style="text-decoration: line-through; color: #ef4444; font-weight: bold;">$1</s>');
+
+    Swal.fire({
+      title: `📋 قائمة أسعار (${categoryTitle}) لعملاء الخارج`,
+      showCloseButton: true,
+      html: `
+        <div style="text-align: right; font-family: Cairo, sans-serif; font-size: 13px; line-height: 1.8; color: #fff; background: #0a0a0a; padding: 14px; border-radius: 10px; max-height: 320px; overflow-y: auto; white-space: pre-wrap;" dir="rtl">
+          ${htmlServicesPreview}
+        </div>
+        <div style="margin-top: 10px; font-size: 12px; color: #10b981; font-weight: bold;">
+          ✅ تم نسخ قائمة الأسعار إلى الحافظة تلقائياً!
+        </div>
+      `,
+      icon: "success",
+      background: "#111",
+      color: "#fff",
+      confirmButtonText: "نسخ مجدداً 📋",
+      confirmButtonColor: "#38bdf8",
+    }).then((res) => {
+      if (res.isConfirmed && navigator.clipboard) {
+        navigator.clipboard.writeText(listText);
+      }
+    });
+  };
+
+  const promptCategoryExport = () => {
+    const cats = Array.from(new Set(svcs.map((s) => s.category || "أخرى")));
+    if (cats.length === 0) return;
+
+    let inputOptions: Record<string, string> = { all: "🌐 جميع الخدمات اليدوية" };
+    cats.forEach((c) => {
+      inputOptions[c] = `📌 قسم: ${c}`;
+    });
+
+    Swal.fire({
+      title: "استخراج أسعار قسم لعملاء الخارج",
+      text: "اختر القسم المطلوب استخراج قائمة أسعار خدماته شاملاً رسوم الإيداع والتقريب لأقرب 5 ج.م:",
+      input: "select",
+      inputOptions,
+      showCancelButton: true,
+      confirmButtonText: "استخراج 📋",
+      cancelButtonText: "إلغاء",
+      background: "#111",
+      color: "#fff",
+      confirmButtonColor: "#38bdf8",
+    }).then((res) => {
+      if (res.isConfirmed && res.value) {
+        const selected = res.value;
+        if (selected === "all") {
+          handleExportItemsList("جميع الخدمات اليدوية", svcs);
+        } else {
+          const filtered = svcs.filter((s) => (s.category || "أخرى") === selected);
+          handleExportItemsList(selected, filtered);
+        }
+      }
+    });
+  };
+
+function TonPriceTrackerCard({ usdRate }: { usdRate: number }) {
+  const [gramUsd, setGramUsd] = useState<number>(3.30);
+  const [customUsdInput, setCustomUsdInput] = useState<string>("28.99");
+  const [loadingGram, setLoadingGram] = useState<boolean>(false);
+
+  const fetchGramPrice = useCallback(async () => {
+    setLoadingGram(true);
+    try {
+      const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd");
+      const data = await res.json();
+      const rawPrice = Number(data?.["the-open-network"]?.usd);
+      if (Number.isFinite(rawPrice) && rawPrice > 0) {
+        setGramUsd(rawPrice);
+      }
+    } catch (e) {
+      console.error("GRAM price fetch error:", e);
+    } finally {
+      setLoadingGram(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchGramPrice();
+    const interval = setInterval(fetchGramPrice, 60000);
+    return () => clearInterval(interval);
+  }, [fetchGramPrice]);
+
+  const gramUsdWithFee = gramUsd * 1.0001; // +0.01% over official price
+  const usdNum = Number(customUsdInput) || 0;
+  const gramRequired = gramUsdWithFee > 0 && usdNum > 0 ? (usdNum / gramUsdWithFee).toFixed(4) : "0";
+
+  return (
+    <div style={{ background: "linear-gradient(135deg, #0c182b 0%, #12233f 100%)", border: "1px solid rgba(56,189,248,0.3)", padding: 18, borderRadius: 16, marginBottom: 20, textAlign: "right" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+        <div style={{ color: "#38bdf8", fontWeight: "bold", fontSize: 15, display: "flex", alignItems: "center", gap: 6 }}>
+          💎 متابعة سعر عملة GRAM وحاسبة الدفع مقابل الدولار ($USD)
+        </div>
+        <button
+          type="button"
+          onClick={fetchGramPrice}
+          style={{ background: "rgba(56,189,248,0.15)", border: "1px solid rgba(56,189,248,0.3)", color: "#7dd3fc", padding: "4px 12px", borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: "pointer" }}
+        >
+          {loadingGram ? "جاري التحديث..." : "🔄 تحديث سعر GRAM الفوري"}
+        </button>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10, marginBottom: 14 }}>
+        <div style={{ background: "#0a1120", padding: 12, borderRadius: 10, border: "1px solid #1e2d4a" }}>
+          <div style={{ color: "#94a3b8", fontSize: 11, marginBottom: 4 }}>سعر 1 GRAM بالدولار الرسمي</div>
+          <div style={{ color: "#94a3b8", fontWeight: "bold", fontFamily: "monospace", fontSize: 15 }} dir="ltr">
+            1 GRAM = ${gramUsd.toFixed(4)} USD
+          </div>
+        </div>
+
+        <div style={{ background: "#0a1120", padding: 12, borderRadius: 10, border: "1px solid rgba(56,189,248,0.4)" }}>
+          <div style={{ color: "#38bdf8", fontSize: 11, marginBottom: 4, fontWeight: "bold" }}>سعر 1 GRAM بالدولار مع (+0.01%)</div>
+          <div style={{ color: "#38bdf8", fontWeight: "bold", fontFamily: "monospace", fontSize: 17 }} dir="ltr">
+            1 GRAM = ${gramUsdWithFee.toFixed(4)} USD
+          </div>
+        </div>
+      </div>
+
+      <div style={{ background: "#091322", padding: 12, borderRadius: 12, border: "1px solid rgba(56,189,248,0.2)" }}>
+        <div style={{ fontSize: 12, color: "#cbd5e1", fontWeight: "bold", marginBottom: 8 }}>
+          🧮 حاسبة كمية GRAM المطلوبة بـ ($USD):
+        </div>
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <div style={{ flex: 1, minWidth: 160 }}>
+            <label style={{ display: "block", fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>أدخل المبلغ بالدولار ($USD):</label>
+            <input
+              type="number"
+              step="0.01"
+              value={customUsdInput}
+              onChange={(e) => setCustomUsdInput(e.target.value)}
+              style={{ width: "100%", height: 38, padding: "0 12px", background: "#111b2e", border: "1px solid #263b5f", borderRadius: 8, color: "#fff", fontFamily: "monospace", fontWeight: "bold", fontSize: 14 }}
+              dir="ltr"
+              placeholder="28.99"
+            />
+          </div>
+          <div style={{ flex: 1, minWidth: 180, background: "rgba(56,189,248,0.1)", padding: 8, borderRadius: 8, border: "1px solid rgba(56,189,248,0.3)", textAlign: "center" }}>
+            <div style={{ fontSize: 11, color: "#7dd3fc", marginBottom: 2 }}>المبلغ المطلوب بـ GRAM (شاملاً +0.01%):</div>
+            <div style={{ color: "#38bdf8", fontWeight: "bold", fontFamily: "monospace", fontSize: 18 }} dir="ltr">
+              ≈ {gramRequired} GRAM
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+  return (
+    <div style={{ maxWidth: 720 }}>
+      <TonPriceTrackerCard usdRate={usdRate} />
+
+      <Card title="⚡ أسعار وباقات الألعاب والخدمات اليدوية">
+        <div
+          style={{
+            marginBottom: 16,
+            padding: 12,
+            borderRadius: 10,
+            background: "rgba(56,189,248,0.08)",
+            border: "1px solid rgba(56,189,248,0.18)",
+            color: "#7dd3fc",
+            fontSize: 13,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 8,
+          }}
+        >
+          <span>سعر الصرف الحالي: <strong>1 USD = {usdRate || "—"} EGP</strong></span>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button
+              type="button"
+              onClick={promptCategoryExport}
+              style={{
+                padding: "6px 12px",
+                borderRadius: 8,
+                background: "rgba(245,158,11,0.2)",
+                border: "1px solid rgba(245,158,11,0.4)",
+                color: "#fbbf24",
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              📋 استخراج أسعار خدمة كاملة (اختر من القائمة)
+            </button>
+            <button
+              type="button"
+              onClick={addGameCategory}
+              style={{
+                padding: "6px 12px",
+                borderRadius: 8,
+                background: "rgba(16,185,129,0.2)",
+                border: "1px solid rgba(16,185,129,0.4)",
+                color: "#34d399",
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              + إضافة لعبة / قسم جديد 🕹️
+            </button>
+            <button
+              type="button"
+              onClick={() => addManualPackage("أخرى", "اشتراك جديد (مثل ChatGPT)")}
+              style={{
+                padding: "6px 12px",
+                borderRadius: 8,
+                background: "rgba(168,85,247,0.2)",
+                border: "1px solid rgba(168,85,247,0.4)",
+                color: "#c084fc",
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              + إضافة اشتراك / خدمة (أخرى) 📦
+            </button>
+            <button
+              type="button"
+              onClick={() => addManualPackage()}
+              style={{
+                padding: "6px 12px",
+                borderRadius: 8,
+                background: "rgba(56,189,248,0.2)",
+                border: "1px solid rgba(56,189,248,0.4)",
+                color: "#38bdf8",
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              + إضافة باقة جديدة ⚡
+            </button>
+          </div>
+        </div>
+
+        {/* Categories Grouped Rendering */}
+        {(() => {
+          const grouped: Record<string, { service: any; index: number }[]> = {};
+          svcs.forEach((s, idx) => {
+            const catName = (s.category || "أخرى").trim();
+            if (!grouped[catName]) grouped[catName] = [];
+            grouped[catName].push({ service: s, index: idx });
+          });
+
+          return Object.entries(grouped).map(([catName, items]) => {
+            const isCatDisabled = items.every(({ service: s }) => s.disabled);
+            return (
+              <div key={catName} style={{ marginBottom: 24 }}>
+                {/* Category Header Banner with Service Price Export and Toggle */}
+                <div
+                  style={{
+                    background: "linear-gradient(135deg, #09172c 0%, #0d2242 100%)",
+                    border: "1px solid rgba(56,189,248,0.3)",
+                    padding: "10px 16px",
+                    borderRadius: 12,
+                    marginBottom: 12,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    flexWrap: "wrap",
+                    gap: 10,
+                  }}
+                >
+                  <div style={{ color: "#38bdf8", fontWeight: "bold", fontSize: 15, display: "flex", alignItems: "center", gap: 8 }}>
+                    📌 خدمة: <span style={{ color: "#fff" }}>{catName}</span> ({items.length} باقة)
+                  </div>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const n = [...svcs];
+                        const targetDisabledState = !isCatDisabled;
+                        items.forEach(({ index }) => {
+                          n[index].disabled = targetDisabledState;
+                        });
+                        setSvcs(n);
+                      }}
+                      style={{
+                        padding: "6px 12px",
+                        borderRadius: 10,
+                        background: isCatDisabled ? "rgba(16,185,129,0.2)" : "rgba(239,68,68,0.2)",
+                        border: isCatDisabled ? "1px solid rgba(16,185,129,0.4)" : "1px solid rgba(239,68,68,0.4)",
+                        color: isCatDisabled ? "#34d399" : "#f87171",
+                        fontSize: 12,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {isCatDisabled ? "🟢 تفعيل القسم بالكامل" : "⏸️ تعطيل القسم مؤقتاً"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleExportItemsList(`خدمة ${catName}`, items.map((i) => i.service))}
+                      style={{
+                        padding: "6px 14px",
+                        borderRadius: 10,
+                        background: "linear-gradient(135deg, #059669, #10b981)",
+                        color: "#fff",
+                        border: "1px solid #059669",
+                        fontSize: 12,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                        boxShadow: "0 4px 12px rgba(16,185,129,0.2)",
+                      }}
+                    >
+                      📋 استخراج أسعار خدمة {catName} بالكامل
+                    </button>
+                  </div>
+                </div>
+
+                {/* Items in Category */}
+                {items.map(({ service: s, index: i }) => {
+                  const linkedCoins = s.id === "tiktok_hidden_w" ? 13_000 : s.id === "tiktok_hidden_m" ? 26_000 : 0;
+                  const automaticEgp = linkedCoins > 0 && tiers.length > 0
+                    ? calculateTikTokPriceEgp(linkedCoins, tiers, usdRate)
+                    : 0;
+
+                  const isAutoLocked = linkedCoins > 0 && tiers.length > 0;
+
+                  const displayEgp = isAutoLocked
+                    ? automaticEgp
+                    : calculateManualServicePriceEgp(s, usdRate);
+                  const displayUsd = isAutoLocked ? (usdRate > 0 ? (automaticEgp / usdRate).toFixed(2) : "0") : (s.priceUsd || "0");
+                  const displaySar = isAutoLocked ? (usdRate > 0 ? ((automaticEgp / usdRate) * 3.75).toFixed(2) : "0") : (Number(s.priceUsd) > 0 ? (Number(s.priceUsd) * 3.75).toFixed(2) : "0");
+
+                  return (
+                    <div
+                      key={i}
+                      style={{
+                        display: "flex",
+                        gap: 10,
+                        marginBottom: 10,
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                        background: s.disabled ? "#1a0f14" : "#0c1424",
+                        border: s.disabled
+                          ? "1px solid rgba(239,68,68,0.4)"
+                          : isAutoLocked
+                            ? "1px solid rgba(56,189,248,0.3)"
+                            : "1px solid #1e2d4a",
+                        padding: 12,
+                        borderRadius: 12,
+                        opacity: s.disabled ? 0.75 : 1,
+                      }}
+                    >
+                      <div style={{ flex: 1.5, minWidth: 160 }}>
+                        {s.id === "tiktok_hidden_w" || s.id === "tiktok_hidden_m" || s.id === "tiktok_superfan" ? (
+                          <>
+                            <div style={{ fontWeight: 700, fontSize: 13, color: "#fff", marginBottom: 2 }}>
+                              {s.name} {s.disabled && <span style={{ color: "#f87171", fontSize: 11 }}>(معطلة مؤقتاً ⏸️)</span>}
+                            </div>
+                            <div style={{ fontSize: 11, color: "#888" }}>
+                              {s.category || "خدمات تيك توك"}
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <input
+                              type="text"
+                              value={s.name || ""}
+                              onChange={(e) => {
+                                const n = [...svcs];
+                                n[i].name = e.target.value;
+                                setSvcs(n);
+                              }}
+                              style={{ ...inp, width: "100%", fontWeight: 700, fontSize: 13, marginBottom: 4 }}
+                              placeholder="اسم الباقة (مثال: 60 شدة)"
+                            />
+                            <input
+                              type="text"
+                              value={s.category || ""}
+                              onChange={(e) => {
+                                const n = [...svcs];
+                                n[i].category = e.target.value;
+                                setSvcs(n);
+                              }}
+                              style={{ ...inp, width: "100%", fontSize: 11, color: "#888" }}
+                              placeholder="اسم اللعبة / القسم (مثال: PUBG MOBILE)"
+                            />
+                          </>
+                        )}
+                        {isAutoLocked && (
+                          <div style={{ fontSize: 10, color: "#38bdf8", fontWeight: 700, marginTop: 4 }}>
+                            🔒 تسعير تلقائي من نظام العملات (غير قابل للتعديل اليدوي)
+                          </div>
+                        )}
+                        {s.disabled && !isAutoLocked && (
+                          <div style={{ fontSize: 10, color: "#f87171", fontWeight: 700, marginTop: 4 }}>
+                            ⏸️ هذه الباقة معطلة مؤقتاً ولن تظهر للعملاء في الصفحة الرئيسية
+                          </div>
+                        )}
+                      </div>
+
+                      <div style={{ flex: 1, minWidth: 120 }}>
+                        <div style={{ color: "#aaa", fontSize: 11, marginBottom: 4 }}>
+                          السعر بالدولار ($)
+                        </div>
+                        {isAutoLocked ? (
+                          <div
+                            style={{
+                              ...inp,
+                              width: "100%",
+                              color: "#38bdf8",
+                              fontWeight: 700,
+                              background: "rgba(56,189,248,0.08)",
+                              cursor: "not-allowed",
+                            }}
+                          >
+                            ${displayUsd}
+                          </div>
+                        ) : (
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={s.priceUsd ?? ""}
+                            onChange={(e) => {
+                              const n = [...svcs];
+                              const newPriceUsd = e.target.value;
+                              n[i].priceUsd = newPriceUsd;
+                              n[i].price_usd = newPriceUsd;
+                              if (usdRate > 0 && Number(newPriceUsd) > 0) {
+                                n[i].price = (Math.round(Number(newPriceUsd) * usdRate * 100) / 100).toFixed(2);
+                              }
+                              setSvcs(n);
+                            }}
+                            style={{ ...inp, width: "100%", color: "#38bdf8", fontWeight: 700 }}
+                            placeholder="السعر $"
+                          />
+                        )}
+                      </div>
+
+                      {Number(displayUsd) > 10 && (
+                        <div style={{ flex: 0.6, minWidth: 80 }}>
+                          <div style={{ color: "#fb7185", fontSize: 11, marginBottom: 4 }}>
+                            الخصم % (فوق $10 فقط)
+                          </div>
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={s.discountPercent ?? ""}
+                            onChange={(e) => {
+                              const n = [...svcs];
+                              n[i].discountPercent = e.target.value;
+                              setSvcs(n);
+                            }}
+                            style={{ ...inp, width: "100%", color: "#fb7185", fontWeight: 700 }}
+                            placeholder="0%"
+                          />
+                        </div>
+                      )}
+
+                      <div style={{ flex: 1, minWidth: 140 }}>
+                        <div style={{ color: "#888", fontSize: 11, marginBottom: 4 }}>
+                          التحويل التلقائي (جنيه / ريال)
+                        </div>
+                        <div
+                          style={{
+                            ...inp,
+                            fontSize: 11,
+                            color: "#34d399",
+                            background: "rgba(52,211,153,0.06)",
+                            cursor: "default",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <span>{displayEgp} ج.م</span>
+                          <span style={{ color: "#fbbf24" }}>{displaySar} ر.س</span>
+                        </div>
+                      </div>
+
+                      <div style={{ flex: 0.8, minWidth: 95 }}>
+                        <div style={{ color: "#aaa", fontSize: 11, marginBottom: 4 }}>
+                          الحد الأدنى (Min)
+                        </div>
+                        <input
+                          type="number"
+                          min="1"
+                          value={s.min ?? s.min_quantity ?? 1}
+                          onChange={(e) => {
+                            const n = [...svcs];
+                            const v = e.target.value;
+                            n[i].min = v;
+                            n[i].min_quantity = Number(v);
+                            setSvcs(n);
+                          }}
+                          style={{ ...inp, width: "100%", color: "#f8fafc", fontWeight: 700 }}
+                          placeholder="الأدنى"
+                        />
+                      </div>
+
+                      <div style={{ flex: 0.8, minWidth: 95 }}>
+                        <div style={{ color: "#aaa", fontSize: 11, marginBottom: 4 }}>
+                          الحد الأقصى (Max)
+                        </div>
+                        <input
+                          type="number"
+                          min="1"
+                          value={s.max ?? s.max_quantity ?? 1}
+                          onChange={(e) => {
+                            const n = [...svcs];
+                            const v = e.target.value;
+                            n[i].max = v;
+                            n[i].max_quantity = Number(v);
+                            setSvcs(n);
+                          }}
+                          style={{ ...inp, width: "100%", color: "#f8fafc", fontWeight: 700 }}
+                          placeholder="الأقصى"
+                        />
+                      </div>
+
+                      <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const n = [...svcs];
+                            n[i].disabled = !n[i].disabled;
+                            setSvcs(n);
+                          }}
+                          style={{
+                            background: s.disabled ? "rgba(239,68,68,0.2)" : "rgba(16,185,129,0.15)",
+                            border: s.disabled ? "1px solid rgba(239,68,68,0.4)" : "1px solid rgba(16,185,129,0.3)",
+                            color: s.disabled ? "#f87171" : "#34d399",
+                            borderRadius: 8,
+                            padding: "0 10px",
+                            height: 34,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 4,
+                            fontSize: 12,
+                            fontWeight: 700,
+                            cursor: "pointer",
+                          }}
+                          title={s.disabled ? "انقر لتفعيل هذه الباقة" : "انقر لتعطيل هذه الباقة مؤقتاً"}
+                        >
+                          {s.disabled ? "⏸️ معطلة" : "🟢 نشطة"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeManualPackage(i)}
+                          style={{
+                            background: "rgba(239,68,68,0.15)",
+                            border: "1px solid rgba(239,68,68,0.3)",
+                            color: "#f87171",
+                            borderRadius: 8,
+                            width: 34,
+                            height: 34,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            cursor: "pointer",
+                          }}
+                          title="حذف الباقة"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          });
+        })()}
+
+        <FloatingSaveBar onClick={save} busy={busy} label="حفظ الخدمات اليدوية والباقات" msg={msg} />
+      </Card>
+    </div>
+  );
+}
+
+// ─── Shared ──────────────────────────────────────────────────────────────────
+
+function Card({
+  title,
+  children,
+  action,
+}: {
+  title: string;
+  children: React.ReactNode;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="bg-card border border-border p-6 md:p-8 rounded-2xl mb-6 shadow-sm overflow-hidden">
+      <div className="flex justify-between items-center mb-6 border-b border-border/50 pb-4">
+        <h3 className="text-primary m-0 text-lg md:text-xl font-bold flex items-center gap-2">
+          {title}
+        </h3>
+        {action}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+export function FloatingSaveBar({
+  onClick,
+  busy,
+  label = "حفظ التغييرات",
+  msg = "",
+}: {
+  onClick: () => void;
+  busy?: boolean;
+  label?: string;
+  msg?: string;
+}) {
+  return (
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center gap-2.5 max-w-md w-[92%] sm:w-auto transition-all duration-300 pointer-events-auto">
+      {msg && (
+        <div className={`px-4 py-2.5 rounded-2xl text-xs font-black shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-bottom-3 flex items-center gap-2 border ${
+          msg.includes("❌")
+            ? "bg-slate-950/95 text-red-400 border-red-500/40 shadow-red-950/50"
+            : "bg-slate-950/95 text-emerald-400 border-emerald-500/40 shadow-emerald-950/50"
+        }`}>
+          {msg}
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={busy}
+        className="w-full sm:w-auto min-w-[280px] h-14 px-8 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 text-slate-950 font-black text-base shadow-2xl shadow-emerald-500/40 hover:brightness-110 hover:scale-[1.02] active:scale-95 transition-all duration-300 flex items-center justify-center gap-3 border border-emerald-300/50 backdrop-blur-md cursor-pointer disabled:opacity-50"
+      >
+        <Save size={20} className={busy ? "animate-spin" : ""} />
+        <span>{busy ? "جاري الحفظ..." : label}</span>
+      </button>
+    </div>
+  );
+}
+
+function StatusMsg({ msg }: { msg: string }) {
+  const isSuccess = msg.includes("✅");
+  return (
+    <div className={`mt-4 p-3 rounded-xl text-center font-bold text-sm border ${isSuccess ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-destructive/10 text-destructive border-destructive/20'}`}>
+      {msg}
+    </div>
+  );
+}
+
+const inp: React.CSSProperties = {
+  padding: 14,
+  borderRadius: 12,
+  border: "1px solid hsl(var(--border))",
+  background: "hsl(var(--input))",
+  color: "hsl(var(--foreground))",
+  outline: "none",
+  fontSize: 15,
+  boxSizing: "border-box",
+  width: "100%",
+  transition: "all 0.2s",
+};
+const lbl: React.CSSProperties = {
+  display: "block",
+  marginBottom: 8,
+  color: "hsl(var(--muted-foreground))",
+  fontSize: 14,
+  fontWeight: 600,
+};
+const saveBtn: React.CSSProperties = {
+  width: "100%",
+  padding: 14,
+  borderRadius: 12,
+  background: "hsl(var(--primary))",
+  color: "hsl(var(--primary-foreground))",
+  border: "none",
+  fontWeight: 700,
+  fontSize: 15,
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 8,
+  marginTop: 4,
+};
+const addBtn: React.CSSProperties = {
+  padding: "8px 16px",
+  borderRadius: 10,
+  background: "hsl(var(--primary))",
+  color: "hsl(var(--primary-foreground))",
+  border: "none",
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  gap: 6,
+  fontSize: 14,
+  fontWeight: 700,
+};
+const delBtn: React.CSSProperties = {
+  padding: "6px 10px",
+  borderRadius: 8,
+  background: "rgba(239, 68, 68, 0.1)",
+  color: "hsl(var(--destructive))",
+  border: "1px solid rgba(239, 68, 68, 0.2)",
+  cursor: "pointer",
+  fontWeight: 600,
+  fontSize: 13,
+};
+const btnSm: React.CSSProperties = {
+  padding: "8px 14px",
+  borderRadius: 10,
+  background: "hsl(var(--background))",
+  color: "hsl(var(--foreground))",
+  border: "1px solid hsl(var(--border))",
+  cursor: "pointer",
+  fontSize: 13,
+  display: "flex",
+  alignItems: "center",
+  gap: 6,
+};
+const actionBtn: React.CSSProperties = {
+  padding: "6px 12px",
+  borderRadius: 8,
+  background: "rgba(255,255,255,0.05)",
+  color: "hsl(var(--muted-foreground))",
+  border: "1px solid hsl(var(--border))",
+  cursor: "pointer",
+  fontSize: 13,
+};
+
+export function VerificationCountdown({ item }: { item: any }) {
+  const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
+
+  useEffect(() => {
+    const calculateSeconds = () => {
+      let deadlineMillis = 0;
+      if (item.verificationDeadline) {
+        deadlineMillis = new Date(item.verificationDeadline).getTime();
+      } else if (item.verificationStartedAt) {
+        const started =
+          typeof item.verificationStartedAt === "object" && item.verificationStartedAt?._seconds
+            ? item.verificationStartedAt._seconds * 1000
+            : new Date(item.verificationStartedAt).getTime();
+        deadlineMillis = started + 5 * 60 * 1000;
+      }
+      if (!deadlineMillis || isNaN(deadlineMillis)) return null;
+      return Math.max(0, Math.ceil((deadlineMillis - Date.now()) / 1000));
+    };
+
+    setSecondsLeft(calculateSeconds());
+    const timer = setInterval(() => {
+      setSecondsLeft(calculateSeconds());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [item.verificationDeadline, item.verificationStartedAt]);
+
+  if (secondsLeft === null) return null;
+
+  const isVerifying = item.status === "matching" || item.paymentStatus === "verifying";
+  if (!isVerifying && secondsLeft <= 0) return null;
+
+  const minutes = Math.floor(secondsLeft / 60);
+  const seconds = secondsLeft % 60;
+  const formatted = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+
+  if (secondsLeft > 0 && isVerifying) {
+    return (
+      <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 mt-1.5 whitespace-nowrap animate-pulse">
+        <Clock size={11} className="animate-spin text-amber-400" />
+        <span>عداد التحقق: {formatted}</span>
+      </div>
+    );
+  }
+
+  if (secondsLeft === 0 && isVerifying) {
+    return (
+      <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-bold bg-destructive/10 text-destructive border border-destructive/30 mt-1.5 whitespace-nowrap">
+        <AlertCircle size={11} />
+        <span>انتهى العداد (مراجعة مطلوبة)</span>
+      </div>
+    );
+  }
+
+  return null;
+}
+
+// ═══════════════════════════════════════════════
+// SMS Manual Review Tab
+// ═══════════════════════════════════════════════
+export function SmsReviewTab() {
+  const [smsList, setSmsList] = useState<any[]>([]);
+  const [pendingRecharges, setPendingRecharges] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [processingId, setProcessingId] = useState("");
+  // For the link modal
+  const [selectedSms, setSelectedSms] = useState<any | null>(null);
+  const [selectedRechargeId, setSelectedRechargeId] = useState("");
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    setLoadError("");
+    try {
+      const res = await fetch("/api/admin/sms-review", { credentials: "include", cache: "no-store" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) throw new Error(data.error || "تعذر تحميل البيانات");
+      setSmsList(Array.isArray(data.smsList) ? data.smsList : []);
+      setPendingRecharges(Array.isArray(data.pendingRecharges) ? data.pendingRecharges : []);
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "خطأ في التحميل");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { loadData(); }, [loadData]);
+
+  const handleIgnore = async (smsId: string) => {
+    const { isConfirmed } = await Swal.fire({
+      title: "تجاهل الرسالة",
+      text: "هل تريد تجاهل هذه الرسالة؟ لن يتم ربطها بأي طلب شحن.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "نعم، تجاهل",
+      cancelButtonText: "إلغاء",
+      background: "#111",
+      color: "#fff",
+      confirmButtonColor: "#888",
+    });
+    if (!isConfirmed) return;
+    setProcessingId(smsId);
+    try {
+      const res = await fetch("/api/admin/sms-review", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ smsId, action: "ignore" }),
+      });
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok || !result.success) throw new Error(result.error || "تعذر تجاهل الرسالة");
+      setSmsList((prev) => prev.filter((s) => s.id !== smsId));
+      await Swal.fire({ icon: "success", title: "تم التجاهل", timer: 1500, showConfirmButton: false, background: "#111", color: "#fff" });
+    } catch (err) {
+      await Swal.fire({ icon: "error", title: "خطأ", text: err instanceof Error ? err.message : "حدث خطأ", background: "#111", color: "#fff" });
+    } finally {
+      setProcessingId("");
+    }
+  };
+
+  const handleLinkAndApprove = async () => {
+    if (!selectedSms || !selectedRechargeId) {
+      await Swal.fire({ icon: "warning", title: "يرجى اختيار طلب شحن", background: "#111", color: "#fff" });
+      return;
+    }
+    const { isConfirmed } = await Swal.fire({
+      title: "تأكيد الربط والموافقة",
+      text: "هل تريد ربط هذه الرسالة بطلب الشحن المختار وإضافة الرصيد للمستخدم؟",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "نعم، وافق وأضف الرصيد",
+      cancelButtonText: "إلغاء",
+      background: "#111",
+      color: "#fff",
+      confirmButtonColor: "#38bdf8",
+    });
+    if (!isConfirmed) return;
+    setProcessingId(selectedSms.id);
+    try {
+      const res = await fetch("/api/admin/sms-review", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ smsId: selectedSms.id, rechargeId: selectedRechargeId, action: "link_and_approve" }),
+      });
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok || !result.success) throw new Error(result.error || "تعذر تنفيذ الإجراء");
+      setSmsList((prev) => prev.filter((s) => s.id !== selectedSms.id));
+      setPendingRecharges((prev) => prev.filter((r) => r.id !== selectedRechargeId));
+      setSelectedSms(null);
+      setSelectedRechargeId("");
+      await Swal.fire({ icon: "success", title: "تم إضافة الرصيد بنجاح ✅", timer: 2000, showConfirmButton: false, background: "#111", color: "#fff" });
+    } catch (err) {
+      await Swal.fire({ icon: "error", title: "خطأ في التنفيذ", text: err instanceof Error ? err.message : "حدث خطأ", background: "#111", color: "#fff" });
+    } finally {
+      setProcessingId("");
+    }
+  };
+
+  const getSmsStatusBadge = (status: string) => {
+    switch (status) {
+      case "manual_review": return <span className="bg-orange-500/15 text-orange-400 border border-orange-500/30 px-2 py-0.5 rounded text-xs font-bold">مراجعة يدوية</span>;
+      case "pending": return <span className="bg-blue-500/15 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded text-xs font-bold">قيد الانتظار</span>;
+      default: return <span className="bg-card border border-border text-foreground px-2 py-0.5 rounded text-xs font-bold">{status}</span>;
+    }
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      {/* Header Banner */}
+      <div className="flex items-start gap-4 p-4 rounded-xl bg-orange-500/10 border border-orange-500/20">
+        <AlertCircle size={22} className="text-orange-400 mt-0.5 shrink-0" />
+        <div>
+          <div className="font-bold text-orange-400 text-sm mb-1">رسائل SMS فشل تطابقها التلقائي</div>
+          <div className="text-muted-foreground text-xs leading-relaxed">
+            هذه الرسائل وردت من بوابة SMS لكن النظام لم يستطع مطابقتها تلقائياً مع طلب شحن.
+            يمكنك ربطها يدوياً بطلب الشحن المناسب وإضافة الرصيد، أو تجاهلها إن كانت غير صالحة.
+          </div>
+        </div>
+        <button onClick={loadData} className="mr-auto shrink-0 bg-white/5 hover:bg-white/10 border border-border px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5">
+          <RefreshCw size={13} /> تحديث
+        </button>
+      </div>
+
+      <Card title={`📩 رسائل SMS تحتاج مراجعة (${smsList.length})`}>
+        {loading ? (
+          <p className="text-muted-foreground text-sm">جاري التحميل...</p>
+        ) : loadError ? (
+          <p className="text-red-400 text-sm">{loadError}</p>
+        ) : smsList.length === 0 ? (
+          <div className="flex items-center gap-3 py-6 text-emerald-400">
+            <CheckCircle size={20} />
+            <span className="font-semibold">لا توجد رسائل تحتاج مراجعة يدوية — كل شيء على ما يرام ✅</span>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {smsList.map((sms) => (
+              <div
+                key={sms.id}
+                className={`rounded-xl border p-4 transition-all ${
+                  selectedSms?.id === sms.id
+                    ? "border-primary/50 bg-primary/5"
+                    : "border-border/50 bg-background/50 hover:border-border"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3 flex-wrap">
+                  <div className="flex flex-col gap-1.5 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {getSmsStatusBadge(sms.processingStatus)}
+                      <span className="text-xs text-muted-foreground font-mono">
+                        {sms.createdAt ? new Date(sms.createdAt).toLocaleString("en-US") : "—"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs text-muted-foreground">المرسل:</span>
+                      <span className="font-mono text-sm text-foreground">{sms.sender}</span>
+                      {sms.classification && sms.classification !== "unknown" && (
+                        <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-xs font-bold">{sms.classification}</span>
+                      )}
+                    </div>
+                    <div className="text-xs text-muted-foreground/80 bg-muted/20 px-3 py-2 rounded-lg font-mono leading-relaxed max-w-xl break-words">
+                      {sms.originalMessage}
+                    </div>
+                    <div className="flex items-center gap-3 flex-wrap text-xs">
+                      {sms.extractedAmountPiasters && (
+                        <span className="text-emerald-400 font-bold">
+                          💰 {ceilTo2Decimals(sms.extractedAmountPiasters / 100)} ج.م
+                        </span>
+                      )}
+                      {sms.extractedPhone && (
+                        <span className="text-blue-400">📞 {sms.extractedPhone}</span>
+                      )}
+                      {sms.extractedSenderName && (
+                        <span className="text-purple-400">👤 {sms.extractedSenderName}</span>
+                      )}
+                      {sms.failureReason && (
+                        <span className="text-destructive/80">⚠️ {sms.failureReason}</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      onClick={() => {
+                        setSelectedSms(selectedSms?.id === sms.id ? null : sms);
+                        setSelectedRechargeId("");
+                      }}
+                      disabled={processingId === sms.id}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all disabled:opacity-50 ${
+                        selectedSms?.id === sms.id
+                          ? "bg-primary/20 text-primary border-primary/40"
+                          : "bg-white/5 hover:bg-white/10 text-foreground border-border"
+                      }`}
+                    >
+                      {selectedSms?.id === sms.id ? "إلغاء الاختيار" : "ربط بطلب شحن"}
+                    </button>
+                    <button
+                      onClick={() => handleIgnore(sms.id)}
+                      disabled={processingId === sms.id}
+                      className="bg-muted/30 hover:bg-destructive/10 text-muted-foreground hover:text-destructive border border-border hover:border-destructive/30 px-3 py-1.5 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
+                    >
+                      {processingId === sms.id ? "جاري..." : "تجاهل"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Recharge linking panel - shown when this SMS is selected */}
+                {selectedSms?.id === sms.id && (
+                  <div className="mt-4 pt-4 border-t border-border/50">
+                    <div className="text-sm font-bold text-foreground mb-3">اختر طلب الشحن المناسب للربط:</div>
+                    {pendingRecharges.length === 0 ? (
+                      <p className="text-muted-foreground text-xs">لا توجد طلبات شحن قيد الانتظار حالياً.</p>
+                    ) : (
+                      <div className="flex flex-col gap-2 max-h-64 overflow-y-auto pr-1">
+                        {pendingRecharges.map((r) => {
+                          const amountEgp = sms.extractedAmountPiasters
+                            ? (sms.extractedAmountPiasters / 100).toFixed(2)
+                            : null;
+                          const rechargeAmount = Number(r.amount || 0);
+                          const amountMatch = amountEgp && Math.abs(parseFloat(amountEgp) - rechargeAmount) < 1;
+                          return (
+                            <label
+                              key={r.id}
+                              className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                                selectedRechargeId === r.id
+                                  ? "border-primary/50 bg-primary/10"
+                                  : amountMatch
+                                  ? "border-emerald-500/40 bg-emerald-500/5 hover:bg-emerald-500/10"
+                                  : "border-border/50 bg-muted/10 hover:bg-muted/20"
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                name={`recharge_${sms.id}`}
+                                value={r.id}
+                                checked={selectedRechargeId === r.id}
+                                onChange={() => setSelectedRechargeId(r.id)}
+                                className="accent-primary"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="font-mono text-primary font-bold text-sm">{r.amount} {r.currency || "EGP"}</span>
+                                  {amountMatch && (
+                                    <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-bold">✓ تطابق المبلغ</span>
+                                  )}
+                                  <span className="bg-background border border-border px-1.5 py-0.5 rounded text-[10px]">{r.method}</span>
+                                </div>
+                                <div className="text-xs text-muted-foreground mt-0.5">
+                                  {r.userEmail || r.userId} — {r.createdAt ? new Date(r.createdAt).toLocaleDateString("en-US") : ""}
+                                </div>
+                              </div>
+                              <span className="font-mono text-[10px] text-muted-foreground shrink-0">
+                                #{String(r.id).slice(0, 6)}
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    )}
+                    <div className="flex gap-2 mt-3">
+                      <button
+                        onClick={handleLinkAndApprove}
+                        disabled={!selectedRechargeId || processingId === sms.id}
+                        className="bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 px-4 py-2 rounded-lg text-sm font-bold transition-all disabled:opacity-50"
+                      >
+                        {processingId === sms.id ? "جاري التنفيذ..." : "✓ ربط وإضافة الرصيد يدوياً"}
+                      </button>
+                      <button
+                        onClick={() => { setSelectedSms(null); setSelectedRechargeId(""); }}
+                        className="bg-muted/20 hover:bg-muted/40 text-muted-foreground border border-border px-4 py-2 rounded-lg text-sm font-bold transition-all"
+                      >
+                        إلغاء
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+export function RechargesTab() {
+  const [recharges, setRecharges] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [gatewayStatus, setGatewayStatus] = useState<any>(null);
+  const [reviewingId, setReviewingId] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setLoadError("");
+    fetch("/api/admin/recharges", { credentials: "include", cache: "no-store" })
+      .then(async (response) => {
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.success) {
+          throw new Error(result?.error?.message || result?.error || "تعذر تحميل طلبات الشحن");
+        }
+        if (active) {
+          setRecharges(Array.isArray(result.recharges) ? result.recharges : []);
+        }
+      })
+      .catch((error) => {
+        if (active) {
+          setLoadError(
+            error instanceof Error ? error.message : "تعذر تحميل طلبات الشحن",
+          );
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    
+    // Fetch Gateway Status
+    fetch("/api/admin/payment/gateway-status", { credentials: "include", cache: "no-store" })
+      .then(res => res.json())
+      .then(data => {
+         if (data.success) setGatewayStatus(data.gateway);
+      }).catch(console.error);
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const approve = async (req: any) => {
+    const { value: confirmedAmount, isConfirmed } = await Swal.fire({
+      title: "تأكيد وموافقة الإيداع",
+      html: `
+        <div class="text-right text-sm space-y-2 mb-4" dir="rtl">
+          <div><strong class="text-primary">المستخدم:</strong> ${req.userEmail || req.userId}</div>
+          <div><strong class="text-primary">وسيلة الدفع:</strong> ${req.method}</div>
+          <div><strong class="text-primary">المبلغ المطلوب:</strong> ${req.amount} ${req.currency || "EGP"}</div>
+          ${req.receiptUrl ? `<div class="mt-2"><a href="${req.receiptUrl}" target="_blank" class="text-cyan-400 underline font-bold">📄 فتح صوره الإيصال المرفقة</a></div>` : ""}
+        </div>
+      `,
+      input: "number",
+      inputLabel: "أدخل المبلغ الفعلي المعتمد بالجنيه المصري (EGP):",
+      inputValue: String(req.amount || 80),
+      showCancelButton: true,
+      confirmButtonText: "نعم، اعتمد وأضف الرصيد",
+      cancelButtonText: "إلغاء",
+      background: "#111",
+      color: "#fff",
+      confirmButtonColor: "#38bdf8",
+      inputValidator: (val) => {
+        if (!val || Number(val) <= 0) {
+          return "يرجى كتابة مبلغ صحيح أكبر من 0";
+        }
+      },
+    });
+    if (!isConfirmed || !confirmedAmount) return;
+    setReviewingId(req.id);
+    try {
+      const response = await fetch("/api/admin/sms-review", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          rechargeId: req.id,
+          action: "approve_direct",
+          confirmedAmountEgp: Number(confirmedAmount),
+        }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "تعذر قبول الإيداع");
+      }
+      setRecharges((current) => current.map((item) =>
+        item.id === req.id ? { ...item, status: "approved", paymentStatus: "verified" } : item
+      ));
+      await Swal.fire({
+        icon: "success",
+        title: "تمت إضافة الرصيد بنجاح ✅",
+        timer: 1800,
+        showConfirmButton: false,
+        background: "#111",
+        color: "#fff",
+      });
+    } catch (error) {
+      await Swal.fire({
+        icon: "error",
+        title: "تعذر قبول الإيداع",
+        text: error instanceof Error ? error.message : "حدث خطأ",
+        background: "#111",
+        color: "#fff",
+      });
+    } finally {
+      setReviewingId("");
+    }
+  };
+
+  const reject = async (id: string) => {
+    const { isConfirmed } = await Swal.fire({
+      title: "تأكيد رفض الإيداع",
+      text: "هل أنت متأكد من رفض هذا الطلب؟ لن يتم إضافة أي رصيد للمستخدم.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "نعم، ارفض الطلب",
+      cancelButtonText: "إلغاء",
+      background: "#111",
+      color: "#fff",
+      confirmButtonColor: "#ff4444",
+    });
+    if (!isConfirmed) return;
+    setReviewingId(id);
+    try {
+      const response = await fetch("/api/admin/sms-review", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rechargeId: id, action: "reject_direct" }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "تعذر رفض الإيداع");
+      }
+      setRecharges((current) => current.map((item) =>
+        item.id === id ? { ...item, status: "rejected", paymentStatus: "rejected" } : item
+      ));
+    } catch (error) {
+      await Swal.fire({
+        icon: "error",
+        title: "تعذر رفض الإيداع",
+        text: error instanceof Error ? error.message : "حدث خطأ",
+        background: "#111",
+        color: "#fff",
+      });
+    } finally {
+      setReviewingId("");
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch(status) {
+       case "verified": return <span className="bg-emerald-500/10 text-emerald-500 px-2.5 py-1 rounded-md text-xs font-bold whitespace-nowrap">تأكيد آلي (SMS)</span>;
+       case "approved": return <span className="bg-emerald-500/10 text-emerald-500 px-2.5 py-1 rounded-md text-xs font-bold whitespace-nowrap">تأكيد يدوي</span>;
+       case "awaiting_payment": return <span className="bg-primary/10 text-primary px-2.5 py-1 rounded-md text-xs font-bold whitespace-nowrap">في انتظار التحويل</span>;
+       case "matching": return <span className="bg-orange-500/10 text-orange-500 px-2.5 py-1 rounded-md text-xs font-bold whitespace-nowrap">جاري المطابقة</span>;
+       case "manual_review": return <span className="bg-destructive/10 text-destructive px-2.5 py-1 rounded-md text-xs font-bold whitespace-nowrap">مراجعة إدارية مطلوبة</span>;
+       case "expired": return <span className="bg-muted-foreground/10 text-muted-foreground px-2.5 py-1 rounded-md text-xs font-bold whitespace-nowrap">منتهي الصلاحية</span>;
+       case "pending": return <span className="bg-orange-500/10 text-orange-500 px-2.5 py-1 rounded-md text-xs font-bold whitespace-nowrap">مراجعة النظام القديم</span>;
+       case "rejected": return <span className="bg-destructive/10 text-destructive px-2.5 py-1 rounded-md text-xs font-bold whitespace-nowrap">مرفوض</span>;
+       default: return <span className="bg-card border border-border text-foreground px-2.5 py-1 rounded-md text-xs font-bold whitespace-nowrap">{status}</span>;
+    }
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      {gatewayStatus && (
+        <Card title="📱 حالة بوابة الـ SMS (Heartbeat)">
+           <div style={{ display: "flex", alignItems: "center", gap: 12, padding: 12, background: "#111", borderRadius: 8 }}>
+              <div style={{ width: 12, height: 12, borderRadius: "50%", background: gatewayStatus.status === "online" ? "#00ff80" : gatewayStatus.status === "delayed" ? "orange" : "#ff4444" }} />
+              <strong style={{ color: gatewayStatus.status === "online" ? "#00ff80" : gatewayStatus.status === "delayed" ? "orange" : "#ff4444" }}>
+                 {gatewayStatus.status === "online" ? "متصل (Online)" : gatewayStatus.status === "delayed" ? "متأخر (Delayed)" : "غير متصل (Offline)"}
+              </strong>
+              <span style={{ color: "#888", fontSize: 13 }}>
+                 (آخر نبضة: {gatewayStatus.lastHeartbeatAt ? new Date(gatewayStatus.lastHeartbeatAt).toLocaleString("ar-EG") : "لا يوجد"})
+                 {gatewayStatus.secondsSinceLastHeartbeat >= 0 ? ` - منذ ${gatewayStatus.secondsSinceLastHeartbeat} ثانية` : ""}
+              </span>
+           </div>
+        </Card>
+      )}
+
+      <Card title="💰 طلبات الشحن">
+        {loading ? (
+          <p>جاري التحميل...</p>
+        ) : loadError ? (
+          <p className="text-red-400">{loadError}</p>
+        ) : recharges.length === 0 ? (
+          <p>لا توجد طلبات شحن.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse min-w-[800px] text-sm">
+              <thead>
+                <tr className="border-b border-border/50 bg-muted/5">
+                  <th className="p-4 text-right text-muted-foreground font-semibold">التاريخ</th>
+                  <th className="p-4 text-right text-muted-foreground font-semibold">المستخدم</th>
+                  <th className="p-4 text-right text-muted-foreground font-semibold">المبلغ المتوقع</th>
+                  <th className="p-4 text-right text-muted-foreground font-semibold">طريقة الدفع</th>
+                  <th className="p-4 text-right text-muted-foreground font-semibold">الرقم / الاسم (المرجع)</th>
+                  <th className="p-4 text-right text-muted-foreground font-semibold">الحالة</th>
+                  <th className="p-4 text-right text-muted-foreground font-semibold">إجراء</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recharges.map((r) => (
+                  <tr key={r.id} className="border-b border-border/30 hover:bg-white/5 transition-colors">
+                    <td className="p-4 whitespace-nowrap text-muted-foreground/80">
+                      {r.createdAt
+                        ? new Date(
+                          typeof r.createdAt === "object" && r.createdAt._seconds
+                            ? r.createdAt._seconds * 1000
+                            : r.createdAt,
+                        ).toLocaleString("en-US")
+                        : "—"}
+                    </td>
+                    <td className="p-4 whitespace-nowrap text-foreground">{r.userEmail || r.userId}</td>
+                    <td className="p-4 whitespace-nowrap">
+                      <strong className="text-primary font-mono text-base">{r.amount}</strong><br/>
+                      <span className="text-xs text-muted-foreground/70">{r.expectedAmountPiasters ? `${r.expectedAmountPiasters} قرش` : ""}</span>
+                    </td>
+                    <td className="p-4 whitespace-nowrap">
+                      <span className="bg-background border border-border px-2 py-1 rounded-md text-xs font-medium">{r.method}</span>
+                    </td>
+                    <td className="p-4">
+                       <div className="font-mono text-foreground text-sm">{r.originalName || r.originalPhone || r.reference}</div>
+                       {r.receiptUrl && !r.receipt_deleted_at && r.receipt_status !== "deleted" && (
+                         <div className="mt-1.5 flex flex-col gap-1">
+                           <a
+                             href={r.receiptUrl}
+                             target="_blank"
+                             rel="noopener noreferrer"
+                             className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-xs font-bold hover:bg-cyan-500/20 transition-all no-underline w-fit"
+                           >
+                             🧾 صوره الإيصال
+                           </a>
+                           {r.receipt_delete_at && (
+                             <span className="text-[10px] text-amber-400 font-semibold">
+                               ⏳ حذف تلقائي بعد 15د من القرار
+                             </span>
+                           )}
+                         </div>
+                       )}
+                       {(r.receipt_deleted_at || r.receipt_status === "deleted" || (!r.receiptUrl && (r.receipt_delete_at || r.approved_at || r.rejected_at))) && (
+                         <div className="mt-1.5 text-xs text-muted-foreground/80 bg-muted/20 px-2.5 py-1 rounded-lg border border-border/40 w-fit">
+                           <span>🗑️ تم حذف صورة الإيصال تلقائياً من R2</span>
+                         </div>
+                       )}
+                       {(r.payerPhoneNormalized || r.payerNameNormalized) && (
+                          <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                             <CheckCircle size={12} className="text-emerald-500" /> المطابقة: {r.payerPhoneNormalized || r.payerNameNormalized}
+                          </div>
+                       )}
+                    </td>
+                    <td className="p-4">
+                      {getStatusBadge(r.status)}
+                      <VerificationCountdown item={r} />
+                    </td>
+                    <td className="p-4">
+                      {(r.status === "pending" || r.status === "manual_review" || r.status === "awaiting_payment" || r.status === "matching" || r.status === "expired") && (
+                        <div className="flex gap-2">
+                          <button disabled={reviewingId === r.id} onClick={() => approve(r)} className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border border-emerald-500/20 px-3 py-1.5 rounded-lg text-xs font-bold transition-all disabled:opacity-50">
+                            {reviewingId === r.id ? "جاري..." : "موافقة"}
+                          </button>
+                          <button disabled={reviewingId === r.id} onClick={() => reject(r.id)} className="bg-destructive/10 hover:bg-destructive/20 text-destructive border border-destructive/20 px-3 py-1.5 rounded-lg text-xs font-bold transition-all disabled:opacity-50">
+                            رفض
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}

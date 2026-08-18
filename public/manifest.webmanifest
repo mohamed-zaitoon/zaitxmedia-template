@@ -1,0 +1,29 @@
+{
+  "name": "ZAITX MEDIA",
+  "short_name": "ZAITX MEDIA",
+  "description": "ZAITX MEDIA",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "background_color": "#f6f8fb",
+  "theme_color": "#d89519",
+  "orientation": "portrait-primary",
+  "categories": ["shopping", "utilities"],
+  "icons": [
+    {
+      "src": "/zaitx-logo-touch.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/zaitx-logo-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

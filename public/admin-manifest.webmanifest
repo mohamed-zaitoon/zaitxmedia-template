@@ -1,0 +1,22 @@
+{
+  "name": "ZAITX MEDIA - Admin",
+  "short_name": "ZAITX MEDIA Admin",
+  "description": "ZAITX MEDIA Admin",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/admin",
+  "scope": "/admin",
+  "display": "standalone",
+  "background_color": "#080101",
+  "theme_color": "#b42323",
+  "orientation": "portrait-primary",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/admin-logo-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

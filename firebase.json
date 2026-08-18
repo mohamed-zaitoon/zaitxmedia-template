@@ -1,0 +1,11 @@
+{
+  "hosting": {
+    "site": "eldawlystore-75acf",
+    "source": ".",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "cleanUrls": true
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  }
+}

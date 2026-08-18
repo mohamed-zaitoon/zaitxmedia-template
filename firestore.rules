@@ -1,0 +1,74 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Check if the user is authenticated
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    // Check if user is an admin by email or profile role
+    function isAdmin() {
+      return isAuth() && (
+        request.auth.token.email in ['admin@example.com', 'demo@example.com'] ||
+        get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role == 'admin'
+      );
+    }
+
+    // Admin credentials & financial ledgers are server-only
+    match /admin_accounts/{accountId} {
+      allow read, write: if false;
+    }
+    match /financial_assets/{assetId} {
+      allow read, write: if false;
+    }
+    match /financial_ledger/{entryId} {
+      allow read, write: if false;
+    }
+    match /financial_audit_logs/{logId} {
+      allow read, write: if false;
+    }
+    match /wallet_transactions/{transactionId} {
+      allow read: if isAuth();
+      allow write: if false;
+    }
+
+    // Settings & Pricing
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Tiers Collection
+    match /tiers/{tierId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Profiles Collection (Owners can read/write their own profile; Admin can read/write all)
+    match /profiles/{userId} {
+      allow read: if isAuth();
+      allow write: if isAuth() && (request.auth.uid == userId || isAdmin());
+    }
+
+    // Orders Collection
+    match /orders/{orderId} {
+      allow read, write: if isAuth();
+    }
+
+    // Recharges Collection
+    match /recharges/{rechargeId} {
+      allow read, write: if isAuth();
+    }
+
+    // Notifications Collection
+    match /notifications/{notificationId} {
+      allow read, write: if isAuth();
+    }
+
+    // Default Fallback
+    match /{document=**} {
+      allow read, write: if isAuth();
+    }
+  }
+}

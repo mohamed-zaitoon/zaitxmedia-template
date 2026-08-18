@@ -1,0 +1,49 @@
+{
+	"$schema": "https://raw.githubusercontent.com/cloudflare/workers-sdk/main/packages/wrangler/config-schema.json",
+	"name": "zaitxmedia-api",
+	"main": "worker/src/index.ts",
+	"compatibility_date": "2025-07-15",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"workers_dev": true,
+	"triggers": {
+		"crons": [
+			"*/15 * * * *"
+		]
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "zaitxmedia-db",
+			"database_id": "7d715916-dd17-4c1b-8866-8da69138778d"
+		},
+		{
+			"binding": "LOCAL_DB",
+			"database_name": "zaitxmedia-local",
+			"database_id": "05c11b3b-0e2b-4670-9b73-7c3a36b31201"
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "STORAGE",
+			"bucket_name": "zaitxmedia-storage"
+		}
+	],
+	"routes": [
+		{
+			"pattern": "api.zaitxmedia.com/*",
+			"zone_name": "zaitxmedia.com"
+		},
+		{
+			"pattern": "api.zaitxmedia.com",
+			"zone_name": "zaitxmedia.com",
+			"custom_domain": true
+		}
+	],
+	"vars": {
+		"CORS_ORIGIN": "https://zaitxmedia.com,https://zaitxmedia.pages.dev,http://localhost:3000",
+		"ENVIRONMENT": "production",
+		"PAYMENT_VERIFICATION_DELAY_SECONDS": "5"
+	}
+}
