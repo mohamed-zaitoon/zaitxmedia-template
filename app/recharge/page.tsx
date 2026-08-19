@@ -374,8 +374,8 @@ export default function RechargePage() {
   const formatDepositBalance = (amountEgp: number) => {
     if (!Number.isFinite(amountEgp)) amountEgp = 0;
     if (selectedCurrency === "USD") return isolateLtr(`${symbols.usd || "$"}${(amountEgp / rates.usd).toFixed(2)}`);
-    if (selectedCurrency === "SAR") return isolateLtr(`${(amountEgp / validSarRate).toFixed(2)} ${symbols.sar || "﷼"}`);
-    return isolateLtr(`${amountEgp.toFixed(2)} ${symbols.egp || "£"}`);
+    if (selectedCurrency === "SAR") return isolateLtr(`${symbols.sar || "﷼"} ${(amountEgp / validSarRate).toFixed(2)}`);
+    return isolateLtr(`${symbols.egp || "£"} ${amountEgp.toFixed(2)}`);
   };
   const estimatedCredit = formatDepositBalance(estimatedNetEgp);
 
@@ -1011,7 +1011,7 @@ export default function RechargePage() {
             <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-4 text-center">
               <span className="block text-xs text-muted-foreground">الرصيد الذي سيُضاف إلى المحفظة</span>
               <strong className="mt-1 block text-2xl font-black text-emerald-400 font-mono" dir="ltr">
-                {amountWithinLimits ? displayNetInCurrency.toFixed(2) : "0.00"} {currencySymbol}
+                {currencySymbol} {amountWithinLimits ? displayNetInCurrency.toFixed(2) : "0.00"}
               </strong>
             </div>
             {amountWithinLimits && feeCalc.netAmount > 0 && tiktokCoins > 0 && tiktokCoins <= tiktokMaxCoins && (
