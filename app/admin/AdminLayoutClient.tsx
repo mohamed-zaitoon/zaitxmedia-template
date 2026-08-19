@@ -108,6 +108,9 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
       <div
         className={`admin-sidebar ${mobileMenuOpen ? "open" : ""}`}
       >
+        {/* Mobile Pull Handle Indicator */}
+        <div className="w-14 h-1.5 rounded-full bg-amber-500/40 mx-auto my-2 shrink-0 md:hidden animate-pulse" />
+
         <div className="mb-4 border-b border-white/[0.07] px-3 pb-5">
             <div className="flex items-center gap-3">
               <img
