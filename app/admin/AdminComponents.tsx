@@ -1391,8 +1391,13 @@ export function SettingsTab() {
 export function PricingTab() {
   const [tiers, setTiers] = useState<any[]>([]);
   const [usdRate, setUsdRate] = useState(0);
+  const [symbolEgp, setSymbolEgp] = useState("£");
+  const [symbolSar, setSymbolSar] = useState("﷼");
+  const [symbolUsd, setSymbolUsd] = useState("$");
+  const [symbolsBusy, setSymbolsBusy] = useState(false);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
+
   useEffect(() => {
     Promise.all([
       fetchAdminData("tiers"),
@@ -1402,6 +1407,12 @@ export function PricingTab() {
         pricingResult.data?.usd_rate || pricingResult.data?.tiktok_usd_rate || 0,
       );
       setUsdRate(rate);
+
+      const cs = pricingResult.data?.currency_symbols || pricingResult.data?.currencySymbols || {};
+      setSymbolEgp(cs.egp || cs.EGP || "£");
+      setSymbolSar(cs.sar || cs.SAR || "﷼");
+      setSymbolUsd(cs.usd || cs.USD || "$");
+
       const data: any[] = (tiersResult.items || []).map((tier: any) => ({
         ...tier,
         pricePer1000Usd:
@@ -1412,6 +1423,27 @@ export function PricingTab() {
       setTiers(data);
     }).catch(console.error);
   }, []);
+
+  const saveCurrencySymbols = async () => {
+    setSymbolsBusy(true);
+    try {
+      await writeAdminData({
+        action: "savePricingSettings",
+        settings: {
+          currency_symbols: {
+            egp: symbolEgp.trim() || "£",
+            sar: symbolSar.trim() || "﷼",
+            usd: symbolUsd.trim() || "$",
+          },
+        },
+      });
+      toast.success("تم حفظ رموز العملات بنجاح 📋");
+    } catch {
+      toast.error("حدث خطأ أثناء حفظ رموز العملات");
+    } finally {
+      setSymbolsBusy(false);
+    }
+  };
 
   const save = async () => {
     setBusy(true);
@@ -1603,9 +1635,58 @@ export function PricingTab() {
   };
 
   return (
-    <div style={{ width: "100%" }} className="pb-32">
-    <Card
-      title="📊 شرائح أسعار تيك توك"
+    <div style={{ width: "100%" }} className="pb-32 space-y-6">
+      {/* 🔣 التحكم الإداري برموز وشكل العملات */}
+      <Card title="🔣 التحكم الإداري برموز وشكل العملات (رموز الجنيه والريال والدولار)">
+        <p className="text-xs text-muted-foreground mb-4">
+          يمكنك تغيير الرمز أو الكلمة التي تظهر بجانب كل عملة في جميع صفحات الموقع (مثلاً: £ أو ج.م للجنيه المصري، ﷼ أو ر.س للريال السعودي):
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+          <div>
+            <label className="block text-xs font-bold text-slate-300 mb-2">🇪🇬 رمز الجنيه المصري (EGP Symbol)</label>
+            <input
+              type="text"
+              value={symbolEgp}
+              onChange={(e) => setSymbolEgp(e.target.value)}
+              className="h-13 w-full rounded-2xl border border-slate-700 bg-slate-900/90 px-4 text-sm font-bold text-white outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 transition-all font-mono"
+              placeholder="مثال: £ أو ج.م"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-300 mb-2">🇸🇦 رمز الريال السعودي (SAR Symbol)</label>
+            <input
+              type="text"
+              value={symbolSar}
+              onChange={(e) => setSymbolSar(e.target.value)}
+              className="h-13 w-full rounded-2xl border border-slate-700 bg-slate-900/90 px-4 text-sm font-bold text-white outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 transition-all font-mono"
+              placeholder="مثال: ﷼ أو ر.س"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-300 mb-2">🇺🇸 رمز الدولار الأمريكي (USD Symbol)</label>
+            <input
+              type="text"
+              value={symbolUsd}
+              onChange={(e) => setSymbolUsd(e.target.value)}
+              className="h-13 w-full rounded-2xl border border-slate-700 bg-slate-900/90 px-4 text-sm font-bold text-white outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 transition-all font-mono"
+              placeholder="مثال: $"
+            />
+          </div>
+        </div>
+
+        <button
+          type="button"
+          disabled={symbolsBusy}
+          onClick={saveCurrencySymbols}
+          className="h-14 px-8 w-full sm:w-auto rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 text-slate-950 font-black text-base shadow-xl shadow-amber-500/25 hover:scale-[1.02] active:scale-95 transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+        >
+          {symbolsBusy ? "جاري الحفظ..." : "💾 حفظ رموز العملات"}
+        </button>
+      </Card>
+
+      <Card
+        title="📊 شرائح أسعار تيك توك"
       action={
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
           <button
