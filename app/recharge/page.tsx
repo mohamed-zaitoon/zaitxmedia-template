@@ -809,8 +809,8 @@ export default function RechargePage() {
                   </div>
                 ) : (
                   <>
-                    {/* Direct Transfer Link Button */}
-                    {selected.link && selected.link.startsWith("http") && (
+                    {/* Direct Transfer Link Button (Cellular Data Only) */}
+                    {selected.link && selected.link.startsWith("http") && isCellularConnection && (
                       <div className="my-2">
                         <a
                           href={selected.link}
