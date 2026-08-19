@@ -8,8 +8,8 @@ import { useAuth } from "./auth-context";
 // 🔒 [AR] الحسابات الإدارية المعتمدة التي يتاح لها استخدام الكونسول وتتبع الأخطاء
 // ============================================================================
 const ALLOWED_ADMIN_EMAILS = new Set([
-  "admin@example.com",
-  "demo@example.com",
+  "mohamwdzaitoon242@gmail.com",
+  "mohamedzaitoon242@gmail.com",
 ]);
 
 /**

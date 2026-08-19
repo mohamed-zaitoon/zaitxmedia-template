@@ -5,9 +5,10 @@ import SiteAvailabilityGate from "./components/SiteAvailabilityGate";
 
 
 export const viewport: Viewport = {
-  themeColor: "#f59e0b",
+  themeColor: "#070a12",
   width: "device-width",
   initialScale: 1,
+  maximumScale: 1,
 };
 
 export const metadata: Metadata = {
@@ -112,6 +113,8 @@ export default function RootLayout({
     >
       <html lang="ar" dir="rtl">
         <head>
+          <meta name="theme-color" content="#070a12" />
+          <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
           <SeoSchema />
         </head>
         <body>
@@ -125,7 +128,7 @@ export default function RootLayout({
                       <CountryBlocker>{children}</CountryBlocker>
                     </SiteAvailabilityGate>
                     <CartDrawer />
-                    <Toaster position="bottom-center" richColors />
+                    <Toaster position="top-center" richColors />
                   </CartProvider>
                 </CurrencyProvider>
               </ThemeProvider>

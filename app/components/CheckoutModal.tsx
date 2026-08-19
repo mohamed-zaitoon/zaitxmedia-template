@@ -36,7 +36,7 @@ export default function CheckoutModal({
   onClose 
 }: any) {
   const router = useRouter();
-  const { rates, selectedCurrency } = useCurrency();
+  const { rates, selectedCurrency, symbols } = useCurrency();
   
   const isTikTokCoins = service?.name?.includes("عملات") && (service?.name?.includes("تيك توك") || service?.name?.includes("تيك تيك"));
   const isSecretSub = service?.name?.includes("اشتراك مخفي") || service?.name?.includes("سوبر فان") || (service?.name?.includes("اشتراك") && (service?.name?.includes("تيك توك") || service?.name?.includes("تيك تيك") || service?.category === "اشتراكات"));
@@ -79,14 +79,14 @@ export default function CheckoutModal({
   const formatLocalAmount = (amountEgp: number) => {
     if (selectedCurrency === "USD") {
       const amt = ceilTo2Decimals(amountEgp / rates.usd);
-      return isolateLtr(`${amt.toFixed(2)} USD`);
+      return isolateLtr(`${amt.toFixed(2)} ${symbols.usd || "$"}`);
     }
     if (usesSar || selectedCurrency === "SAR") {
       const amt = ceilTo2Decimals(amountEgp / rates.sar);
-      return isolateLtr(`${amt.toFixed(2)} SAR`);
+      return isolateLtr(`${amt.toFixed(2)} ${symbols.sar || "﷼"}`);
     }
     const amt = ceilTo2Decimals(amountEgp);
-    return isolateLtr(`${amt.toFixed(2)} EGP`);
+    return isolateLtr(`${amt.toFixed(2)} ${symbols.egp || "£"}`);
   };
   const missingBalanceLocal = toLocalAmount(missingBalanceEgp);
   const rechargeAmountWithFee = grossDepositRequiredForNet(

@@ -1,16 +1,17 @@
 """
 ============================================================================
-🐍 [EN] FastAPI Standalone Microservice Engine for ZaitXMedia Platform (Example Template)
-🐍 [AR] محرك خدمات بايثون المصغرة لمنصة زايت إكس ميديا (قالب توضيحي)
+🐍 [EN] FastAPI Standalone Microservice Engine for ZaitXMedia Platform
+🐍 [AR] محرك خدمات بايثون المصغرة لمنصة زايت إكس ميديا (FastAPI Engine)
 ============================================================================
 """
 from fastapi import FastAPI, HTTPException, Security, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 import os
+import re
 
 app = FastAPI(
-    title="ZaitXMedia Python Microservice Engine (Example Template)",
+    title="ZaitXMedia Python Microservice Engine",
     description="High-performance Python Automation Backend for Next.js Platform",
     version="1.0.0"
 )
@@ -19,7 +20,7 @@ security = HTTPBearer()
 
 # 🔒 [EN] Secret key verification for inter-service communication
 # 🔒 [AR] مفتاح التحقق والأمان للربط المشفر بين السيرفرات والخدمات المصغرة
-API_SECRET_KEY = os.getenv("PYTHON_SERVICE_SECRET", "EXAMPLE_PYTHON_SECRET_KEY")
+API_SECRET_KEY = os.getenv("PYTHON_SERVICE_SECRET", "zaitxmedia_python_secure_key_2026")
 
 def verify_token(credentials: HTTPAuthorizationCredentials = Security(security)):
     """
@@ -44,7 +45,7 @@ class SMSVerifyRequest(BaseModel):
 def read_root():
     return {
         "status": "online",
-        "service": "ZaitXMedia Python Automation Service Template",
+        "service": "ZaitXMedia Python Automation Service",
         "version": "1.0.0"
     }
 
@@ -54,10 +55,15 @@ def health_check():
 
 @app.post("/api/tiktok/coins", dependencies=[Depends(verify_token)])
 def calculate_coins(req: CoinCalculationRequest):
+    """
+    ⚡ [EN] Calculates TikTok Coin packages dynamically based on USD rate in Python.
+    ⚡ [AR] حساب باقات وأسعار عملات تيك توك بناءً على سعر صرف الدولار الديناميكي في بايثون.
+    """
     cost_per_coin_usd = 0.0105
     total_cost_usd = req.coins_count * cost_per_coin_usd
     total_cost_egp = total_cost_usd * req.usd_rate
 
+    # Calculate quantity tiers
     tier_discount = 0.0
     if req.coins_count >= 10000:
         tier_discount = 0.05
@@ -77,20 +83,26 @@ def calculate_coins(req: CoinCalculationRequest):
 
 @app.post("/api/payments/verify-sms", dependencies=[Depends(verify_token)])
 def verify_sms(req: SMSVerifyRequest):
+    """
+    💳 [EN] Automated payment SMS pattern matching engine in Python.
+    💳 [AR] محرك مطابقة وتحليل رسائل الإيداعات والدفع التلقائي في بايثون.
+    """
     text = req.sms_text.lower()
     amount_str = str(int(req.expected_amount))
     amount_float_str = f"{req.expected_amount:.2f}"
 
+    # Match amount in text
     has_amount = amount_str in text or amount_float_str in text
 
+    # Pattern recognition for provider
     detected_provider = "unknown"
-    if "تم تحويل" in text or "vodafone" in req.sender.lower() or "vf-cash" in text:
+    if "تم تحويل" in text or "vodafone" in req.sender.lower() or "vf-cash" in text or "محفظة" in text:
         detected_provider = "vodafone"
-    elif "instapay" in text or "ipn" in text:
+    elif "instapay" in text or "ipn" in text or "انستاباي" in text:
         detected_provider = "instapay"
     elif "برق" in text or "barq" in text:
         detected_provider = "barq"
-    elif "bank" in text or "transfer" in text:
+    elif "بنك" in text or "bank" in text or "transfer" in text:
         detected_provider = "bank"
 
     is_matched = has_amount and (req.provider == "auto" or detected_provider == req.provider or has_amount)

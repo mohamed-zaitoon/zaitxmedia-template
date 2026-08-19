@@ -110,8 +110,10 @@ async function passwordMatches(
 }
 
 export const ALLOWED_ADMIN_EMAILS = [
-  "admin@example.com",
-  "demo@example.com",
+  "admin@zaitxmedia.com",
+  "mohamedzaitoon242@gmail.com",
+  "mohamwdzaitoon242@gmail.com",
+  "zaitxmedia@gmail.com",
 ];
 
 async function createBootstrapAdminIfNeeded(

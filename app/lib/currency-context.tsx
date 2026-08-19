@@ -7,19 +7,33 @@ import { isolateLtr } from "./bidi";
 
 export type Currency = "EGP" | "USD" | "SAR";
 
+export interface CurrencySymbols {
+  egp: string;
+  sar: string;
+  usd: string;
+}
+
 export interface CurrencyContextType {
   selectedCurrency: Currency;
   setSelectedCurrency: (c: Currency) => void;
   convertPrice: (priceEGP: number) => { amount: number; symbol: string; formatted: string };
   rates: { usd: number; sar: number };
+  symbols: CurrencySymbols;
   loading: boolean;
 }
+
+const defaultSymbols: CurrencySymbols = {
+  egp: "£",
+  sar: "﷼",
+  usd: "$",
+};
 
 const CurrencyContext = createContext<CurrencyContextType>({
   selectedCurrency: "EGP",
   setSelectedCurrency: () => {},
-  convertPrice: (p) => ({ amount: p, symbol: "ج", formatted: p.toFixed(2) + "ج" }),
+  convertPrice: (p) => ({ amount: p, symbol: "£", formatted: p.toFixed(2) + " £" }),
   rates: { usd: 50, sar: 13 },
+  symbols: defaultSymbols,
   loading: true,
 });
 
@@ -31,6 +45,7 @@ export function ceilTo2Decimals(val: number): number {
 export const CurrencyProvider = ({ children }: { children: ReactNode }) => {
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>("USD");
   const [rates, setRates] = useState({ usd: 50, sar: 13 });
+  const [symbols, setSymbols] = useState<CurrencySymbols>(defaultSymbols);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -47,13 +62,21 @@ export const CurrencyProvider = ({ children }: { children: ReactNode }) => {
         let usdRate = 50;
         let sarRate = 13;
 
-        // Fetch USD & custom SAR rate from settings/pricing
+        // Fetch USD, custom SAR rate, and admin custom currency symbols
         const s = await getDoc(pricingRef);
         if (s.exists()) {
           const d = s.data();
           usdRate = Number(d.usd_rate || d.tiktok_usd_rate || 50);
           if (d.sar_rate_override && Number(d.sar_rate_override) > 0) {
             sarRate = Number(d.sar_rate_override);
+          }
+          if (d.currency_symbols || d.currencySymbols) {
+            const cs = d.currency_symbols || d.currencySymbols;
+            setSymbols({
+              egp: cs.egp || cs.EGP || "£",
+              sar: cs.sar || cs.SAR || "﷼",
+              usd: cs.usd || cs.USD || "$",
+            });
           }
         }
 
@@ -87,6 +110,14 @@ export const CurrencyProvider = ({ children }: { children: ReactNode }) => {
         if (Number.isFinite(usd) && usd > 0) {
           setRates((current) => ({ ...current, usd }));
         }
+        if (data.currency_symbols || data.currencySymbols) {
+          const cs = data.currency_symbols || data.currencySymbols;
+          setSymbols({
+            egp: cs.egp || cs.EGP || "£",
+            sar: cs.sar || cs.SAR || "﷼",
+            usd: cs.usd || cs.USD || "$",
+          });
+        }
       },
       console.error,
     );
@@ -113,17 +144,20 @@ export const CurrencyProvider = ({ children }: { children: ReactNode }) => {
   const convertPrice = (priceEGP: number) => {
     if (selectedCurrency === "USD") {
       const amt = Math.ceil(((priceEGP / rates.usd) - 1e-9) * 100) / 100;
-      return { amount: amt, symbol: "USD", formatted: isolateLtr(`${amt.toFixed(2)} USD`) };
+      const sym = symbols.usd || "$";
+      return { amount: amt, symbol: sym, formatted: `${amt.toFixed(2)} ${sym}` };
     } else if (selectedCurrency === "SAR") {
       const amt = Math.ceil(((priceEGP / rates.sar) - 1e-9) * 100) / 100;
-      return { amount: amt, symbol: "SAR", formatted: isolateLtr(`${amt.toFixed(2)} SAR`) };
+      const sym = symbols.sar || "﷼";
+      return { amount: amt, symbol: sym, formatted: `${amt.toFixed(2)} ${sym}` };
     }
     const roundedEgp = Math.ceil((priceEGP - 1e-9) * 100) / 100;
-    return { amount: roundedEgp, symbol: "EGP", formatted: isolateLtr(`${roundedEgp.toFixed(2)} EGP`) };
+    const sym = symbols.egp || "£";
+    return { amount: roundedEgp, symbol: sym, formatted: `${roundedEgp.toFixed(2)} ${sym}` };
   };
 
   return (
-    <CurrencyContext.Provider value={{ selectedCurrency, setSelectedCurrency: changeCurrency, convertPrice, rates, loading }}>
+    <CurrencyContext.Provider value={{ selectedCurrency, setSelectedCurrency: changeCurrency, convertPrice, rates, symbols, loading }}>
       {children}
     </CurrencyContext.Provider>
   );

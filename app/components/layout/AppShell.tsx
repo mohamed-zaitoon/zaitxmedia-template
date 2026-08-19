@@ -5,16 +5,13 @@ import SiteFooter from "./SiteFooter";
 import MobileBottomNavigation from "./MobileBottomNavigation";
 import OneSignalProvider from "../OneSignalProvider";
 import GlobalDiscountBanner from "../GlobalDiscountBanner";
-import PaymentSetupModal from "../PaymentSetupModal";
 import { useAuth } from "@/app/lib/auth-context";
-
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
 
   return (
     <div className="min-h-dvh w-full min-w-0 bg-background">
       <OneSignalProvider userId={user?.id} />
-      <PaymentSetupModal />
       <div className="graffiti-bg"></div>
 
       <div className="relative flex min-h-dvh w-full min-w-0 flex-col">
@@ -26,7 +23,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </main>
 
         <SiteFooter />
-        <MobileBottomNavigation />
       </div>
     </div>
   );

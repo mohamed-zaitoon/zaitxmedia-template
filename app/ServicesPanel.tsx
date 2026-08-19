@@ -82,16 +82,16 @@ function CustomDropdown({ options, value, onChange, placeholder, isOpen: externa
         onClick={toggle}
         dir="rtl"
       >
-        <div className="flex justify-between items-center flex-1 min-w-0 pr-1 pl-1">
+        <div className="flex justify-between items-center flex-1 min-w-0 px-2 sm:px-3">
           <span
             dir="auto"
-            className="break-words text-sm font-extrabold text-right leading-snug flex-1 py-0.5 px-1 tracking-wide"
+            className="break-words text-sm font-extrabold text-right leading-relaxed flex-1 py-1 px-2 tracking-wide"
             style={{ color: value ? "var(--foreground)" : "var(--muted-foreground)", unicodeBidi: "plaintext" }}
           >
             <bdi>{selectedLabel}</bdi>
           </span>
           {selectedOption?.price && (
-            <span className="text-cyan-400 font-black mr-3 ml-1 shrink-0 text-[13px] bg-cyan-500/10 border border-cyan-500/25 px-3 py-1 rounded-xl flex items-center gap-2 shadow-sm" dir="ltr" style={{ unicodeBidi: "isolate" }}>
+            <span className="text-cyan-400 font-black mr-3 ml-1 shrink-0 text-[13px] bg-cyan-500/10 border border-cyan-500/25 px-3 py-1.5 rounded-xl flex items-center gap-2 shadow-sm" dir="ltr" style={{ unicodeBidi: "isolate" }}>
               {selectedOption.originalPrice && (
                 <span className="text-[11px] text-red-400 line-through opacity-75 font-mono">
                   {selectedOption.originalPrice}
@@ -112,7 +112,7 @@ function CustomDropdown({ options, value, onChange, placeholder, isOpen: externa
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.18 }}
-            className="absolute top-full left-0 right-0 z-[999] bg-[#090f1d]/98 backdrop-blur-2xl border border-cyan-500/35 rounded-2xl mt-2 max-h-[360px] overflow-y-auto shadow-2xl shadow-black/95 p-2 text-right"
+            className="absolute top-full left-0 right-0 z-[999] bg-[#090f1d]/98 backdrop-blur-2xl border border-cyan-500/35 rounded-2xl mt-2 max-h-[360px] overflow-y-auto shadow-2xl shadow-black/95 p-3 text-right"
             dir="rtl"
             onPointerDown={(e) => e.stopPropagation()}
           >
@@ -126,7 +126,7 @@ function CustomDropdown({ options, value, onChange, placeholder, isOpen: externa
                   dir="rtl"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full h-12 rounded-xl border border-[#263b5f] bg-[#111b2e] py-2.5 pr-4 pl-11 text-sm text-foreground placeholder:text-slate-400 outline-none transition-all focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 text-right shadow-inner"
+                  className="w-full h-12 rounded-xl border border-[#263b5f] bg-[#111b2e] py-3 px-5 pr-4 pl-11 text-sm text-foreground placeholder:text-slate-400 outline-none transition-all focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 text-right shadow-inner"
                   style={{ unicodeBidi: "plaintext" }}
                 />
                 <Search
@@ -147,7 +147,7 @@ function CustomDropdown({ options, value, onChange, placeholder, isOpen: externa
                     close();
                     setSearch("");
                   }}
-                  className={`min-h-[54px] w-full cursor-pointer rounded-2xl border px-4 py-3 text-right transition-all duration-200 active:scale-[0.99] ${
+                  className={`min-h-[56px] w-full cursor-pointer rounded-2xl border px-5 py-3.5 text-right transition-all duration-200 active:scale-[0.99] ${
                     o.value === value
                       ? "border-cyan-400/60 bg-gradient-to-r from-[#15324a] to-[#12283b] shadow-md shadow-cyan-950/40"
                       : "border-[#1e3050] bg-[#111b2e]/90 hover:border-cyan-500/40 hover:bg-[#17263f] active:bg-[#1c3050]"
@@ -740,7 +740,7 @@ export default function ServicesPanel({
                     />
                     {quantity && qNum < minQ && isPromo && (
                       <div className="text-destructive text-xs mt-2.5 flex items-center justify-end gap-1.5 px-2">
-                        <AlertCircle size={13} /> {`الكمية أقل من الحد الأدنى (${minQ}) — تقابل ${promoMinEgp.toLocaleString()} ج.م`}
+                        <AlertCircle size={13} /> {`الكمية أقل من الحد الأدنى (${minQ}) — تقابل ${convertPrice(promoMinEgp).formatted}`}
                       </div>
                     )}
                     {quantity && qNum < minQ && !isPromo && (
@@ -750,7 +750,7 @@ export default function ServicesPanel({
                     )}
                     {quantity && qNum > maxQ && isPromo && (
                       <div className="text-destructive text-xs mt-2.5 flex items-center justify-end gap-1.5 px-2">
-                        <AlertCircle size={13} /> {`الكمية تتجاوز الحد الأقصى (${maxQ}) — تقابل ${promoMaxEgp.toLocaleString()} ج.م`}
+                        <AlertCircle size={13} /> {`الكمية تتجاوز الحد الأقصى (${maxQ}) — تقابل ${convertPrice(promoMaxEgp).formatted}`}
                       </div>
                     )}
                     {quantity && qNum > maxQ && !isPromo && (
@@ -765,18 +765,20 @@ export default function ServicesPanel({
                   className="bg-gradient-to-r from-slate-900/90 via-slate-900/60 to-slate-900/90 p-5 px-6 py-4.5 rounded-2xl mb-6 border flex justify-between items-center shadow-xl backdrop-blur-xl my-6"
                   style={{ borderColor: `${tabInfo?.color || 'var(--primary)'}45` }}
                 >
-                  <span className="text-muted-foreground font-semibold text-base px-1">الإجمالي:</span>
+                  <span className="text-muted-foreground font-semibold text-base px-1">السعر الإجمالي:</span>
                   <div className="flex items-center gap-3">
                     {originalFinalPrice > finalPrice && (
-                      <span className="text-sm text-red-400 line-through opacity-70 font-mono">
+                      <span className="text-sm text-red-400 line-through opacity-70 font-mono" dir="ltr">
                         {convertPrice(originalFinalPrice).formatted}
                       </span>
                     )}
                     <strong
-                      className="text-2xl font-black font-mono px-2 tracking-wide"
+                      className="text-2xl font-black font-mono px-2 tracking-wide inline-flex items-center gap-1.5"
+                      dir="ltr"
                       style={{ color: tabInfo?.color || 'var(--primary)' }}
                     >
-                      {convertPrice(finalPrice).formatted}
+                      <span>{convertPrice(finalPrice).amount.toFixed(2)}</span>
+                      <span>{convertPrice(finalPrice).symbol}</span>
                     </strong>
                   </div>
                 </div>

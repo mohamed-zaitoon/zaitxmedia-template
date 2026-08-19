@@ -138,11 +138,7 @@ export default function PasskeyButton({
         <ShieldCheck size={18} />
         <span>حماية الحساب ببصمة الأصبع / Face ID</span>
       </div>
-      <p className="text-xs text-slate-300 max-w-sm leading-relaxed">
-        {registered
-          ? "حسابك محمي ببصمة الأصبع. سيُطلب منك قراءة البصمة لتأكيد الهوية فور إدخال بيانات الدخول."
-          : "قم بتشغيل الحماية البيومترية لحفظ البصمة في هاتفك والتأكد من هوية المستخدم بعد إدخال كلمة المرور."}
-      </p>
+
 
       {registered && (
         <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-medium bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">

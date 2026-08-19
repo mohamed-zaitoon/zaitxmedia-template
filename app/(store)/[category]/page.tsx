@@ -488,21 +488,7 @@ export default function CategoryPage() {
                   background: "rgba(255,255,255,0.02)",
                 }}
               >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
-                  <h3
-                    style={{
-                      margin: 0,
-                      color: "#38bdf8",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
-                      fontSize: 16,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    <Coins size={20} /> حاسبة شحن عملات تيك توك
-                  </h3>
-                </div>
+
 
                 <div className="tiktok-inputs" style={{ marginBottom: 12 }}>
                   <div className="graffiti-input-group" style={{ width: "100%" }}>

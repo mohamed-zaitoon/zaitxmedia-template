@@ -5,6 +5,8 @@ import { useAuth } from "../lib/auth-context";
 import { updateMyProfile } from "../lib/profile-client";
 import { X, User } from "lucide-react";
 import Swal from "sweetalert2";
+import GenericCustomSelect from "./GenericCustomSelect";
+import { validateCountryChange } from "../lib/geolocation";
 
 export default function ProfileSettingsModal({ onClose }: any) {
   const { user, hasGoogleLinked, linkGoogle, unlinkGoogle } = useAuth();
@@ -221,14 +223,19 @@ export default function ProfileSettingsModal({ onClose }: any) {
             >
               الدولة
             </label>
-            <select
+            <GenericCustomSelect
               value={country}
-              onChange={(e) => setCountry(e.target.value)}
-              style={{ ...inputStyle, cursor: "pointer" }}
-            >
-              <option value="EG">مصر 🇪🇬</option>
-              <option value="SA">السعودية 🇸🇦</option>
-            </select>
+              title="اختر الدولة"
+              options={[
+                { value: "EG", label: "مصر 🇪🇬" },
+                { value: "SA", label: "السعودية 🇸🇦" },
+              ]}
+              onChange={async (val) => {
+                if (val === country) return;
+                const isAllowed = await validateCountryChange(val);
+                if (isAllowed) setCountry(val);
+              }}
+            />
           </div>
 
           <div

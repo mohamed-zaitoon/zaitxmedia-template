@@ -31,7 +31,7 @@ export function parseAmountToMinorUnits(input: string | number, currency: Curren
  */
 export function formatMinorUnits(amountMinor: number, currency: Currency): string {
   const pounds = amountMinor / 100;
-  const symbol = currency === "EGP" ? "ج.م" : "ر.س";
+  const symbol = currency === "EGP" ? "£" : "﷼";
   return `${pounds.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${symbol}`;
 }
 
@@ -46,7 +46,7 @@ export function minorToMajor(amountMinor: number): number {
  * Get currency symbol
  */
 export function getCurrencySymbol(currency: Currency): string {
-  return currency === "EGP" ? "ج.م" : "ر.س";
+  return currency === "EGP" ? "£" : "﷼";
 }
 
 /**

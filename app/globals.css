@@ -29,6 +29,39 @@
   --font-mono: "JetBrains Mono", monospace;
 }
 
+/* Custom Styled Select Dropdowns Across Entire Site */
+select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23f59e0b' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5' /%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: left 1.25rem center !important;
+  background-size: 1.25rem !important;
+  padding-left: 3rem !important;
+  border-radius: 1rem !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  background-color: #060a12 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+select:focus {
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25) !important;
+  outline: none !important;
+}
+
+select option {
+  background-color: #0a0f1d !important;
+  color: #ffffff !important;
+  padding: 14px !important;
+  font-weight: 600 !important;
+}
+
 /* Ultra-Modern Glassmorphism & Aesthetics */
 .glass-panel-modern {
   background: rgba(13, 20, 36, 0.78);
@@ -62,6 +95,60 @@
 
 .glow-btn-primary:hover {
   box-shadow: 0 12px 30px -2px rgba(56, 189, 248, 0.5);
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   💎 PREMIUM TOUCH TARGETS & ULTRA BUTTON STYLES
+   ========================================================================== */
+.btn-ultra-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  padding: 0.875rem 1.75rem;
+  min-height: 3.25rem;
+  border-radius: 1rem;
+  font-weight: 800;
+  font-size: 0.9375rem;
+  background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+  color: #ffffff;
+  box-shadow: 0 10px 25px -5px rgba(14, 165, 233, 0.4);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.btn-ultra-primary:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 15px 35px -5px rgba(14, 165, 233, 0.55);
+}
+
+.btn-ultra-primary:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.btn-ultra-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  min-height: 3rem;
+  border-radius: 0.875rem;
+  font-weight: 700;
+  font-size: 0.875rem;
+  background: rgba(15, 23, 42, 0.85);
+  color: #f8fafc;
+  border: 1px solid rgba(51, 65, 85, 0.8);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.btn-ultra-secondary:hover {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
   transform: translateY(-1px);
 }
 
@@ -243,20 +330,23 @@ body {
 
 @media (max-width: 640px) {
   .centered-app-frame {
-    width: calc(100% - 20px) !important;
-    max-width: calc(100% - 20px) !important;
+    width: min(100%, calc(100vw - 32px)) !important;
+    max-width: 100% !important;
     box-sizing: border-box !important;
-    margin-inline: auto !important;
-    inset-inline: auto !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
     transform: none;
   }
 
   .app-main-content {
-    width: calc(100% - 20px) !important;
-    max-width: calc(100% - 20px) !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    margin-inline: auto !important;
+    width: min(100%, calc(100vw - 32px)) !important;
+    max-width: 100% !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
     align-items: center !important;
     justify-content: flex-start !important;
   }
@@ -276,6 +366,21 @@ body {
     max-width: 100% !important;
     margin-inline: auto !important;
   }
+}
+
+/* Universal Padding & Spacing Protection - Prevents text touching borders */
+td, th {
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+  padding-top: 0.85rem !important;
+  padding-bottom: 0.85rem !important;
+}
+
+.badge, .tag-pill {
+  padding-left: 0.75rem !important;
+  padding-right: 0.75rem !important;
+  padding-top: 0.35rem !important;
+  padding-bottom: 0.35rem !important;
 }
 
 .hero-centered {

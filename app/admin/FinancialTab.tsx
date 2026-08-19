@@ -5,10 +5,11 @@ import {
   Search, Building2, BookOpen, FileText, Plus, X, ChevronUp, ChevronDown,
   ArrowUpRight, ArrowDownRight, Minus, Eye, Filter,
 } from "lucide-react";
+import GenericCustomSelect from "../components/GenericCustomSelect";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type Currency = "USD" | "EGP" | "SAR";
-const CUR_SYMBOL: Record<Currency, string> = { USD: "$", EGP: "ج.م", SAR: "ر.س" };
+const CUR_SYMBOL: Record<Currency, string> = { USD: "$", EGP: "EGP", SAR: "SAR" };
 
 function n(v: any) { return Number(v) || 0; }
 function ceilTo2Decimals(val: number): number {
@@ -707,14 +708,18 @@ export function FinancialTab() {
                   onChange={e => setAssetForm({ ...assetForm, [key]: e.target.value })}
                   className="px-3 py-2 rounded-lg bg-black/30 border border-border text-sm text-foreground outline-none focus:border-primary/40" />
               ))}
-              <select value={assetForm.type} onChange={e => setAssetForm({ ...assetForm, type: e.target.value })}
-                className="px-3 py-2 rounded-lg bg-black/30 border border-border text-sm text-foreground outline-none">
-                {["Exchange", "Wallet", "Bank", "Cash", "Other"].map(t => <option key={t}>{t}</option>)}
-              </select>
-              <select value={assetForm.currency} onChange={e => setAssetForm({ ...assetForm, currency: e.target.value })}
-                className="px-3 py-2 rounded-lg bg-black/30 border border-border text-sm text-foreground outline-none">
-                {["USD", "EGP", "SAR"].map(c => <option key={c}>{c}</option>)}
-              </select>
+              <GenericCustomSelect
+                value={assetForm.type}
+                title="نوع الأصل الحسابي"
+                options={["Exchange", "Wallet", "Bank", "Cash", "Other"].map(t => ({ value: t, label: t }))}
+                onChange={val => setAssetForm({ ...assetForm, type: val })}
+              />
+              <GenericCustomSelect
+                value={assetForm.currency}
+                title="عملة الحساب"
+                options={["USD", "EGP", "SAR"].map(c => ({ value: c, label: c }))}
+                onChange={val => setAssetForm({ ...assetForm, currency: val })}
+              />
               <input type="number" min="0" step="0.01" placeholder="الرصيد" value={assetForm.balance}
                 onChange={e => setAssetForm({ ...assetForm, balance: e.target.value })}
                 className="px-3 py-2 rounded-lg bg-black/30 border border-border text-sm text-foreground outline-none" />

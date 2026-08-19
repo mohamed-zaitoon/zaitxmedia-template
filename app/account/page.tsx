@@ -6,6 +6,8 @@ import { useAuth } from "../lib/auth-context";
 import { useCurrency } from "../lib/currency-context";
 import { useUser } from "@clerk/nextjs";
 import { getMyProfile, updateMyProfile } from "../lib/profile-client";
+import GenericCustomSelect from "../components/GenericCustomSelect";
+import { validateCountryChange } from "../lib/geolocation";
 import {
   User,
   Package,
@@ -23,6 +25,7 @@ import Swal from "sweetalert2";
 import AppShell from "../components/layout/AppShell";
 import PasskeyButton from "../components/PasskeyButton";
 import { useTheme } from "../lib/theme-context";
+import { toast } from "sonner";
 
 export default function AccountPage() {
   const router = useRouter();
@@ -186,14 +189,7 @@ function ProfileSection({ user }: any) {
           color: "#fff",
         });
       } else {
-        Swal.fire({
-          icon: "success",
-          title: "تم الحفظ بنجاح",
-          timer: 1500,
-          showConfirmButton: false,
-          background: "#0c1322",
-          color: "#fff",
-        });
+        toast.success("تم الحفظ بنجاح 💾");
       }
       window.setTimeout(() => window.location.reload(), 1000);
     } catch (error: any) {
@@ -317,48 +313,27 @@ function ProfileSection({ user }: any) {
 
         <div>
           <label className="text-muted-foreground text-xs font-bold mb-1.5 block">الدولة</label>
-          <select
+          <GenericCustomSelect
             value={country}
-            onChange={(e) => setCountry(e.target.value)}
-            className="w-full h-12 px-4 rounded-xl bg-black/40 border border-border text-foreground text-sm outline-none focus:border-primary transition-all cursor-pointer appearance-none text-right"
-          >
-            <option value="EG" className="bg-[#0c1322]">🇪🇬 مصر</option>
-            <option value="SA" className="bg-[#0c1322]">🇸🇦 السعودية</option>
-          </select>
-        </div>
+            title="اختر الدولة"
+            options={[
+              { value: "EG", label: "🇪🇬 مصر" },
+              { value: "SA", label: "🇸🇦 السعودية" },
+            ]}
+            onChange={async (newCountry) => {
+              if (newCountry === country) return;
+              const isAllowed = await validateCountryChange(newCountry);
+              if (!isAllowed) return;
 
-        <div className="w-full rounded-2xl border border-cyan-500/30 bg-cyan-500/5 p-4 text-right space-y-3">
-          <label className="text-cyan-400 text-xs font-extrabold block">💳 وسائل الدفع المتوفرة لديك (تظهر لك فقط في الشحن والدفع):</label>
-          <div className="flex flex-col gap-2.5">
-            {[
-              { id: "vodafone", label: "📱 فودافون كاش / المحافظ الإلكترونية", countries: ["EG"] },
-              { id: "instapay", label: "⚡ تطبيق انستا باي (InstaPay) على هاتفي", countries: ["EG"] },
-              { id: "barq", label: "🇸🇦 تطبيق برق (Barq)", countries: ["SA"] },
-              { id: "bank", label: "🏛️ الحسابات والتحويلات البنكية", countries: ["EG", "SA", "GLOBAL"] },
-            ]
-              .filter((m) => m.countries.includes(country) || m.countries.includes("GLOBAL"))
-              .map((m) => {
-              const checked = preferredMethods.includes(m.id);
-              return (
-                <label key={m.id} className="flex items-center gap-2.5 text-xs text-foreground font-semibold cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => {
-                      setPreferredMethods((prev) =>
-                        prev.includes(m.id) ? prev.filter((x) => x !== m.id) : [...prev, m.id]
-                      );
-                    }}
-                    className="w-4 h-4 accent-cyan-400 rounded cursor-pointer"
-                  />
-                  {m.label}
-                </label>
-              );
-            })}
-          </div>
-          <p className="text-[11px] text-muted-foreground/80 leading-relaxed pt-1">
-            💡 سيقوم الموقع تلقائياً بعرض الخيارات المحددة فقط وتوفير تجربة سريعة لك.
-          </p>
+              setCountry(newCountry);
+              const defaultMethods = newCountry === "SA" ? ["barq", "bank"] : newCountry === "EG" ? ["vodafone", "instapay", "bank"] : ["bank"];
+              setPreferredMethods(defaultMethods);
+              if (typeof window !== "undefined") {
+                localStorage.removeItem("payment_configured_permanently");
+                localStorage.setItem("last_configured_country", newCountry);
+              }
+            }}
+          />
         </div>
 
         <button

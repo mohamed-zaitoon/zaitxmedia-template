@@ -6,6 +6,9 @@ import { useAuth } from "../lib/auth-context";
 import { updateMyProfile } from "../lib/profile-client";
 import { motion } from "framer-motion";
 import { CheckCircle } from "lucide-react";
+import GenericCustomSelect from "../components/GenericCustomSelect";
+import { validateCountryChange } from "../lib/geolocation";
+import { toast } from "sonner";
 
 export default function CompleteProfilePage() {
   const router = useRouter();
@@ -70,7 +73,7 @@ export default function CompleteProfilePage() {
         setBusy(false);
         return;
       }
-      
+      toast.success("تم الحفظ بنجاح 💾");
       router.push("/");
     } catch (err: any) {
       setErrorMsg(err.message || "حدث خطأ أثناء حفظ البيانات");
@@ -161,14 +164,19 @@ export default function CompleteProfilePage() {
 
           <div>
             <label style={{ display: "block", color: "#aaa", fontSize: 13, marginBottom: 6 }}>الدولة</label>
-            <select
+            <GenericCustomSelect
               value={country}
-              onChange={(e) => setCountry(e.target.value)}
-              style={{ ...inputStyle, cursor: "pointer" }}
-            >
-              <option value="EG">مصر 🇪🇬</option>
-              <option value="SA">السعودية 🇸🇦</option>
-            </select>
+              title="اختر الدولة"
+              options={[
+                { value: "EG", label: "مصر 🇪🇬" },
+                { value: "SA", label: "السعودية 🇸🇦" },
+              ]}
+              onChange={async (val) => {
+                if (val === country) return;
+                const isAllowed = await validateCountryChange(val);
+                if (isAllowed) setCountry(val);
+              }}
+            />
           </div>
 
           <div>

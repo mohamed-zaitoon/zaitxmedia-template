@@ -26,12 +26,30 @@ migration-data/
 backups/
 secrets/
 exports/
+public/.well-known/acme-challenge/
 build/
+**/build/
 .gradle/
+**/.gradle/
 .kotlin/
+**/.kotlin/
 local.properties
+**/local.properties
 *.apk
 *.aab
+*.idsig
+*.jks
+**/key.properties
+**/google-services.json
 ADMIN.md
 .vercel
+.env*
+
+# large binary archives
+*.tgz
+scripts/zaitx-admin-linux-bin
+
+# clerk configuration (can include secrets)
+/.clerk/
 scratch/
+

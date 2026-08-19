@@ -4,6 +4,8 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../lib/auth-context";
 import { MAX_WALLET_BALANCE_EGP, grossDepositRequiredForNet } from "@/lib/money/wallet";
+import GenericCustomSelect from "../components/GenericCustomSelect";
+import { toast } from "sonner";
 
 import { db } from "../lib/firebase";
 
@@ -180,177 +182,130 @@ export default function AdminPage() {
 
   return (
     <div
-      style={{
-        minHeight: "100vh",
-        background: "#060606",
-        color: "#fff",
-        display: "flex",
-      }}
+      className="min-h-screen bg-gradient-to-br from-[#060812] via-[#090d1a] to-[#04060d] text-slate-100 flex font-sans"
       dir="rtl"
     >
       {/* Mobile Sidebar Overlay */}
       {mobileMenuOpen && (
         <div 
           onClick={() => setMobileMenuOpen(false)}
-          style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", zIndex: 99 }}
+          className="fixed inset-0 bg-black/80 backdrop-blur-md z-[80] md:hidden"
         />
       )}
       
       {/* Sidebar */}
       <div
-        style={{
-          width: 240,
-          background: "#0b0b0b",
-          borderLeft: "1px solid #181818",
-          padding: "24px 0",
-          display: "flex",
-          flexDirection: "column",
-          flexShrink: 0,
-          position: mobileMenuOpen ? "fixed" : "relative",
-          top: 0,
-          bottom: 0,
-          right: mobileMenuOpen ? 0 : "auto",
-          zIndex: 100,
-          transition: "transform 0.3s ease",
-        }}
-        className={mobileMenuOpen ? "" : "hide-mobile"}
+        className={`w-64 bg-[#0a0f1d]/98 border-l border-amber-500/20 py-6 flex flex-col shrink-0 z-[90] backdrop-blur-2xl transition-all duration-300 ${
+          mobileMenuOpen ? "fixed top-[82px] right-0 left-0 bottom-0 w-full md:w-64 border-t border-amber-500/30" : "hidden md:flex relative top-0 bottom-0"
+        }`}
       >
-        <div
-          style={{
-            padding: "0 24px 24px",
-            borderBottom: "1px solid #181818",
-            marginBottom: 8,
-          }}
-        >
-          <h2
-            style={{
-              color: "#38bdf8",
-              fontSize: 20,
-              margin: "0 0 4px 0",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              fontWeight: 800,
-            }}
-          >
-            <Zap size={22} /> ZAITX MEDIA
-          </h2>
-          <span style={{ fontSize: 11, color: "#555" }}>
-            لوحة التحكم - Admin
-          </span>
-        </div>
-        <nav style={{ padding: "0 12px", flex: 1 }}>
-          {tabs.map((tab) => (
+        {/* Brand Header */}
+        <div className="px-6 pb-6 border-b border-slate-800/80 mb-3 flex items-center justify-between">
+          <div>
+            <h2 className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-500 text-xl font-black flex items-center gap-2.5">
+              <Zap size={22} className="text-amber-400 fill-amber-400/20 animate-pulse" /> ZAITX MEDIA
+            </h2>
+            <span className="text-[11px] text-amber-400/80 font-bold mt-1 block">
+              لوحة التحكم الاحترافية — VIP Admin
+            </span>
+          </div>
+          {mobileMenuOpen && (
             <button
-              key={tab.id}
-              onClick={() => { setActiveTab(tab.id); setMobileMenuOpen(false); }}
-              style={{
-                width: "100%",
-                padding: "12px 16px",
-                marginBottom: 2,
-                border: "none",
-                borderRadius: 10,
-                cursor: "pointer",
-                textAlign: "right",
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                fontSize: 14,
-                background:
-                  activeTab === tab.id
-                    ? "rgba(56,189,248,0.12)"
-                    : "transparent",
-                color: activeTab === tab.id ? "#38bdf8" : "#888",
-                transition: "all 0.15s",
-                fontWeight: activeTab === tab.id ? 600 : 400,
-              }}
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white"
             >
-              {tab.icon} {tab.label}
+              <X size={16} />
             </button>
-          ))}
+          )}
+        </div>
+
+        {/* Server Status Badge */}
+        <div className="px-6 mb-3">
+          <div className="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center gap-2 text-[11px] text-emerald-400 font-extrabold">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            <span>السيرفر متصل ويعمل بكفاءة 🟢</span>
+          </div>
+        </div>
+
+        {/* Navigation Tabs */}
+        <nav className="px-3 flex-1 overflow-y-auto space-y-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => { setActiveTab(tab.id); setMobileMenuOpen(false); }}
+                className={`w-full px-4 py-3 rounded-2xl border text-right transition-all flex items-center gap-3 text-xs font-black cursor-pointer ${
+                  isActive
+                    ? "bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-transparent border-amber-500/80 text-amber-300 shadow-lg shadow-amber-500/10 scale-[1.01]"
+                    : "bg-transparent border-transparent text-slate-400 hover:bg-slate-900/80 hover:text-slate-200"
+                }`}
+              >
+                <div className={`p-1.5 rounded-xl ${isActive ? "bg-amber-500/20 text-amber-300" : "text-slate-400"}`}>
+                  {tab.icon}
+                </div>
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </nav>
-        <div style={{ padding: "16px 24px", borderTop: "1px solid #181818" }}>
-          <div style={{ fontSize: 12, color: "#555", marginBottom: 8 }}>
+
+        {/* User Badge & Logout */}
+        <div className="p-4 border-t border-slate-800/80 mt-2 space-y-2">
+          <div className="px-3 py-2 rounded-xl bg-slate-900/80 border border-slate-800 text-xs text-slate-300 truncate font-mono font-bold">
             {user?.email}
           </div>
           <button
             onClick={async () => {
               await signOutUser();
             }}
-            style={{
-              width: "100%",
-              padding: 10,
-              borderRadius: 8,
-              background: "rgba(255,68,68,0.08)",
-              border: "1px solid rgba(255,68,68,0.2)",
-              color: "#ff4444",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 6,
-              fontSize: 13,
-            }}
+            className="w-full py-2.5 px-4 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-400 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
-            <LogOut size={14} /> تسجيل الخروج
+            <LogOut size={15} /> تسجيل الخروج
           </button>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "32px 20px" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", width: "100%" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 28,
-            flexWrap: "wrap",
-            gap: 12,
-          }}
-        >
-          <h1
-            style={{
-              fontSize: 24,
-              margin: 0,
-              fontWeight: 800,
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-            }}
-          >
-            {tabs.find((t) => t.id === activeTab)?.icon}
-            <span>{tabs.find((t) => t.id === activeTab)?.label}</span>
-          </h1>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button
-              onClick={() => setMobileMenuOpen(true)}
-              className="show-mobile"
-              style={{
-                background: "transparent",
-                border: "none",
-                color: "#fff",
-                cursor: "pointer",
-                padding: 4
-              }}
-            >
-              <Menu size={24} />
-            </button>
-            <button
-              onClick={async () => {
-                await signOutUser();
-              }}
-              style={{
-                ...btnSm,
-                color: "#ff4444",
-                borderColor: "rgba(255,68,68,0.3)",
-              }}
-            >
-              <LogOut size={14} />
-            </button>
+      {/* Main Content Area */}
+      <div className="flex-1 overflow-y-auto p-4 md:p-8">
+        <div className="max-w-7xl mx-auto w-full pb-36 md:pb-48">
+          {/* Top Bar */}
+          <div className="flex justify-between items-center mb-8 bg-slate-950/80 border border-cyan-500/20 p-4 rounded-2xl backdrop-blur-xl shadow-xl flex-wrap gap-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setMobileMenuOpen(true)}
+                className="md:hidden p-2 rounded-xl bg-slate-900 text-cyan-400 border border-cyan-500/30 cursor-pointer"
+                aria-label="القائمة"
+              >
+                <Menu size={20} />
+              </button>
+              <h1 className="text-xl md:text-2xl font-black text-foreground flex items-center gap-3 m-0">
+                <div className="p-2 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                  {tabs.find((t) => t.id === activeTab)?.icon}
+                </div>
+                <span>{tabs.find((t) => t.id === activeTab)?.label}</span>
+              </h1>
+            </div>
+            <div className="flex items-center gap-3">
+              <a
+                href="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3.5 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 text-xs font-black border border-cyan-500/30 transition-all flex items-center gap-2 no-underline"
+              >
+                <Home size={15} /> العودة للمتجر
+              </a>
+              <button
+                onClick={async () => {
+                  await signOutUser();
+                }}
+                className="p-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 transition-all cursor-pointer"
+                aria-label="خروج"
+              >
+                <LogOut size={16} />
+              </button>
+            </div>
           </div>
-        </div>
 
 
 
@@ -559,8 +514,14 @@ export function SettingsTab() {
     globalUsdDiscountMaxAmount: "0",
     globalUsdDiscountExpiresAt: "",
     sarRateOverride: "13.33",
+    sarDeduction: "0.20",
     sarMinDeposit: "10",
     sarMaxDeposit: "10000",
+    sarDepositFeeMin: "0",
+    sarDepositFeeMax: "0",
+    symbolEgp: "£",
+    symbolSar: "﷼",
+    symbolUsd: "$",
     supportedCountries: ["EG", "SA", "AE", "KW", "QA", "GLOBAL"],
     defaultUiStyle: "glass",
     defaultUiTheme: "cyber",
@@ -583,6 +544,7 @@ export function SettingsTab() {
     fetchAdminData("settings/pricing").then((result) => {
       if (result.exists) {
         const v = result.data;
+        const cs = v.currency_symbols || v.currencySymbols || {};
         if (Array.isArray(v.custom_countries) && v.custom_countries.length > 0) {
           setCustomCountries(v.custom_countries);
         }
@@ -601,8 +563,14 @@ export function SettingsTab() {
           depositFeeMaxEgp: String(v.deposit_fee_max_egp ?? v.depositFeeMaxEgp ?? 20),
           maxWalletBalanceUsd: String(v.max_wallet_balance_usd ?? v.maxWalletBalanceUsd ?? 20000),
           sarRateOverride: String(v.sar_rate_override || "13.33"),
+          sarDeduction: String(v.sar_deduction ?? v.sarDeduction ?? "0.20"),
           sarMinDeposit: String(v.sar_min_deposit || "10"),
           sarMaxDeposit: String(v.sar_max_deposit || "10000"),
+          sarDepositFeeMin: String(v.sar_deposit_fee_min ?? v.sarDepositFeeMin ?? "0"),
+          sarDepositFeeMax: String(v.sar_deposit_fee_max ?? v.sarDepositFeeMax ?? "0"),
+          symbolEgp: cs.egp || cs.EGP || "£",
+          symbolSar: cs.sar || cs.SAR || "﷼",
+          symbolUsd: cs.usd || cs.USD || "$",
           supportedCountries: Array.isArray(v.supported_countries) ? v.supported_countries : ["EG", "SA", "AE", "KW", "QA", "GLOBAL"],
           globalUsdDiscountEnabled: Boolean(v.global_usd_discount_enabled ?? v.globalUsdDiscountEnabled ?? false),
           globalUsdDiscountPercent: String(v.global_usd_discount_percent ?? v.globalUsdDiscountPercent ?? 10),
@@ -686,9 +654,20 @@ export function SettingsTab() {
       global_usd_discount_percent: Number(form.globalUsdDiscountPercent) || 0,
       global_usd_discount_max_amount: Number(form.globalUsdDiscountMaxAmount) || 0,
       global_usd_discount_expires_at: form.globalUsdDiscountExpiresAt || null,
-      sar_rate_override: Number(form.sarRateOverride) || 13.33,
+      sar_deduction: Number(form.sarDeduction) || 0,
+      sarDeduction: Number(form.sarDeduction) || 0,
+      sar_rate_override: Number(form.sarRateOverride) || Math.round((((Number(form.usdRate) || 50.0) / 3.75) - (Number(form.sarDeduction) || 0)) * 100) / 100,
       sar_min_deposit: Number(form.sarMinDeposit) || 10,
       sar_max_deposit: Number(form.sarMaxDeposit) || 10000,
+      sar_deposit_fee_min: Number(form.sarDepositFeeMin) || 0,
+      sarDepositFeeMin: Number(form.sarDepositFeeMin) || 0,
+      sar_deposit_fee_max: Number(form.sarDepositFeeMax) || 0,
+      sarDepositFeeMax: Number(form.sarDepositFeeMax) || 0,
+      currency_symbols: {
+        egp: form.symbolEgp.trim() || "£",
+        sar: form.symbolSar.trim() || "﷼",
+        usd: form.symbolUsd.trim() || "$",
+      },
       supported_countries: form.supportedCountries,
       custom_countries: customCountries,
     };
@@ -741,7 +720,7 @@ export function SettingsTab() {
   };
 
   return (
-    <div style={{ width: "100%" }}>
+    <div style={{ width: "100%" }} className="pb-32">
       <Card title="🛠️ حالة الموقع للمستخدمين">
         <div className={`mb-4 rounded-2xl border p-4 text-center font-bold ${siteEnabled ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-400" : "border-red-500/25 bg-red-500/10 text-red-400"}`}>
           {siteEnabled ? "الموقع يعمل حاليًا للمستخدمين" : "الموقع متوقف حاليًا وتظهر شاشة الصيانة"}
@@ -798,6 +777,44 @@ export function SettingsTab() {
               />
             </div>
           ))}
+        </div>
+
+        <div className="mt-6 pt-4 border-t border-border/50">
+          <h4 className="text-xs font-black text-cyan-400 mb-3 flex items-center gap-2">
+            🔣 التحكم الإداري بخصائص ورموز العملات (Custom Currency Symbols)
+          </h4>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
+            <div>
+              <label style={lbl}>🇪🇬 رمز الجنيه المصري (EGP Symbol)</label>
+              <input
+                type="text"
+                value={form.symbolEgp}
+                onChange={(e) => setForm({ ...form, symbolEgp: e.target.value })}
+                style={inp}
+                placeholder="مثال: £"
+              />
+            </div>
+            <div>
+              <label style={lbl}>🇸🇦 رمز الريال السعودي (SAR Symbol)</label>
+              <input
+                type="text"
+                value={form.symbolSar}
+                onChange={(e) => setForm({ ...form, symbolSar: e.target.value })}
+                style={inp}
+                placeholder="مثال: ﷼"
+              />
+            </div>
+            <div>
+              <label style={lbl}>🇺🇸 رمز الدولار الأمريكي (USD Symbol)</label>
+              <input
+                type="text"
+                value={form.symbolUsd}
+                onChange={(e) => setForm({ ...form, symbolUsd: e.target.value })}
+                style={inp}
+                placeholder="مثال: $"
+              />
+            </div>
+          </div>
         </div>
 
         <div className="mt-6 pt-4 border-t border-border/50">
@@ -968,51 +985,118 @@ export function SettingsTab() {
         </div>
       </Card>
 
-      <Card title="🇸🇦 إعدادات المملكة العربية السعودية (الريال السعودي SAR)">
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-          <div>
-            <label style={lbl}>🇸🇦 سعر الريال مقابل الجنيه (ج.م / 1 ر.س)</label>
-            <input
-              type="number"
-              step="0.01"
-              value={form.sarRateOverride}
-              onChange={(e) => setForm({ ...form, sarRateOverride: e.target.value })}
-              style={inp}
-              placeholder="13.33"
-            />
-          </div>
-          <div>
-            <label style={lbl}>🇸🇦 سعر صرف الدولار بالريال (ر.س / 1$)</label>
-            <input
-              type="number"
-              step="0.01"
-              value="3.75"
-              disabled
-              style={inp}
-            />
-          </div>
-          <div>
-            <label style={lbl}>🔻 الحد الأدنى للشحن بالريال (ر.س)</label>
-            <input
-              type="number"
-              value={form.sarMinDeposit}
-              onChange={(e) => setForm({ ...form, sarMinDeposit: e.target.value })}
-              style={inp}
-              placeholder="10"
-            />
-          </div>
-          <div>
-            <label style={lbl}>🔺 الحد الأقصى للشحن بالريال (ر.س)</label>
-            <input
-              type="number"
-              value={form.sarMaxDeposit}
-              onChange={(e) => setForm({ ...form, sarMaxDeposit: e.target.value })}
-              style={inp}
-              placeholder="10000"
-            />
-          </div>
-        </div>
-      </Card>
+      {(() => {
+        const usdNum = Number(form.usdRate) || 50.0;
+        const googleSarBase = usdNum / 3.75;
+        const sarDeductionNum = Number(form.sarDeduction) || 0;
+        const autoCalculatedSar = Math.max(0.1, googleSarBase - sarDeductionNum);
+
+        return (
+          <Card title="🇸🇦 إعدادات المملكة العربية السعودية والتحكم التلقائي بسعر الريال">
+            <p className="text-xs text-muted-foreground mb-4">
+              اكتب قيمة التخفيض المطلوبة من سعر الريال المرجعي من جوجل، وسيتم حساب وإظهار السعر النهائي التلقائي فورياً للمستخدمين دون حاجة للتعديل اليدوي:
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div>
+                <label style={lbl}>🌐 سعر الريال المرجعي المباشر من جوجل (ج.م / 1 ر.س)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={googleSarBase.toFixed(2)}
+                  disabled
+                  style={{ ...inp, opacity: 0.8, background: "rgba(255,255,255,0.03)", color: "#38bdf8", fontWeight: "bold" }}
+                />
+                <span className="text-[10px] text-muted-foreground mt-1 block">محسوب تلقائياً من سعر الدولار ({usdNum} ج.م ÷ 3.75)</span>
+              </div>
+              <div>
+                <label style={lbl}>🔻 قيمة التخفيض المطلوبة من سعر الريال (ج.م)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={form.sarDeduction}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const deductionVal = Number(val) || 0;
+                    const newAutoSar = Math.max(0.1, googleSarBase - deductionVal);
+                    setForm({ ...form, sarDeduction: val, sarRateOverride: newAutoSar.toFixed(2) });
+                  }}
+                  style={{ ...inp, border: "1px solid #f59e0b", color: "#f59e0b", fontWeight: "bold" }}
+                  placeholder="0.20"
+                />
+                <span className="text-[10px] text-amber-400 mt-1 block">المبلغ الذي ينقص من سعر جوجل لتخفيض الريال للمستخدمين</span>
+              </div>
+              <div>
+                <label style={lbl}>⚡ السعر المباشر النهائي للريال (تلقائي 100%)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={autoCalculatedSar.toFixed(2)}
+                  disabled
+                  style={{ ...inp, opacity: 0.9, background: "rgba(16,185,129,0.1)", border: "1px solid #10b981", color: "#34d399", fontWeight: "bold" }}
+                />
+                <span className="text-[10px] text-emerald-400 mt-1 block">السعر الذي يتم تطبيقه وحسابه فورياً للمستخدمين</span>
+              </div>
+              <div>
+                <label style={lbl}>🇸🇦 سعر صرف الدولار بالريال الثابت (ر.س / 1$)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value="3.75"
+                  disabled
+                  style={{ ...inp, opacity: 0.7 }}
+                />
+              </div>
+              <div>
+                <label style={lbl}>🔻 الحد الأدنى للشحن بالريال (ر.س)</label>
+                <input
+                  type="number"
+                  value={form.sarMinDeposit}
+                  onChange={(e) => setForm({ ...form, sarMinDeposit: e.target.value })}
+                  style={inp}
+                  placeholder="10"
+                />
+              </div>
+              <div>
+                <label style={lbl}>🔻 الحد الأدنى لخصم الرسوم بالريال (ر.س - يدوياً)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={form.sarDepositFeeMin}
+                  onChange={(e) => setForm({ ...form, sarDepositFeeMin: e.target.value })}
+                  style={inp}
+                  placeholder="0 (تلقائي حسب الصرف)"
+                />
+              </div>
+              <div>
+                <label style={lbl}>🔺 الحد الأقصى لخصم الرسوم بالريال (ر.س - يدوياً)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={form.sarDepositFeeMax}
+                  onChange={(e) => setForm({ ...form, sarDepositFeeMax: e.target.value })}
+                  style={inp}
+                  placeholder="0 (تلقائي حسب الصرف)"
+                />
+              </div>
+              <div className="col-span-2 p-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 flex flex-wrap items-center justify-between gap-3 mt-1">
+                <div>
+                  <span className="text-xs text-muted-foreground block font-extrabold text-emerald-400">
+                    🟢 السعر النهائي المحسوب والفعلي للريال في الموقع حالياً:
+                  </span>
+                  <strong className="text-2xl text-emerald-300 font-mono font-black mt-1 block">
+                    {autoCalculatedSar.toFixed(2)} ج.م / 1 ر.س
+                  </strong>
+                </div>
+                <div className="text-xs text-slate-300 bg-slate-900/80 px-3.5 py-2 rounded-xl border border-slate-700">
+                  <span>سعر جوجل المرجعي: <strong>{googleSarBase.toFixed(2)} ج.م</strong></span>
+                  <span className="mx-2 text-amber-400"> - </span>
+                  <span>قيمة التخفيض: <strong>{sarDeductionNum.toFixed(2)} ج.م</strong></span>
+                </div>
+              </div>
+            </div>
+          </Card>
+        );
+      })()}
 
       <Card
         title="🌍 إدارة الدول وطرق الدفع والعملات المخصصة (Country Manager)"
@@ -1333,13 +1417,11 @@ export function PricingTab() {
         </div>
         <div style="width: 100%; height: 340px; background: #070d18; color: #4ade80; border: 1px solid #1e293b; border-radius: 12px; padding: 12px; font-family: monospace; font-size: 13px; direction: rtl; text-align: right; white-space: pre-wrap; line-height: 1.6; overflow-y: auto;">${htmlWithFeePreview}</div>
       `,
-      showCancelButton: true,
+      showCancelButton: false,
       confirmButtonText: "📋 نسخ القائمة الحالية للحافظة",
-      cancelButtonText: "إغلاق",
       background: "#0c1322",
       color: "#fff",
       confirmButtonColor: "#38bdf8",
-      cancelButtonColor: "#475569",
     });
 
     if (isConfirmed) {
@@ -1358,7 +1440,7 @@ export function PricingTab() {
   };
 
   return (
-    <div style={{ width: "100%" }}>
+    <div style={{ width: "100%" }} className="pb-32">
     <Card
       title="📊 شرائح أسعار تيك توك"
       action={
@@ -1594,12 +1676,24 @@ export function WalletsTab() {
   });
 
   return (
+    <div className="pb-32">
     <Card
       title="💳 المحافظ وحسابات البنوك حسب الدولة"
       action={
-        <button onClick={add} style={addBtn}>
-          <Plus size={14} /> إضافة حساب جديد
-        </button>
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={save}
+            disabled={busy}
+            className="px-4 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-black text-xs transition-all shadow-lg shadow-cyan-500/20 active:scale-95 cursor-pointer flex items-center gap-1.5"
+          >
+            <Save size={14} />
+            <span>{busy ? "جاري الحفظ..." : "💾 حفظ التغييرات"}</span>
+          </button>
+          <button onClick={add} style={addBtn}>
+            <Plus size={14} /> إضافة حساب جديد
+          </button>
+        </div>
       }
     >
       <div className="flex items-center gap-2 mb-4 flex-wrap">
@@ -1636,33 +1730,43 @@ export function WalletsTab() {
             borderRadius: 8,
           }}
         >
-          <select
+          <GenericCustomSelect
             value={w.countryCode || (w.type === "barq" ? "SA" : w.type === "bank" ? "GLOBAL" : "EG")}
-            onChange={(e) => upd(actualIndex, "countryCode", e.target.value)}
-            style={{ ...inp, minWidth: 140, background: "#111827", color: "#38bdf8", fontWeight: "bold" }}
-          >
-            {availableCountries.map((c) => (
-              <option key={c.id} value={c.id} style={{ color: "#000" }}>
-                {c.label}
-              </option>
-            ))}
-          </select>
+            title="اختر الدولة المتاحة"
+            options={availableCountries.map((c) => ({ value: c.id, label: c.label }))}
+            onChange={(val) => upd(actualIndex, "countryCode", val)}
+            className="w-48 shrink-0"
+          />
 
-          <select
+          <GenericCustomSelect
             value={w.type || "vodafone"}
-            onChange={(e) => upd(actualIndex, "type", e.target.value)}
-            style={{ ...inp, flex: 1, minWidth: 120 }}
-          >
-            <option value="vodafone" style={{ color: "#000" }}>فودافون كاش / محافظ</option>
-            <option value="instapay" style={{ color: "#000" }}>انستاباي (InstaPay)</option>
-            <option value="barq" style={{ color: "#000" }}>برق (Barq - السعودية)</option>
-            <option value="bank" style={{ color: "#000" }}>حساب بنكي (Bank Transfer)</option>
-          </select>
+            title="اختر وسيلة الدفع"
+            options={[
+              { value: "vodafone", label: "فودافون كاش / محفظه الكترونية" },
+              { value: "instapay", label: "انستاباي (InstaPay)" },
+              { value: "barq", label: "برق (Barq - السعودية)" },
+              { value: "bank", label: "حساب بنكي (Bank Transfer)" },
+              { value: "custom", label: "➕ طريقة دفع مخصصة جديدة" },
+            ]}
+            onChange={(val) => upd(actualIndex, "type", val)}
+            className="flex-1 min-w-[180px]"
+          />
+          {w.type === "custom" && (
+            <input
+              value={w.customName || w.title || ""}
+              onChange={(e) => {
+                upd(actualIndex, "customName", e.target.value);
+                upd(actualIndex, "title", e.target.value);
+              }}
+              style={{ ...inp, flex: 2, minWidth: 160, border: "1px solid #38bdf8", color: "#38bdf8", fontWeight: "bold" }}
+              placeholder="اسم طريقة الدفع (مثال: STC Pay / زين كاش)"
+            />
+          )}
           <input
             value={w.number}
             onChange={(e) => upd(actualIndex, "number", e.target.value)}
             style={{ ...inp, flex: 2, minWidth: w.type === "bank" ? 150 : 180 }}
-            placeholder={w.type === "bank" ? "رقم الحساب" : w.type === "instapay" ? "رقم الهاتف / الحساب" : "الرقم / اليوزر"}
+            placeholder={w.type === "bank" ? "رقم الحساب" : w.type === "instapay" ? "رقم الهاتف / الحساب" : "الرقم / الحساب / التتعليمات"}
             dir="ltr"
           />
           {w.type === "instapay" && (
@@ -1713,7 +1817,7 @@ export function WalletsTab() {
               dir="ltr"
             />
           )}
-          {w.type === "instapay" && (
+          {(w.type === "instapay" || w.type === "vodafone" || w.type === "custom") && (
             <div style={{ display: "flex", gap: 6, alignItems: "center", minWidth: 180, flex: 2 }}>
               <input
                 type="text"
@@ -1814,8 +1918,10 @@ export function WalletsTab() {
         </div>
       );
       })}
+      <FloatingAddButton onClick={add} label="إضافة طريقة دفع / محفظة جديدة ➕" />
       <FloatingSaveBar onClick={save} busy={busy} label="حفظ المحافظ ووسائل الإيداع" msg={msg} />
     </Card>
+    </div>
   );
 }
 
@@ -2495,7 +2601,7 @@ export function OrdersTab() {
         setOrders((previous) => previous.map((order) => (
           order.id === id ? { ...order, ...updateData, ...savedUpdate } : order
         )));
-        Swal.fire({ title: 'تم!', text: 'تم إرسال البيانات للمستخدم بنجاح.', icon: 'success', background: '#1a1a1a', color: '#fff' });
+        toast.success("تم إرسال البيانات للمستخدم بنجاح 💾");
         await notifyOrderUser(id, currentOrder?.user_email, "provide_link", currentOrder?.service_name || "خدمة");
       } else {
         Swal.fire({ title: 'خطأ', text: 'لم تقم بإدخال رابط أو رفع صورة!', icon: 'error', background: '#1a1a1a', color: '#fff' });
@@ -2610,7 +2716,7 @@ export function OrdersTab() {
               }
             : o
         )));
-        Swal.fire({ title: "تم!", text: "تم رفض الطلب بنجاح", icon: "success", background: "#111", color: "#fff" });
+        toast.success("تم رفض الطلب بنجاح 💾");
         await notifyOrderUser(id, currentOrder?.user_email, "rejected", currentOrder?.service_name || "خدمة");
       } catch (networkErr: any) {
         const msg = typeof networkErr?.message === "string" ? networkErr.message : "تعذر رفض الطلب";
@@ -2709,17 +2815,19 @@ export function OrdersTab() {
             }}
           />
         </div>
-        <select
+        <GenericCustomSelect
           value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          style={{ ...inp, width: 130, cursor: "pointer" }}
-        >
-          <option value="all" style={{ color: "#000" }}>الكل</option>
-          <option value="pending" style={{ color: "#000" }}>معلق</option>
-          <option value="pending_action" style={{ color: "#000" }}>بانتظار إجراء</option>
-          <option value="completed" style={{ color: "#000" }}>مكتمل</option>
-          <option value="rejected" style={{ color: "#000" }}>مرفوض</option>
-        </select>
+          title="تصفية الطلبات"
+          options={[
+            { value: "all", label: "الكل" },
+            { value: "pending", label: "معلق" },
+            { value: "pending_action", label: "بانتظار إجراء" },
+            { value: "completed", label: "مكتمل" },
+            { value: "rejected", label: "مرفوض" },
+          ]}
+          onChange={(val) => setFilter(val)}
+          className="w-36 shrink-0"
+        />
         <button onClick={() => setRefresh((r) => r + 1)} style={btnSm}>
           <RefreshCw size={14} />
         </button>
@@ -4199,6 +4307,7 @@ function TonPriceTrackerCard({ usdRate }: { usdRate: number }) {
           });
         })()}
 
+        <FloatingAddButton onClick={() => addManualPackage()} label="إضافة باقة جديدة ➕" />
         <FloatingSaveBar onClick={save} busy={busy} label="حفظ الخدمات اليدوية والباقات" msg={msg} />
       </Card>
     </div>
@@ -4217,9 +4326,9 @@ function Card({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="bg-card border border-border p-6 md:p-8 rounded-2xl mb-6 shadow-sm overflow-hidden">
-      <div className="flex justify-between items-center mb-6 border-b border-border/50 pb-4">
-        <h3 className="text-primary m-0 text-lg md:text-xl font-bold flex items-center gap-2">
+    <div className="bg-slate-950/90 border border-cyan-500/25 p-6 md:p-8 rounded-3xl mb-7 shadow-2xl backdrop-blur-2xl overflow-hidden transition-all hover:border-cyan-500/40">
+      <div className="flex justify-between items-center mb-6 border-b border-slate-800/80 pb-4">
+        <h3 className="text-cyan-400 m-0 text-lg md:text-xl font-extrabold flex items-center gap-2.5">
           {title}
         </h3>
         {action}
@@ -4229,10 +4338,20 @@ function Card({
   );
 }
 
+export function FloatingAddButton({
+  onClick,
+  label = "إضافة جديدة ➕",
+}: {
+  onClick: () => void;
+  label?: string;
+}) {
+  return null;
+}
+
 export function FloatingSaveBar({
   onClick,
   busy,
-  label = "حفظ التغييرات",
+  label = "حفظ جميع الإعدادات 💾",
   msg = "",
 }: {
   onClick: () => void;
@@ -4240,22 +4359,26 @@ export function FloatingSaveBar({
   label?: string;
   msg?: string;
 }) {
+  useEffect(() => {
+    if (!msg) return;
+    if (msg.includes("❌")) {
+      toast.error(msg);
+    } else {
+      toast.success(msg);
+    }
+  }, [msg]);
+
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center gap-2.5 max-w-md w-[92%] sm:w-auto transition-all duration-300 pointer-events-auto">
-      {msg && (
-        <div className={`px-4 py-2.5 rounded-2xl text-xs font-black shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-bottom-3 flex items-center gap-2 border ${
-          msg.includes("❌")
-            ? "bg-slate-950/95 text-red-400 border-red-500/40 shadow-red-950/50"
-            : "bg-slate-950/95 text-emerald-400 border-emerald-500/40 shadow-emerald-950/50"
-        }`}>
-          {msg}
-        </div>
-      )}
+    <div className="sticky top-2 z-[999] my-4 w-full rounded-2xl border border-amber-500/30 bg-[#0a0f1d]/95 p-3.5 px-6 shadow-2xl backdrop-blur-2xl flex items-center justify-between gap-4 flex-wrap">
+      <div className="flex items-center gap-2.5 text-white font-bold text-sm">
+        <span className="h-3 w-3 rounded-full bg-amber-400 animate-pulse" />
+        <span>هل انتهيت من التعديلات؟ لا تنس الحفظ</span>
+      </div>
       <button
         type="button"
         onClick={onClick}
         disabled={busy}
-        className="w-full sm:w-auto min-w-[280px] h-14 px-8 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 text-slate-950 font-black text-base shadow-2xl shadow-emerald-500/40 hover:brightness-110 hover:scale-[1.02] active:scale-95 transition-all duration-300 flex items-center justify-center gap-3 border border-emerald-300/50 backdrop-blur-md cursor-pointer disabled:opacity-50"
+        className="h-12 px-7 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 text-slate-950 font-black text-sm md:text-base shadow-xl shadow-amber-500/25 hover:brightness-110 hover:scale-[1.02] active:scale-95 transition-all duration-200 flex items-center justify-center gap-2.5 border border-amber-300/50 cursor-pointer disabled:opacity-50"
       >
         <Save size={20} className={busy ? "animate-spin" : ""} />
         <span>{busy ? "جاري الحفظ..." : label}</span>
@@ -4274,11 +4397,11 @@ function StatusMsg({ msg }: { msg: string }) {
 }
 
 const inp: React.CSSProperties = {
-  padding: 14,
-  borderRadius: 12,
-  border: "1px solid hsl(var(--border))",
-  background: "hsl(var(--input))",
-  color: "hsl(var(--foreground))",
+  padding: "14px 16px",
+  borderRadius: "14px",
+  border: "1px solid rgba(245, 158, 11, 0.25)",
+  background: "#060a12",
+  color: "#ffffff",
   outline: "none",
   fontSize: 15,
   boxSizing: "border-box",
@@ -4288,18 +4411,18 @@ const inp: React.CSSProperties = {
 const lbl: React.CSSProperties = {
   display: "block",
   marginBottom: 8,
-  color: "hsl(var(--muted-foreground))",
+  color: "rgba(255, 255, 255, 0.75)",
   fontSize: 14,
-  fontWeight: 600,
+  fontWeight: 700,
 };
 const saveBtn: React.CSSProperties = {
   width: "100%",
-  padding: 14,
-  borderRadius: 12,
-  background: "hsl(var(--primary))",
-  color: "hsl(var(--primary-foreground))",
-  border: "none",
-  fontWeight: 700,
+  padding: "14px 28px",
+  borderRadius: 16,
+  background: "linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%)",
+  color: "#000000",
+  border: "1px solid rgba(254, 240, 138, 0.4)",
+  fontWeight: 900,
   fontSize: 15,
   cursor: "pointer",
   display: "flex",
@@ -4307,49 +4430,57 @@ const saveBtn: React.CSSProperties = {
   justifyContent: "center",
   gap: 8,
   marginTop: 4,
+  boxShadow: "0 10px 25px -5px rgba(245, 158, 11, 0.35)",
+  transition: "all 0.2s ease-in-out",
 };
 const addBtn: React.CSSProperties = {
-  padding: "8px 16px",
-  borderRadius: 10,
-  background: "hsl(var(--primary))",
-  color: "hsl(var(--primary-foreground))",
-  border: "none",
+  padding: "12px 24px",
+  borderRadius: 16,
+  background: "linear-gradient(135deg, #fbbf24 0%, #d97706 100%)",
+  color: "#000000",
+  border: "1px solid rgba(254, 240, 138, 0.3)",
   cursor: "pointer",
   display: "flex",
   alignItems: "center",
-  gap: 6,
+  gap: 8,
   fontSize: 14,
-  fontWeight: 700,
+  fontWeight: 900,
+  boxShadow: "0 8px 20px -4px rgba(245, 158, 11, 0.35)",
+  transition: "all 0.2s ease-in-out",
 };
 const delBtn: React.CSSProperties = {
-  padding: "6px 10px",
-  borderRadius: 8,
-  background: "rgba(239, 68, 68, 0.1)",
-  color: "hsl(var(--destructive))",
-  border: "1px solid rgba(239, 68, 68, 0.2)",
+  padding: "10px 18px",
+  borderRadius: 14,
+  background: "rgba(239, 68, 68, 0.12)",
+  color: "#f87171",
+  border: "1px solid rgba(239, 68, 68, 0.3)",
   cursor: "pointer",
-  fontWeight: 600,
+  fontWeight: 700,
   fontSize: 13,
+  transition: "all 0.2s",
 };
 const btnSm: React.CSSProperties = {
-  padding: "8px 14px",
-  borderRadius: 10,
-  background: "hsl(var(--background))",
-  color: "hsl(var(--foreground))",
-  border: "1px solid hsl(var(--border))",
+  padding: "12px 20px",
+  borderRadius: 14,
+  background: "#0a0f1d",
+  color: "#ffffff",
+  border: "1px solid rgba(245, 158, 11, 0.3)",
   cursor: "pointer",
-  fontSize: 13,
+  fontSize: 14,
+  fontWeight: 700,
   display: "flex",
   alignItems: "center",
-  gap: 6,
+  gap: 8,
+  transition: "all 0.2s",
 };
 const actionBtn: React.CSSProperties = {
-  padding: "6px 12px",
-  borderRadius: 8,
-  background: "rgba(255,255,255,0.05)",
-  color: "hsl(var(--muted-foreground))",
-  border: "1px solid hsl(var(--border))",
+  padding: "10px 18px",
+  borderRadius: 14,
+  background: "rgba(56, 189, 248, 0.12)",
+  color: "#38bdf8",
+  border: "1px solid rgba(56, 189, 248, 0.3)",
   cursor: "pointer",
+  fontWeight: 700,
   fontSize: 13,
 };
 
@@ -4464,7 +4595,7 @@ export function SmsReviewTab() {
       const result = await res.json().catch(() => ({}));
       if (!res.ok || !result.success) throw new Error(result.error || "تعذر تجاهل الرسالة");
       setSmsList((prev) => prev.filter((s) => s.id !== smsId));
-      await Swal.fire({ icon: "success", title: "تم التجاهل", timer: 1500, showConfirmButton: false, background: "#111", color: "#fff" });
+      toast.success("تم التجاهل 💾");
     } catch (err) {
       await Swal.fire({ icon: "error", title: "خطأ", text: err instanceof Error ? err.message : "حدث خطأ", background: "#111", color: "#fff" });
     } finally {
@@ -4503,7 +4634,7 @@ export function SmsReviewTab() {
       setPendingRecharges((prev) => prev.filter((r) => r.id !== selectedRechargeId));
       setSelectedSms(null);
       setSelectedRechargeId("");
-      await Swal.fire({ icon: "success", title: "تم إضافة الرصيد بنجاح ✅", timer: 2000, showConfirmButton: false, background: "#111", color: "#fff" });
+      toast.success("تم إضافة الرصيد بنجاح ✅");
     } catch (err) {
       await Swal.fire({ icon: "error", title: "خطأ في التنفيذ", text: err instanceof Error ? err.message : "حدث خطأ", background: "#111", color: "#fff" });
     } finally {
@@ -4786,14 +4917,7 @@ export function RechargesTab() {
       setRecharges((current) => current.map((item) =>
         item.id === req.id ? { ...item, status: "approved", paymentStatus: "verified" } : item
       ));
-      await Swal.fire({
-        icon: "success",
-        title: "تمت إضافة الرصيد بنجاح ✅",
-        timer: 1800,
-        showConfirmButton: false,
-        background: "#111",
-        color: "#fff",
-      });
+      toast.success("تمت إضافة الرصيد بنجاح ✅");
     } catch (error) {
       await Swal.fire({
         icon: "error",

@@ -17,6 +17,7 @@ import AppShell from "../../../../app/components/layout/AppShell";
 import { toast } from "sonner";
 import Link from "next/link";
 import { isolateLtr } from "../../../lib/bidi";
+import CustomWalletSelect from "@/app/components/CustomWalletSelect";
 
 const tn = (s: string) =>
   s
@@ -106,12 +107,10 @@ export default function OrderPayPage({ params }: { params: Promise<{ id: string 
 
           const countryCode = user?.country_code || "EG";
           let relevantTypes: string[] = [];
-          if (userPrefList && Array.isArray(userPrefList) && userPrefList.length > 0) {
-            relevantTypes = userPrefList;
-          } else if (countryCode === "SA") {
-            relevantTypes = isMobilePhone ? ["bank"] : ["barq", "bank"];
+          if (countryCode === "SA") {
+            relevantTypes = ["barq", "bank"];
           } else {
-            relevantTypes = isMobilePhone ? ["vodafone", "bank"] : ["instapay", "vodafone", "bank"];
+            relevantTypes = ["instapay", "vodafone", "bank"];
           }
 
           const randomizedWallets: any[] = [];
@@ -506,20 +505,11 @@ export default function OrderPayPage({ params }: { params: Promise<{ id: string 
                         name="walletType"
                         render={({ field }: any) => (
                           <FormItem>
-                            <select
-                              {...field}
-                              className="w-full p-4 rounded-xl bg-[#111] border-[#333] text-white outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all cursor-pointer shadow-sm [&>option]:bg-[#111] [&>option]:text-white"
-                            >
-                              <option value="" disabled>اختر طريقة الدفع</option>
-                              {wallets.map((w, i) => (
-                                <option key={i} value={w.type} disabled={w.disabled}>
-                                  {w.type === "vodafone" && (w.disabled ? "فودافون كاش / محافظ (غير متاح حالياً)" : "فودافون كاش / محافظ")}
-                                  {w.type === "instapay" && (w.disabled ? "انستاباي (غير متاح حالياً)" : "انستاباي")}
-                                  {w.type === "barq" && (w.disabled ? "برق (غير متاح حالياً)" : "برق")}
-                                  {w.type === "bank" && (w.disabled ? "حساب بنكي (غير متاح حالياً)" : "حساب بنكي")}
-                                </option>
-                              ))}
-                            </select>
+                            <CustomWalletSelect
+                              value={field.value}
+                              onChange={field.onChange}
+                              options={wallets}
+                            />
                             <FormMessage />
                           </FormItem>
                         )}
@@ -558,9 +548,10 @@ export default function OrderPayPage({ params }: { params: Promise<{ id: string 
                                   <button
                                     type="button"
                                     onClick={() => copyToClipboard(selectedWallet.number)}
-                                    className="rounded-lg bg-primary/10 hover:bg-primary/20 px-3 py-1.5 text-primary border border-primary/20 text-xs font-bold transition-all"
+                                    className="rounded-lg bg-primary/10 hover:bg-primary/20 p-2 text-primary border border-primary/20 transition-all shrink-0 cursor-pointer"
+                                    aria-label="نسخ"
                                   >
-                                    نسخ
+                                    <Copy size={16} />
                                   </button>
                                 </div>
                               )}
@@ -573,9 +564,10 @@ export default function OrderPayPage({ params }: { params: Promise<{ id: string 
                                   <button
                                     type="button"
                                     onClick={() => copyToClipboard(selectedWallet.link)}
-                                    className="rounded-lg bg-primary/10 hover:bg-primary/20 px-3 py-1.5 text-primary border border-primary/20 text-xs font-bold transition-all"
+                                    className="rounded-lg bg-primary/10 hover:bg-primary/20 p-2 text-primary border border-primary/20 transition-all shrink-0 cursor-pointer"
+                                    aria-label="نسخ"
                                   >
-                                    نسخ
+                                    <Copy size={16} />
                                   </button>
                                 </div>
                               )}
@@ -588,9 +580,10 @@ export default function OrderPayPage({ params }: { params: Promise<{ id: string 
                                   <button
                                     type="button"
                                     onClick={() => copyToClipboard(selectedWallet.swift)}
-                                    className="rounded-lg bg-primary/10 hover:bg-primary/20 px-3 py-1.5 text-primary border border-primary/20 text-xs font-bold transition-all"
+                                    className="rounded-lg bg-primary/10 hover:bg-primary/20 p-2 text-primary border border-primary/20 transition-all shrink-0 cursor-pointer"
+                                    aria-label="نسخ"
                                   >
-                                    نسخ
+                                    <Copy size={16} />
                                   </button>
                                 </div>
                               )}
@@ -628,11 +621,22 @@ export default function OrderPayPage({ params }: { params: Promise<{ id: string 
                               
                               {/* Manual copy box hidden for InstaPay per user request */}
                               
-                              {selectedWallet.name && (
-                                <div className="flex items-center gap-2 text-muted-foreground text-sm bg-background/50 p-3 rounded-lg w-fit">
-                                  <Info size={16} className="text-primary" /> باسم: <strong className="text-foreground">{selectedWallet.name}</strong>
-                                </div>
-                              )}
+                              {(selectedWallet.name || selectedWallet.holderName) && (() => {
+                                const holderStr = selectedWallet.holderName || selectedWallet.name;
+                                return (
+                                  <div className="flex items-center justify-between gap-3 text-sm bg-background/80 p-3.5 rounded-xl border border-border/80 w-full shadow-sm">
+                                    <strong className="text-foreground font-black text-base">{holderStr}</strong>
+                                    <button
+                                      type="button"
+                                      onClick={() => copyToClipboard(holderStr)}
+                                      className="rounded-lg bg-primary/10 hover:bg-primary/20 p-2 text-primary border border-primary/20 transition-all shrink-0 cursor-pointer"
+                                      aria-label="نسخ"
+                                    >
+                                      <Copy size={16} />
+                                    </button>
+                                  </div>
+                                );
+                              })()}
                             </div>
                           ) : (
                             <>
@@ -646,20 +650,31 @@ export default function OrderPayPage({ params }: { params: Promise<{ id: string 
                                 <button 
                                   type="button"
                                   onClick={() => copyToClipboard(selectedWallet.number)}
-                                  className={`text-primary hover:text-primary-foreground hover:bg-primary px-4 py-2 rounded-lg flex items-center justify-center gap-2 border border-primary/30 cursor-pointer transition-all duration-300 bg-primary/10 ${
+                                  className={`p-3 rounded-lg flex items-center justify-center border border-primary/30 cursor-pointer transition-all duration-300 bg-primary/10 text-primary hover:bg-primary/20 shrink-0 ${
                                     copied === selectedWallet.number ? "scale-105 border-emerald-500/40 text-emerald-400" : ""
                                   }`}
+                                  aria-label="نسخ"
                                 >
                                   {copied === selectedWallet.number ? <CheckCircle size={18} className="animate-bounce" /> : <Copy size={18} />}
-                                  {copied === selectedWallet.number ? "تم النسخ" : "نسخ"}
                                 </button>
                               </div>
 
-                              {selectedWallet.name && (
-                                <div className="flex items-center gap-2 text-muted-foreground text-sm bg-background/50 p-3 rounded-lg w-fit">
-                                  <Info size={16} className="text-primary" /> باسم: <strong className="text-foreground">{selectedWallet.name}</strong>
-                                </div>
-                              )}
+                              {(selectedWallet.name || selectedWallet.holderName) && (() => {
+                                const holderStr = selectedWallet.holderName || selectedWallet.name;
+                                return (
+                                  <div className="flex items-center justify-between gap-3 text-sm bg-background/80 p-3.5 rounded-xl border border-border/80 w-full shadow-sm mt-2">
+                                    <strong className="text-foreground font-black text-base">{holderStr}</strong>
+                                    <button
+                                      type="button"
+                                      onClick={() => copyToClipboard(holderStr)}
+                                      className="rounded-lg bg-primary/10 hover:bg-primary/20 p-2 text-primary border border-primary/20 transition-all shrink-0 cursor-pointer"
+                                      aria-label="نسخ"
+                                    >
+                                      <Copy size={16} />
+                                    </button>
+                                  </div>
+                                );
+                              })()}
                             </>
                           )}
                         </div>
@@ -672,7 +687,7 @@ export default function OrderPayPage({ params }: { params: Promise<{ id: string 
                       <div className="flex justify-center pt-2 w-full">
                         <a
                           href={`https://wa.me/201206126529?text=${encodeURIComponent(
-                            `السلام عليكم، قمت بطلب الرقم #${order?.id || ""} بقيمة ${Number(order?.totalPayableEgp).toFixed(2)} ج.م وأريد تأكيد التحويل البنكي.`
+                            `السلام عليكم، قمت بطلب الرقم #${order?.id || ""} بقيمة ${Number(order?.totalPayableEgp).toFixed(2)} EGP وأريد تأكيد التحويل البنكي.`
                           )}`}
                           target="_blank"
                           rel="noreferrer"

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, BadgeCheck, Bell, Boxes, Check, ChevronLeft, Gamepad2, PackageCheck, ShoppingBag, Sparkles, WalletCards, Zap } from "lucide-react";
+import { ArrowLeft, BadgeCheck, Bell, Boxes, Check, ChevronLeft, Gamepad2, PackageCheck, ShoppingBag, Sparkles, Wallet, WalletCards, Zap } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "../lib/auth-context";
 
@@ -91,11 +91,8 @@ export default function LandingPage() {
               اشحن تيك توك والألعاب واطلب خدمات السوشيال من لوحة واحدة، بسعر واضح ومتابعة مباشرة من الدفع حتى اكتمال التنفيذ.
             </p>
             <div className="flex flex-col gap-3.5 sm:flex-row">
-              <Link href="/tiktok" className="inline-flex h-14 items-center justify-center gap-3 rounded-2xl bg-primary px-7 font-black text-[#031018] shadow-[0_14px_35px_rgba(6,182,212,.22)] transition hover:-translate-y-1 hover:bg-cyan-300">
-                تصفح الخدمات <ArrowLeft size={19} />
-              </Link>
-              <Link href="/account" className="inline-flex h-14 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.045] px-7 font-bold text-white transition hover:border-primary/30 hover:bg-white/[0.08]">
-                <PackageCheck size={18} /> متابعة طلب
+              <Link href="/recharge" className="inline-flex h-14 items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-400 px-8 font-black text-slate-950 shadow-[0_14px_35px_rgba(245,158,11,.25)] transition hover:-translate-y-1 hover:brightness-110 active:scale-95 cursor-pointer text-base">
+                <Wallet size={20} className="fill-slate-950" /> ⚡ شحن الرصيد
               </Link>
             </div>
             <div className="flex flex-wrap gap-x-7 gap-y-3.5 pt-1 text-xs font-semibold text-slate-400">

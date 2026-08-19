@@ -16,12 +16,25 @@ export default function PaymentSetupModal() {
   useEffect(() => {
     if (loading || !user) return;
     
+    const userCountry = user.country_code || "EG";
+    const lastCountry = typeof window !== "undefined" ? localStorage.getItem("last_configured_country") : null;
+
+    // If user changed country, reset payment preferences for the new country!
+    if (lastCountry && lastCountry !== userCountry) {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("payment_configured_permanently");
+        localStorage.setItem("last_configured_country", userCountry);
+      }
+    } else if (typeof window !== "undefined" && !lastCountry) {
+      localStorage.setItem("last_configured_country", userCountry);
+    }
+
     // Check both profile AND client localStorage memory
     const isLocallySaved = typeof window !== "undefined" && localStorage.getItem("payment_configured_permanently") === "true";
-    const hasConfigured = isLocallySaved || Boolean(user.payment_methods_configured || user.preferred_payment_methods);
+    const hasConfigured = isLocallySaved && (lastCountry === userCountry);
     
     if (!hasConfigured) {
-      if (user.country_code === "SA") {
+      if (userCountry === "SA") {
         setSelectedMethods(["barq", "bank"]);
       } else {
         setSelectedMethods(["vodafone", "bank"]);
