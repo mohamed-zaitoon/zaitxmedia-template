@@ -22,6 +22,7 @@ import {
   getManualServicePriceUsd,
 } from "@/lib/pricing/manual-service";
 import { isGlobalUsdDiscountActive } from "@/lib/pricing/pricing-discount";
+import { grossDepositRequiredForNet, getMethodFeePercent } from "@/lib/money/wallet";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
 
@@ -756,26 +757,58 @@ export default function ServicesPanel({
                   </div>
                 )}
 
-                <div
-                  className="bg-gradient-to-r from-slate-900/90 via-slate-900/60 to-slate-900/90 p-5 px-6 py-4.5 rounded-2xl mb-6 border flex justify-between items-center shadow-xl backdrop-blur-xl my-6"
-                  style={{ borderColor: `${tabInfo?.color || 'var(--primary)'}45` }}
-                >
-                  <span className="text-muted-foreground font-semibold text-base px-1">السعر الإجمالي:</span>
-                  <div className="flex items-center gap-3">
-                    {originalFinalPrice > finalPrice && (
-                      <span className="text-sm text-red-400 line-through opacity-70 font-mono" dir="ltr">
-                        {convertPrice(originalFinalPrice).formatted}
-                      </span>
-                    )}
-                    <strong
-                      className="text-2xl font-black font-mono px-2 tracking-wide inline-flex items-center gap-1.5"
-                      dir="ltr"
-                      style={{ color: tabInfo?.color || 'var(--primary)' }}
-                    >
-                      <span>{convertPrice(finalPrice).amount.toFixed(2)}</span>
-                      <span>{convertPrice(finalPrice).symbol}</span>
-                    </strong>
+                <div className="flex flex-col gap-3 my-6">
+                  {/* السعر الإجمالي */}
+                  <div
+                    className="bg-gradient-to-r from-slate-900/90 via-slate-900/60 to-slate-900/90 p-4 px-6 rounded-2xl border flex justify-between items-center shadow-xl backdrop-blur-xl"
+                    style={{ borderColor: `${tabInfo?.color || 'var(--primary)'}45` }}
+                  >
+                    <span className="text-slate-300 font-extrabold text-sm md:text-base px-1">💵 السعر الإجمالي:</span>
+                    <div className="flex items-center gap-3">
+                      {originalFinalPrice > finalPrice && (
+                        <span className="text-sm text-red-400 line-through opacity-70 font-mono" dir="ltr">
+                          {convertPrice(originalFinalPrice).formatted}
+                        </span>
+                      )}
+                      <strong
+                        className="text-xl md:text-2xl font-black font-mono px-2 tracking-wide inline-flex items-center gap-1.5"
+                        dir="ltr"
+                        style={{ color: tabInfo?.color || 'var(--primary)' }}
+                      >
+                        <span>{convertPrice(finalPrice).amount.toFixed(2)}</span>
+                        <span>{convertPrice(finalPrice).symbol}</span>
+                      </strong>
+                    </div>
                   </div>
+
+                  {/* السعر برسوم الإيداع */}
+                  {finalPrice > 0 && (
+                    <div className="bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-slate-900/80 p-4 px-6 rounded-2xl border border-amber-500/35 flex justify-between items-center shadow-lg backdrop-blur-xl">
+                      <span className="text-amber-400 font-extrabold text-xs md:text-sm flex items-center gap-1.5">
+                        💳 السعر برسوم الإيداع =
+                      </span>
+                      <strong className="text-lg md:text-xl font-black font-mono text-amber-300 tracking-wide inline-flex items-center gap-1.5" dir="ltr">
+                        <span>
+                          {convertPrice(
+                            grossDepositRequiredForNet(
+                              finalPrice,
+                              getMethodFeePercent("wallet", siteSettings),
+                              2
+                            )
+                          ).amount.toFixed(2)}
+                        </span>
+                        <span>
+                          {convertPrice(
+                            grossDepositRequiredForNet(
+                              finalPrice,
+                              getMethodFeePercent("wallet", siteSettings),
+                              2
+                            )
+                          ).symbol}
+                        </span>
+                      </strong>
+                    </div>
+                  )}
                 </div>
 
                 <div className="mt-4 px-1">

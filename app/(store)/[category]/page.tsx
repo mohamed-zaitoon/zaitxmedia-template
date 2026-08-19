@@ -8,6 +8,7 @@ import { Boxes, Gamepad2 } from "lucide-react";
 import { motion } from "framer-motion";
 import ServicesPanel from "../../ServicesPanel";
 import CheckoutModal from "../../components/CheckoutModal";
+import { grossDepositRequiredForNet, getMethodFeePercent } from "@/lib/money/wallet";
 import { db } from "../../lib/firebase";
 import {
   doc,
@@ -147,6 +148,7 @@ export default function CategoryPage() {
   const [tiers, setTiers] = useState<any[]>([]);
   const [manual, setManual] = useState<any[]>([]);
   const [manualSvcs, setManualSvcs] = useState<any>({});
+  const [pricingSettings, setPricingSettings] = useState<any>(null);
   const [globalDiscountConfig, setGlobalDiscountConfig] = useState<{ enabled: boolean; discountPercent: number; maxDiscountUsd?: number; expiresAt?: string | null }>({ enabled: false, discountPercent: 0, expiresAt: null });
   const [loaded, setLoaded] = useState(false);
   const [coins, setC] = useState("");
@@ -163,6 +165,7 @@ export default function CategoryPage() {
     const applyPricing = (s: any) => {
       if (s.exists()) {
         const v = s.data();
+        setPricingSettings(v);
         setMin(v.tiktok_min_coins || 30);
         setMax(v.tiktok_max_coins || 2500000);
         setSmmRate(v.smm_usd_rate || 50);
@@ -529,16 +532,25 @@ export default function CategoryPage() {
                       </div>
                     )}
                     {price && Number(price) > 0 && (
-                      <div style={{ fontSize: 14, color: "#38bdf8", marginTop: 10, fontWeight: "bold", background: "rgba(56,189,248,0.08)", padding: "12px 14px", borderRadius: 12, border: "1px solid rgba(56,189,248,0.2)" }} className="flex items-center justify-between flex-wrap gap-2">
-                        <div className="flex items-center gap-2.5 flex-wrap">
-                          <span>💵 السعر الإجمالي:</span>
-                          {originalPrice && Number(originalPrice) > Number(price) + 0.01 && (
-                            <span className="text-red-400/90 line-through text-sm font-mono font-bold decoration-red-500 decoration-2">
-                              {convertPrice(Number(originalPrice)).formatted}
-                            </span>
-                          )}
-                          <strong className="text-emerald-400 text-lg font-mono font-black">
-                            {convertPrice(Number(price)).formatted}
+                      <div className="flex flex-col gap-2.5 mt-3">
+                        <div style={{ fontSize: 14, color: "#38bdf8", fontWeight: "bold", background: "rgba(56,189,248,0.08)", padding: "12px 14px", borderRadius: 12, border: "1px solid rgba(56,189,248,0.2)" }} className="flex items-center justify-between flex-wrap gap-2">
+                          <div className="flex items-center gap-2.5 flex-wrap">
+                            <span>💵 السعر الإجمالي:</span>
+                            {originalPrice && Number(originalPrice) > Number(price) + 0.01 && (
+                              <span className="text-red-400/90 line-through text-sm font-mono font-bold decoration-red-500 decoration-2" dir="ltr">
+                                {convertPrice(Number(originalPrice)).formatted}
+                              </span>
+                            )}
+                            <strong className="text-emerald-400 text-lg font-mono font-black" dir="ltr">
+                              {convertPrice(Number(price)).formatted}
+                            </strong>
+                          </div>
+                        </div>
+
+                        <div style={{ fontSize: 13, color: "#fbbf24", fontWeight: "bold", background: "rgba(251,191,36,0.08)", padding: "10px 14px", borderRadius: 12, border: "1px solid rgba(251,191,36,0.25)" }} className="flex items-center justify-between flex-wrap gap-2">
+                          <span className="text-amber-400 font-extrabold text-xs md:text-sm">💳 السعر برسوم الإيداع =</span>
+                          <strong className="text-amber-300 text-base md:text-lg font-mono font-black" dir="ltr">
+                            {convertPrice(grossDepositRequiredForNet(Number(price), getMethodFeePercent("wallet", pricingSettings), 2)).formatted}
                           </strong>
                         </div>
                       </div>
