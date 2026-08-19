@@ -1216,20 +1216,9 @@ export function SettingsTab() {
 
       <Card
         title="🌍 إدارة الدول وطرق الدفع والعملات المخصصة (Country Manager)"
-        action={
-          <button
-            type="button"
-            onClick={() => {
-              document.getElementById("add-country-section")?.scrollIntoView({ behavior: "smooth" });
-            }}
-            style={addBtn}
-          >
-            <Plus size={14} /> إضافة دولة
-          </button>
-        }
       >
         <p className="text-xs text-muted-foreground mb-4">
-          اختر الدول المفعلة لتظهر للمستخدمين، أو انقر على "إضافة دولة" لإضافة دولة جديدة مخصصة بالكامل مع عملتها وطرق الدفع الخاصة بها:
+          اختر الدول المفعلة لتظهر للمستخدمين، أو أضف دولة جديدة مخصصة بالكامل مع عملتها وطرق الدفع الخاصة بها من النموذج أدناه:
         </p>
 
         {/* Dynamic List of Active/Custom Countries */}
