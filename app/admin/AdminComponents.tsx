@@ -199,45 +199,45 @@ export default function AdminPage() {
       
       {/* Sidebar - Desktop relative sidebar & Mobile Bottom Sheet Drawer (Bottom to Top) */}
       <div
-        className={`bg-[#0a0f1d]/98 border-amber-500/20 py-6 flex flex-col shrink-0 z-[100] backdrop-blur-2xl transition-all duration-300 ${
+        className={`bg-[#0a0f1d]/98 border-amber-500/20 py-4 flex flex-col shrink-0 z-[100] backdrop-blur-2xl transition-all duration-300 ${
           mobileMenuOpen
-            ? "fixed bottom-0 left-0 right-0 w-full max-h-[85vh] rounded-t-3xl border-t-2 border-amber-500/40 shadow-[0_-20px_50px_rgba(0,0,0,0.85)] animate-in slide-in-from-bottom duration-300 md:hidden"
+            ? "fixed bottom-0 left-0 right-0 w-full max-h-[70vh] rounded-t-[2.25rem] border-t-2 border-amber-500/40 shadow-[0_-20px_50px_rgba(0,0,0,0.85)] animate-in slide-in-from-bottom duration-300 md:hidden font-sans"
             : "hidden md:flex relative top-0 bottom-0 w-64 border-l"
         }`}
       >
         {/* Mobile Pull Handle Indicator */}
-        <div className="w-14 h-1.5 rounded-full bg-amber-500/40 mx-auto mb-3 shrink-0 md:hidden animate-pulse" />
+        <div className="w-12 h-1 rounded-full bg-amber-500/50 mx-auto mb-2 shrink-0 md:hidden" />
 
         {/* Brand Header */}
-        <div className="px-6 pb-4 border-b border-slate-800/80 mb-3 flex items-center justify-between">
+        <div className="px-5 pb-3 border-b border-slate-800/80 mb-2 flex items-center justify-between">
           <div>
-            <h2 className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-500 text-xl font-black flex items-center gap-2.5">
-              <Zap size={22} className="text-amber-400 fill-amber-400/20 animate-pulse" /> ZAITX MEDIA
+            <h2 className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-500 text-lg font-black flex items-center gap-2">
+              <Zap size={20} className="text-amber-400 fill-amber-400/20" /> ZAITX MEDIA
             </h2>
-            <span className="text-[11px] text-amber-400/80 font-bold mt-1 block">
+            <span className="text-[10px] text-amber-400/80 font-bold mt-0.5 block">
               لوحة التحكم الاحترافية — VIP Admin
             </span>
           </div>
           {mobileMenuOpen && (
             <button
               onClick={() => setMobileMenuOpen(false)}
-              className="w-9 h-9 rounded-2xl bg-slate-800/90 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white cursor-pointer"
+              className="w-8 h-8 rounded-xl bg-slate-800/90 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white cursor-pointer"
             >
-              <X size={18} />
+              <X size={16} />
             </button>
           )}
         </div>
 
         {/* Server Status Badge */}
-        <div className="px-6 mb-3">
-          <div className="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center gap-2 text-[11px] text-emerald-400 font-extrabold">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+        <div className="px-5 mb-2">
+          <div className="px-3 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center gap-2 text-[10px] text-emerald-400 font-extrabold">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
             <span>السيرفر متصل ويعمل بكفاءة 🟢</span>
           </div>
         </div>
 
         {/* Navigation Tabs */}
-        <nav className="px-4 flex-1 overflow-y-auto space-y-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden max-h-[60vh] md:max-h-none">
+        <nav className="px-3.5 flex-1 overflow-y-auto space-y-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden max-h-[50vh] md:max-h-none">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
