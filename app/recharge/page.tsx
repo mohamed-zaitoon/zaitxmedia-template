@@ -253,11 +253,11 @@ export default function RechargePage() {
       const customTypes = Object.keys(grouped).filter(t => !["vodafone", "instapay", "barq", "bank", "binance_pay", "binance"].includes(t) || t === "custom");
 
       if (countryCode === "SA") {
-        // Saudi Arabia (SA): Barq, Binance Pay, Bank Transfer
-        relevantTypes = ["barq", "binance_pay", "bank", ...customTypes].filter(t => t !== "vodafone" && t !== "instapay");
+        // Saudi Arabia (SA): Barq, Bank Transfer, Custom, Binance Pay (last!)
+        relevantTypes = ["barq", "bank", ...customTypes, "binance_pay"].filter(t => t !== "vodafone" && t !== "instapay");
       } else {
-        // Egypt (EG) & International: InstaPay, Vodafone Cash, Binance Pay, Bank Transfer
-        relevantTypes = ["instapay", "vodafone", "binance_pay", "bank", ...customTypes].filter(t => t !== "barq");
+        // Egypt (EG) & International: InstaPay, Vodafone Cash, Bank Transfer, Custom, Binance Pay (last!)
+        relevantTypes = ["instapay", "vodafone", "bank", ...customTypes, "binance_pay"].filter(t => t !== "barq");
       }
 
       const finalWallets: any[] = [];

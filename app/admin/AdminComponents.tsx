@@ -2053,8 +2053,8 @@ export function WalletsTab() {
               { value: "vodafone", label: "فودافون كاش / محفظه الكترونية" },
               { value: "instapay", label: "انستاباي (InstaPay)" },
               { value: "barq", label: "برق (Barq - السعودية)" },
-              { value: "binance_pay", label: "🟡 Binance Pay" },
               { value: "bank", label: "حساب بنكي (Bank Transfer)" },
+              { value: "binance_pay", label: "🟡 Binance Pay" },
               { value: "custom", label: "➕ طريقة دفع مخصصة جديدة" },
             ]}
             onChange={(val) => upd(actualIndex, "type", val)}
@@ -2244,8 +2244,8 @@ export function WalletsTab() {
               { id: "vodafone", label: "📱 فودافون كاش / المحافظ" },
               { id: "instapay", label: "⚡ انستاباي InstaPay" },
               { id: "barq", label: "✨ برق Barq" },
-              { id: "binance_pay", label: "🟡 Binance Pay" },
               { id: "bank", label: "🏦 تحويل بنكي Bank" },
+              { id: "binance_pay", label: "🟡 Binance Pay" },
               ...Array.from(new Set(wallets.map(w => w.type).filter(t => !["vodafone", "instapay", "barq", "binance_pay", "binance", "bank"].includes(t)))).map(t => ({ id: t, label: `💳 ${t}` }))
             ].map((m) => (
               <button
