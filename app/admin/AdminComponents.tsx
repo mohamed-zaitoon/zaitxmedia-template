@@ -1313,49 +1313,49 @@ export function SettingsTab() {
         </div>
 
         {/* Add New Custom Country Form */}
-        <div id="add-country-section" className="p-4 rounded-2xl border border-cyan-500/30 bg-cyan-500/5 text-right space-y-3">
-          <h4 className="text-xs font-extrabold text-cyan-400 flex items-center gap-2">
+        <div id="add-country-section" className="p-6 rounded-3xl border border-cyan-500/35 bg-gradient-to-b from-cyan-500/10 via-slate-900/60 to-slate-900/90 text-right space-y-4 shadow-xl">
+          <h4 className="text-sm font-black text-cyan-400 flex items-center gap-2">
             <span>➕ إضافة دولة جديدة مخصصة للموقع:</span>
           </h4>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label style={lbl}>اسم الدولة</label>
+              <label className="block text-xs font-bold text-slate-300 mb-2">اسم الدولة</label>
               <input
                 type="text"
                 placeholder="مثال: الإمارات"
                 value={newCountry.name}
                 onChange={(e) => setNewCountry({ ...newCountry, name: e.target.value })}
-                style={inp}
+                className="h-13 w-full rounded-2xl border border-slate-700 bg-slate-900/90 px-4 text-sm font-semibold text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 transition-all"
               />
             </div>
             <div>
-              <label style={lbl}>رمز الدولة (ISO Code)</label>
+              <label className="block text-xs font-bold text-slate-300 mb-2">رمز الدولة (ISO Code)</label>
               <input
                 type="text"
                 placeholder="مثال: AE"
                 value={newCountry.code}
                 onChange={(e) => setNewCountry({ ...newCountry, code: e.target.value.toUpperCase().trim() })}
-                style={inp}
+                className="h-13 w-full rounded-2xl border border-slate-700 bg-slate-900/90 px-4 text-sm font-semibold text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 transition-all font-mono"
               />
             </div>
             <div>
-              <label style={lbl}>رمز العملة</label>
+              <label className="block text-xs font-bold text-slate-300 mb-2">رمز العملة</label>
               <input
                 type="text"
                 placeholder="مثال: AED"
                 value={newCountry.currency}
                 onChange={(e) => setNewCountry({ ...newCountry, currency: e.target.value.toUpperCase().trim() })}
-                style={inp}
+                className="h-13 w-full rounded-2xl border border-slate-700 bg-slate-900/90 px-4 text-sm font-semibold text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 transition-all font-mono"
               />
             </div>
             <div>
-              <label style={lbl}>علم الدولة (Emoji Flag)</label>
+              <label className="block text-xs font-bold text-slate-300 mb-2">علم الدولة (Emoji Flag)</label>
               <input
                 type="text"
                 placeholder="مثال: 🇦🇪"
                 value={newCountry.flag}
                 onChange={(e) => setNewCountry({ ...newCountry, flag: e.target.value.trim() })}
-                style={inp}
+                className="h-13 w-full rounded-2xl border border-slate-700 bg-slate-900/90 px-4 text-sm font-semibold text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 transition-all"
               />
             </div>
           </div>
@@ -1373,9 +1373,10 @@ export function SettingsTab() {
               }));
               setNewCountry({ name: "", code: "", currency: "", flag: "🌍" });
             }}
-            className="px-5 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-black text-xs cursor-pointer shadow-md transition-all mt-1"
+            className="h-14 px-8 w-full sm:w-auto rounded-2xl bg-gradient-to-r from-cyan-400 via-cyan-500 to-teal-500 text-slate-950 font-black text-base shadow-xl shadow-cyan-500/25 hover:scale-[1.02] active:scale-95 transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 mt-4"
           >
-            ➕ إضافة دولة
+            <Plus size={20} />
+            <span>إضافة دولة مخصصة جديدة 🌍</span>
           </button>
         </div>
       </Card>
