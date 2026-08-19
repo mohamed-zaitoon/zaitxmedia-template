@@ -64,6 +64,7 @@ import {
 } from "lucide-react";
 import Swal from "sweetalert2";
 import { FinancialTab } from "./FinancialTab";
+import { SecurityTab } from "./SecurityTab";
 import { calculateTikTokPriceEgp, calculateTikTokOriginalPriceEgp, ceilTo2Decimals, type TikTokPricingTier } from "@/lib/pricing/tiktok";
 import { calculateManualServicePriceEgp, getManualServicePriceUsd, calculateManualServiceOriginalPriceEgp } from "@/lib/pricing/manual-service";
 import { isGlobalUsdDiscountActive } from "@/lib/pricing/pricing-discount";
@@ -91,6 +92,7 @@ function calculateExactRemainingTimeText(expiresAt?: string | null): string {
 const tabs = [
   { id: "dashboard", label: "الرئيسية", icon: <BarChart3 size={16} /> },
   { id: "settings", label: "الإعدادات", icon: <Settings size={16} /> },
+  { id: "security", label: "حماية النظام", icon: <ShieldCheck size={16} /> },
   { id: "pricing", label: "الأسعار", icon: <DollarSign size={16} /> },
   { id: "wallets", label: "المحافظ", icon: <Wallet size={16} /> },
   { id: "users", label: "المستخدمون", icon: <Users size={16} /> },
@@ -318,6 +320,7 @@ export default function AdminPage() {
 
         {activeTab === "dashboard" && <DashboardTab />}
         {activeTab === "settings" && <SettingsTab />}
+        {activeTab === "security" && <SecurityTab />}
         {activeTab === "pricing" && <PricingTab />}
         {activeTab === "wallets" && <WalletsTab />}
         {activeTab === "users" && <UsersTab />}
@@ -544,21 +547,36 @@ export function DashboardTab() {
             </button>
           </div>
 
-          <div className="p-6 rounded-2xl border border-purple-500/25 bg-gradient-to-b from-purple-500/10 via-slate-900/50 to-transparent flex flex-col justify-between gap-6 shadow-xl">
+          <div 
+            onClick={() => {
+              const securityTabBtn = document.querySelector('[data-tab="security"]') as HTMLElement;
+              if (securityTabBtn) {
+                securityTabBtn.click();
+              } else {
+                const btn = Array.from(document.querySelectorAll('button')).find((b) => b.textContent?.includes("حماية النظام"));
+                btn?.click();
+              }
+            }}
+            className="p-6 rounded-2xl border border-purple-500/30 bg-gradient-to-b from-purple-500/15 via-slate-900/60 to-slate-900/90 flex flex-col justify-between gap-6 shadow-xl hover:border-purple-500/60 transition-all cursor-pointer group"
+          >
             <div className="space-y-2">
               <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                <div className="p-3 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30 group-hover:scale-110 transition-transform">
                   <ShieldCheck size={22} />
                 </div>
                 <h3 className="font-black text-white text-lg">🛡️ حماية النظام والتدقيق المباشر</h3>
               </div>
               <p className="text-sm text-slate-300 leading-relaxed pt-2">
-                فحص التوقيعات المشفرة لرسائل الـ SMS، تتبع بصمة الأصبع والوجه، ومراقبة أمان الحسابات بنظام الحماية الفائق.
+                فحص التوقيعات المشفرة لرسائل الـ SMS، تتبع تشفير HMAC، ومراقبة أمان الحسابات بنظام الحماية الفائق.
               </p>
             </div>
-            <div className="h-14 w-full rounded-2xl bg-purple-500/15 border border-purple-500/30 text-purple-300 font-black text-sm md:text-base flex items-center justify-center gap-2">
-              <span>Python Security Audit Active 🐍</span>
-            </div>
+            <button
+              type="button"
+              className="h-14 w-full rounded-2xl bg-gradient-to-r from-purple-500 via-indigo-500 to-purple-600 text-white font-black text-sm md:text-base flex items-center justify-center gap-2 shadow-lg shadow-purple-500/20 group-hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+            >
+              <ShieldCheck size={18} />
+              <span>فتح مركز الحماية والتدقيق المباشر 🚀</span>
+            </button>
           </div>
         </div>
       </div>
