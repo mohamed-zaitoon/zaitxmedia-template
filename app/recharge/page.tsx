@@ -42,6 +42,7 @@ export default function RechargePage() {
   const [tiktokMaxCoins, setTiktokMaxCoins] = useState(2500000);
   const [globalDiscountConfig, setGlobalDiscountConfig] = useState<{ enabled: boolean; discountPercent: number; maxDiscountUsd?: number }>({ enabled: false, discountPercent: 0 });
   const [isCellularConnection, setIsCellularConnection] = useState(false);
+  const [selectedWalletIndexMap, setSelectedWalletIndexMap] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const checkNetwork = () => {
@@ -166,6 +167,7 @@ export default function RechargePage() {
       }
 
       const finalWallets: any[] = [];
+      const initialIndices: Record<string, number> = {};
 
       for (const type of relevantTypes) {
         const list = (grouped[type] || []).filter((w: any) => {
@@ -174,7 +176,8 @@ export default function RechargePage() {
         });
         const activeList = list.filter((w: any) => w.isActive !== false);
         if (activeList.length > 0) {
-          finalWallets.push(activeList[Math.floor(Math.random() * activeList.length)]);
+          finalWallets.push(...activeList);
+          initialIndices[type] = Math.floor(Math.random() * activeList.length);
         } else if (list.length > 0) {
           finalWallets.push({ ...list[0], disabled: true });
         } else {
@@ -183,6 +186,7 @@ export default function RechargePage() {
       }
 
       setWallets(finalWallets);
+      setSelectedWalletIndexMap(initialIndices);
       if (finalWallets.length > 0) {
         const defaultType = countryCode === "SA" ? "barq" : "instapay";
         const matchingDefault = finalWallets.find(w => w.type === defaultType && !w.disabled);
@@ -285,13 +289,33 @@ export default function RechargePage() {
     window.location.href = targetUrl;
   };
 
-  const selected = useMemo(
-    () => wallets.find((w) => {
-      const type = w.type;
-      return type === method;
-    }),
-    [wallets, method],
-  );
+  const activeMatchingWallets = useMemo(() => {
+    const countryCode = user?.country_code || "EG";
+    return wallets.filter((w) => {
+      if (w.type !== method) return false;
+      if (w.disabled) return false;
+      if (!w.countryCode) return true;
+      return w.countryCode === countryCode || w.countryCode === "GLOBAL";
+    });
+  }, [wallets, method, user?.country_code]);
+
+  const selected = useMemo(() => {
+    if (activeMatchingWallets.length === 0) {
+      return wallets.find((w) => w.type === method);
+    }
+    const idx = selectedWalletIndexMap[method] ?? 0;
+    return activeMatchingWallets[idx % activeMatchingWallets.length];
+  }, [activeMatchingWallets, selectedWalletIndexMap, method, wallets]);
+
+  const handleRotateWallet = () => {
+    if (activeMatchingWallets.length <= 1) return;
+    setSelectedWalletIndexMap((prev) => {
+      const current = prev[method] ?? 0;
+      const next = (current + 1) % activeMatchingWallets.length;
+      return { ...prev, [method]: next };
+    });
+    toast.success("تم تبديل رقم المحفظة عشوائياً 🔀");
+  };
   const isSaudiUser = selectedCurrency === "SAR" || user?.country === "SA" || method === "barq";
   const currencySymbol = isSaudiUser ? (symbols.sar || "﷼") : (symbols.egp || "£");
   const fee = getMethodFeePercent(method, pricingConfig);
@@ -825,6 +849,21 @@ export default function RechargePage() {
                     {/* Always visible Transfer Phone Number Box (Backup without text label) */}
                     {(selected.number || selected.link) && (
                       <div className="mt-3 space-y-1.5">
+                        {activeMatchingWallets.length > 1 && (
+                          <div className="flex items-center justify-between px-1 mb-1">
+                            <span className="text-[11px] font-bold text-slate-400">
+                              محفظة نشطة ({activeMatchingWallets.length} أرقام)
+                            </span>
+                            <button
+                              type="button"
+                              onClick={handleRotateWallet}
+                              className="flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 px-2.5 py-1 rounded-lg border border-amber-500/30 transition-all cursor-pointer shadow-sm active:scale-95"
+                            >
+                              <RefreshCw size={12} />
+                              <span>تبديل الرقم عشوائياً</span>
+                            </button>
+                          </div>
+                        )}
                         <div className="flex items-center justify-between gap-3 bg-background p-4 rounded-xl border border-border shadow-sm" dir="ltr">
                           <strong className="break-all font-mono text-lg text-emerald-400">{selected.number || selected.link}</strong>
                           <button
