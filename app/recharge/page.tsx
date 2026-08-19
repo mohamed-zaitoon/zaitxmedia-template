@@ -587,6 +587,8 @@ export default function RechargePage() {
           body: JSON.stringify({
             amountUsd: numericAmount,
             currency: "USD",
+            userBinanceOrderId: reference,
+            reference: reference,
           }),
         });
         const data = await response.json();
@@ -1055,12 +1057,24 @@ export default function RechargePage() {
                   )}
                 </div>
 
-                {method !== "bank" && method !== "binance_pay" && method !== "binance" && (
+                {method !== "bank" && (
                   <div className="space-y-1.5">
                     <label className="block text-xs font-bold text-slate-200">
-                      {method === "barq" ? "اسم المحول بالإنجليزية" : method === "instapay" ? "الرقم المرجعي من رسالة SMS" : "رقم الهاتف المحول منه"}
+                      {method === "barq"
+                        ? "اسم المحول بالإنجليزية"
+                        : method === "instapay"
+                          ? "الرقم المرجعي من رسالة SMS"
+                          : (method === "binance_pay" || method === "binance")
+                            ? "رقم المعاملة (Binance Order ID)"
+                            : "رقم الهاتف المحول منه"}
                     </label>
-                    <input value={reference} onChange={(e) => setReference(e.target.value)} className="h-12 w-full rounded-xl border border-border/80 bg-input px-4 text-left font-mono text-base outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner" dir="ltr" />
+                    <input
+                      value={reference}
+                      onChange={(e) => setReference(e.target.value)}
+                      placeholder={(method === "binance_pay" || method === "binance") ? "أدخل رقم Binance Order ID هنا (مثال: 228394857)" : ""}
+                      className="h-12 w-full rounded-xl border border-border/80 bg-input px-4 text-left font-mono text-base outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner"
+                      dir="ltr"
+                    />
                   </div>
                 )}
 
@@ -1108,7 +1122,7 @@ export default function RechargePage() {
                 )}
 
                 <button
-                  disabled={busy || uploadingReceipt || !user || !selected || selected.disabled || !amountWithinLimits || (method !== "bank" && method !== "binance_pay" && method !== "binance" && !reference) || (method === "bank" && !receiptUrl)}
+                  disabled={busy || uploadingReceipt || !user || !selected || selected.disabled || !amountWithinLimits || (method !== "bank" && !reference) || (method === "bank" && !receiptUrl)}
                   onClick={submit}
                   className="btn-ultra-primary w-full h-12 py-3 text-sm font-black rounded-xl shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
                 >

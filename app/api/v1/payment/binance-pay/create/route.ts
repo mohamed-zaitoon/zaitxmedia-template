@@ -52,6 +52,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
+    const userBinanceOrderId = String(body.userBinanceOrderId || body.reference || body.binanceOrderId || "").trim();
+
     const merchantTradeNo = `BP_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
     const recipientBinanceId = process.env.BINANCE_PAY_RECIPIENT_ID || DEFAULT_RECIPIENT_BINANCE_ID;
     const createdAt = new Date().toISOString();
@@ -70,9 +72,10 @@ export async function POST(request: Request) {
       paymentMethodKey: "binance_pay",
       merchantTradeNo,
       binanceOrderId: merchantTradeNo,
+      userBinanceOrderId: userBinanceOrderId || merchantTradeNo,
       recipientBinanceId,
-      originalReference: merchantTradeNo,
-      referenceNumber: merchantTradeNo,
+      originalReference: userBinanceOrderId || merchantTradeNo,
+      referenceNumber: userBinanceOrderId || merchantTradeNo,
       paymentStatus: "pending",
       status: "pending",
       binanceStatus: "INITIAL",
