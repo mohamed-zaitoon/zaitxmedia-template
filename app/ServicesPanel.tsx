@@ -217,7 +217,7 @@ export default function ServicesPanel({
   renderCustomService,
   userProfile,
 }: any) {
-  const { convertPrice } = useCurrency();
+  const { convertPrice, selectedCurrency } = useCurrency();
   const { isAndroid, isIOS } = useDevicePlatform();
   const [selectedCat, setSelectedCat] = useState("");
   const [selectedServiceId, setSelectedServiceId] = useState("");
@@ -771,12 +771,21 @@ export default function ServicesPanel({
                         </span>
                       )}
                       <strong
-                        className="text-xl md:text-2xl font-black font-mono px-2 tracking-wide inline-flex items-center gap-1.5"
+                        className="text-xl md:text-2xl font-black font-mono px-2 tracking-wide inline-flex items-center gap-1"
                         dir="ltr"
                         style={{ color: tabInfo?.color || 'var(--primary)' }}
                       >
-                        <span>{convertPrice(finalPrice).amount.toFixed(2)}</span>
-                        <span>{convertPrice(finalPrice).symbol}</span>
+                        {selectedCurrency === "USD" ? (
+                          <>
+                            <span>{convertPrice(finalPrice).symbol}</span>
+                            <span>{convertPrice(finalPrice).amount.toFixed(2)}</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>{convertPrice(finalPrice).amount.toFixed(2)}</span>
+                            <span>{convertPrice(finalPrice).symbol}</span>
+                          </>
+                        )}
                       </strong>
                     </div>
                   </div>
@@ -787,25 +796,50 @@ export default function ServicesPanel({
                       <span className="text-amber-400 font-extrabold text-xs md:text-sm flex items-center gap-1.5">
                         💳 السعر برسوم الإيداع =
                       </span>
-                      <strong className="text-lg md:text-xl font-black font-mono text-amber-300 tracking-wide inline-flex items-center gap-1.5" dir="ltr">
-                        <span>
-                          {convertPrice(
-                            grossDepositRequiredForNet(
-                              finalPrice,
-                              getMethodFeePercent("wallet", siteSettings),
-                              2
-                            )
-                          ).amount.toFixed(2)}
-                        </span>
-                        <span>
-                          {convertPrice(
-                            grossDepositRequiredForNet(
-                              finalPrice,
-                              getMethodFeePercent("wallet", siteSettings),
-                              2
-                            )
-                          ).symbol}
-                        </span>
+                      <strong className="text-lg md:text-xl font-black font-mono text-amber-300 tracking-wide inline-flex items-center gap-1" dir="ltr">
+                        {selectedCurrency === "USD" ? (
+                          <>
+                            <span>
+                              {convertPrice(
+                                grossDepositRequiredForNet(
+                                  finalPrice,
+                                  getMethodFeePercent("wallet", siteSettings),
+                                  2
+                                )
+                              ).symbol}
+                            </span>
+                            <span>
+                              {convertPrice(
+                                grossDepositRequiredForNet(
+                                  finalPrice,
+                                  getMethodFeePercent("wallet", siteSettings),
+                                  2
+                                )
+                              ).amount.toFixed(2)}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <span>
+                              {convertPrice(
+                                grossDepositRequiredForNet(
+                                  finalPrice,
+                                  getMethodFeePercent("wallet", siteSettings),
+                                  2
+                                )
+                              ).amount.toFixed(2)}
+                            </span>
+                            <span>
+                              {convertPrice(
+                                grossDepositRequiredForNet(
+                                  finalPrice,
+                                  getMethodFeePercent("wallet", siteSettings),
+                                  2
+                                )
+                              ).symbol}
+                            </span>
+                          </>
+                        )}
                       </strong>
                     </div>
                   )}

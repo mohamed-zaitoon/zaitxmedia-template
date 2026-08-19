@@ -145,15 +145,15 @@ export const CurrencyProvider = ({ children }: { children: ReactNode }) => {
     if (selectedCurrency === "USD") {
       const amt = Math.ceil(((priceEGP / rates.usd) - 1e-9) * 100) / 100;
       const sym = symbols.usd || "$";
-      return { amount: amt, symbol: sym, formatted: `${amt.toFixed(2)} ${sym}` };
+      return { amount: amt, symbol: sym, formatted: isolateLtr(`${sym}${amt.toFixed(2)}`) };
     } else if (selectedCurrency === "SAR") {
       const amt = Math.ceil(((priceEGP / rates.sar) - 1e-9) * 100) / 100;
       const sym = symbols.sar || "﷼";
-      return { amount: amt, symbol: sym, formatted: `${amt.toFixed(2)} ${sym}` };
+      return { amount: amt, symbol: sym, formatted: isolateLtr(`${amt.toFixed(2)} ${sym}`) };
     }
     const roundedEgp = Math.ceil((priceEGP - 1e-9) * 100) / 100;
     const sym = symbols.egp || "£";
-    return { amount: roundedEgp, symbol: sym, formatted: `${roundedEgp.toFixed(2)} ${sym}` };
+    return { amount: roundedEgp, symbol: sym, formatted: isolateLtr(`${roundedEgp.toFixed(2)} ${sym}`) };
   };
 
   return (

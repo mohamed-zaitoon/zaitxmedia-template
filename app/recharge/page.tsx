@@ -341,7 +341,7 @@ export default function RechargePage() {
   const estimatedNetEgp = feeCalc.netAmount;
   const formatDepositBalance = (amountEgp: number) => {
     if (!Number.isFinite(amountEgp)) amountEgp = 0;
-    if (selectedCurrency === "USD") return isolateLtr(`${(amountEgp / rates.usd).toFixed(2)} ${symbols.usd || "$"}`);
+    if (selectedCurrency === "USD") return isolateLtr(`${symbols.usd || "$"}${(amountEgp / rates.usd).toFixed(2)}`);
     if (selectedCurrency === "SAR") return isolateLtr(`${(amountEgp / validSarRate).toFixed(2)} ${symbols.sar || "﷼"}`);
     return isolateLtr(`${amountEgp.toFixed(2)} ${symbols.egp || "£"}`);
   };

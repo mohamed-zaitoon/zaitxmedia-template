@@ -79,7 +79,7 @@ export default function CheckoutModal({
   const formatLocalAmount = (amountEgp: number) => {
     if (selectedCurrency === "USD") {
       const amt = ceilTo2Decimals(amountEgp / rates.usd);
-      return isolateLtr(`${amt.toFixed(2)} ${symbols.usd || "$"}`);
+      return isolateLtr(`${symbols.usd || "$"}${amt.toFixed(2)}`);
     }
     if (usesSar || selectedCurrency === "SAR") {
       const amt = ceilTo2Decimals(amountEgp / rates.sar);
