@@ -1,13 +1,13 @@
 <div align="center">
 
-<h1>👑 ZAITX MEDIA — Production System</h1>
+<h1>👑 ZAITX MEDIA — Template Edition</h1>
 
 <p>
-  <a href="https://zaitxmedia.com">
-    <img src="https://img.shields.io/badge/Production_URL-zaitxmedia.com-f59e0b?style=for-the-badge&logo=vercel&logoColor=white" alt="Production URL" />
+  <a href="https://mohamed-zaitoon.github.io/zaitxmedia-template">
+    <img src="https://img.shields.io/badge/Live_Demo-mohamed--zaitoon.github.io%2Fzaitxmedia--template-f59e0b?style=for-the-badge&logo=github&logoColor=white" alt="Live Demo" />
   </a>
-  <a href="https://github.com/mohamed-zaitoon/zaitxmedia">
-    <img src="https://img.shields.io/badge/GitHub-zaitxmedia-181717?style=for-the-badge&logo=github" alt="Repository" />
+  <a href="https://github.com/mohamed-zaitoon/zaitxmedia-template">
+    <img src="https://img.shields.io/badge/GitHub-zaitxmedia--template-181717?style=for-the-badge&logo=github" alt="Repository" />
   </a>
 </p>
 
@@ -51,8 +51,8 @@ Luxury Gold & Obsidian Dark Design • Real-time Location Verification • Secur
 <h3>🚀 Quick Start</h3>
 
 <pre>
-<code>git clone https://github.com/mohamed-zaitoon/zaitxmedia.git
-cd zaitxmedia
+<code>git clone https://github.com/mohamed-zaitoon/zaitxmedia-template.git
+cd zaitxmedia-template
 npm install
 npm run dev</code>
 </pre>
@@ -61,7 +61,7 @@ npm run dev</code>
 
 <div align="center">
   <p><b>Developed with ❤️ by Mohamed Zaitoon</b></p>
-  <a href="https://zaitxmedia.com">
-    <img src="https://img.shields.io/badge/Production-zaitxmedia.com-f59e0b?style=for-the-badge&logo=vercel" alt="Production" />
+  <a href="https://mohamed-zaitoon.github.io/zaitxmedia-template">
+    <img src="https://img.shields.io/badge/Hosted_on-GitHub_Pages-222222?style=for-the-badge&logo=github" alt="GitHub Pages" />
   </a>
 </div>
