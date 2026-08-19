@@ -1547,11 +1547,11 @@ body {
 @media (max-width: 900px) {
   .admin-sidebar {
     position: fixed;
-    bottom: 10px;
-    left: 10px;
-    right: 10px;
+    bottom: 12px;
+    left: 20px;
+    right: 20px;
     top: auto;
-    width: calc(100% - 20px);
+    width: calc(100% - 40px);
     max-height: 68vh;
     border-radius: 28px;
     border: 1px solid rgba(245, 158, 11, 0.4);

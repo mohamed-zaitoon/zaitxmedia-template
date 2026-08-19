@@ -201,7 +201,7 @@ export default function AdminPage() {
       <div
         className={`bg-[#0a0f1d]/98 border-amber-500/30 py-3.5 flex flex-col shrink-0 z-[100] backdrop-blur-2xl transition-all duration-300 ${
           mobileMenuOpen
-            ? "fixed bottom-2.5 left-2.5 right-2.5 w-[calc(100%-20px)] max-h-[68vh] rounded-[2rem] border border-amber-500/40 shadow-[0_15px_50px_rgba(0,0,0,0.95)] animate-in slide-in-from-bottom duration-300 md:hidden font-sans overflow-hidden"
+            ? "fixed bottom-3 left-5 right-5 w-[calc(100%-40px)] max-h-[68vh] rounded-[2rem] border border-amber-500/40 shadow-[0_15px_50px_rgba(0,0,0,0.95)] animate-in slide-in-from-bottom duration-300 md:hidden font-sans overflow-hidden"
             : "hidden md:flex relative top-0 bottom-0 w-64 border-l"
         }`}
       >
