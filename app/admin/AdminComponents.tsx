@@ -1437,9 +1437,25 @@ export function PricingTab() {
           },
         },
       });
-      toast.success("تم حفظ رموز العملات بنجاح 📋");
-    } catch {
-      toast.error("حدث خطأ أثناء حفظ رموز العملات");
+      Swal.fire({
+        icon: "success",
+        title: "تم حفظ رموز العملات بنجاح 📋",
+        text: "تم تحديث رموز وأشكال العملات في Firestore وسيرفرات الموقع بنجاح.",
+        confirmButtonText: "موافق",
+        confirmButtonColor: "#10b981",
+        background: "#0f172a",
+        color: "#fff",
+      });
+    } catch (e: any) {
+      Swal.fire({
+        icon: "error",
+        title: "تعذر الحفظ",
+        text: e?.message || "حدث خطأ أثناء حفظ رموز العملات",
+        confirmButtonText: "موافق",
+        confirmButtonColor: "#ef4444",
+        background: "#0f172a",
+        color: "#fff",
+      });
     } finally {
       setSymbolsBusy(false);
     }

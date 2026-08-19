@@ -226,6 +226,16 @@ export async function POST(request: Request) {
       );
       return NextResponse.json({ success: true });
     }
+    if (body.action === "savePricingSettings" && body.settings && typeof body.settings === "object") {
+      await adminDb.collection("settings").doc("pricing").set(
+        {
+          ...body.settings,
+          updatedAt: FieldValue.serverTimestamp(),
+        },
+        { merge: true },
+      );
+      return NextResponse.json({ success: true });
+    }
     if (body.action === "saveTiers" && Array.isArray(body.tiers)) {
       const pricing = await adminDb.collection("settings").doc("pricing").get();
       const usdRate = Number(
