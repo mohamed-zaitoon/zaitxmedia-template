@@ -33,7 +33,6 @@ export function getMethodFeePercent(method: string, pricingConfig?: any): number
   if (m === "binance_pay" || m === "binance") {
     const val = Number(pricingConfig.binance_pay_fee_percent ?? pricingConfig.binancePayFeePercent);
     if (Number.isFinite(val) && val >= 0) return val;
-    return 0;
   }
 
   const globalVal = Number(pricingConfig.deposit_fee_percent ?? pricingConfig.depositFeePercent ?? pricingConfig.feePercent);

@@ -463,13 +463,13 @@ export default function RechargePage() {
     && numericAmount <= maximumInCurrency + 0.01;
 
   const effectiveMinFeeEgp = isBinancePay
-    ? 0
+    ? (Number(pricingConfig?.binancePayDepositFeeMin ?? pricingConfig?.binance_pay_deposit_fee_min) || 0) * (rates.usd || 54.55)
     : isSarCurrency && Number(pricingConfig?.sarDepositFeeMin ?? pricingConfig?.sar_deposit_fee_min) > 0
       ? Number(pricingConfig?.sarDepositFeeMin ?? pricingConfig?.sar_deposit_fee_min) * validSarRate
       : depositFeeMinEgp;
 
   const effectiveMaxFeeEgp = isBinancePay
-    ? 0
+    ? (Number(pricingConfig?.binancePayDepositFeeMax ?? pricingConfig?.binance_pay_deposit_fee_max) || 0) * (rates.usd || 54.55)
     : isSarCurrency && Number(pricingConfig?.sarDepositFeeMax ?? pricingConfig?.sar_deposit_fee_max) > 0
       ? Number(pricingConfig?.sarDepositFeeMax ?? pricingConfig?.sar_deposit_fee_max) * validSarRate
       : depositFeeMaxEgp;
