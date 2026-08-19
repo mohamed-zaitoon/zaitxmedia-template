@@ -1929,9 +1929,9 @@ export function WalletsTab() {
             type="button"
             onClick={save}
             disabled={busy}
-            className="px-4 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-black text-xs transition-all shadow-lg shadow-cyan-500/20 active:scale-95 cursor-pointer flex items-center gap-1.5"
+            className="h-12 px-7 rounded-2xl bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-500 text-slate-950 font-black text-sm md:text-base shadow-xl shadow-cyan-500/30 hover:brightness-110 hover:scale-[1.02] active:scale-95 transition-all duration-200 flex items-center justify-center gap-2.5 border border-cyan-300/50 cursor-pointer disabled:opacity-50"
           >
-            <Save size={14} />
+            <Save size={20} className={busy ? "animate-spin" : ""} />
             <span>{busy ? "جاري الحفظ..." : "💾 حفظ التغييرات"}</span>
           </button>
           <button onClick={add} style={addBtn}>
@@ -4620,9 +4620,9 @@ export function FloatingSaveBar({
         type="button"
         onClick={onClick}
         disabled={busy}
-        className="h-12 px-7 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 text-slate-950 font-black text-sm md:text-base shadow-xl shadow-amber-500/25 hover:brightness-110 hover:scale-[1.02] active:scale-95 transition-all duration-200 flex items-center justify-center gap-2.5 border border-amber-300/50 cursor-pointer disabled:opacity-50"
+        className="h-14 px-8 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 text-slate-950 font-black text-base md:text-lg shadow-xl shadow-amber-500/30 hover:brightness-110 hover:scale-[1.03] active:scale-95 transition-all duration-200 flex items-center justify-center gap-3 border border-amber-300/60 cursor-pointer disabled:opacity-50"
       >
-        <Save size={20} className={busy ? "animate-spin" : ""} />
+        <Save size={22} className={busy ? "animate-spin" : ""} />
         <span>{busy ? "جاري الحفظ..." : label}</span>
       </button>
     </div>
