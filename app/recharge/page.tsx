@@ -5,7 +5,7 @@ import { useAuth } from "@/app/lib/auth-context";
 import { db } from "@/app/lib/firebase";
 import AppShell from "@/app/components/layout/AppShell";
 import { doc, getDoc, collection, query, orderBy, getDocs } from "firebase/firestore";
-import { CheckCircle, Clock, Copy, RefreshCw, ShieldAlert, Wallet, Zap } from "lucide-react";
+import { CheckCircle, Clock, Copy, HelpCircle, RefreshCw, ShieldAlert, Wallet, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { useCurrency } from "@/app/lib/currency-context";
 import { grossDepositRequiredForNet, getMethodFeePercent } from "@/lib/money/wallet";
@@ -43,6 +43,33 @@ export default function RechargePage() {
   const [globalDiscountConfig, setGlobalDiscountConfig] = useState<{ enabled: boolean; discountPercent: number; maxDiscountUsd?: number }>({ enabled: false, discountPercent: 0 });
   const [isCellularConnection, setIsCellularConnection] = useState(false);
   const [selectedWalletIndexMap, setSelectedWalletIndexMap] = useState<Record<string, number>>({});
+  const [siteInstructions, setSiteInstructions] = useState<Record<string, string[]>>({
+    vodafone: [
+      "ارسل المبلغ أولا",
+      "قم بكتابه الرقم الخاص بك الذي قمت بالتحويل لنا من خلاله في الخانه المطلوبه",
+      "اكتب المبلغ الذي قمت بتحويله في الخانه المطلوبه",
+      "اضغط على تأكيد الايداع",
+    ],
+    instapay: [
+      "أرسل المبلغ إلى حسابنا البنكي عبر InstaPay",
+      "اكتب الرقم المرجعي للتحويل من رسالة SMS",
+      "اكتب المبلغ الذي أرسلته بالجنيه المصري",
+      "اضغط على تأكيد الايداع",
+    ],
+    barq: [
+      "أرسل المبلغ إلى حسابنا في تطبيق برق (Barq)",
+      "اكتب اسم المحول باللغة الإنجليزية كما هو في التطبيق",
+      "اكتب المبلغ بالريال السعودي",
+      "اضغط على تأكيد الايداع",
+    ],
+    bank: [
+      "أرسل المبلغ إلى حسابنا البنكي المعروض",
+      "ارفع صورة إيصال التحويل البنكي بوضوح",
+      "اكتب المبلغ الإجمالي المحول",
+      "اضغط على تأكيد الايداع",
+    ],
+  });
+  const [showInstructionsModal, setShowInstructionsModal] = useState(true);
 
   useEffect(() => {
     const checkNetwork = () => {
@@ -108,7 +135,11 @@ export default function RechargePage() {
     if (loading) return;
 
     getDoc(doc(db, "settings", "site")).then((snapshot) => {
-      const allWallets: any[] = snapshot.data()?.wallets || [];
+      const siteData = snapshot.data();
+      const allWallets: any[] = siteData?.wallets || [];
+      if (siteData?.methodInstructions && typeof siteData.methodInstructions === "object") {
+        setSiteInstructions((prev) => ({ ...prev, ...siteData.methodInstructions }));
+      }
       const countryCode = user?.country_code || "EG";
 
       // Group all wallets (active and inactive) by type
@@ -608,6 +639,7 @@ export default function RechargePage() {
                 value={method}
                 onChange={(val) => {
                   setMethod(val);
+                  setShowInstructionsModal(true);
                   if (typeof window !== "undefined") localStorage.setItem("preferred_payment_method", val);
                 }}
                 options={wallets}
@@ -1049,6 +1081,63 @@ export default function RechargePage() {
           </div>
         )}
       </div>
+
+      {/* Step-by-Step Payment Instructions Modal */}
+      {showInstructionsModal && (
+        <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-[99999] flex items-center justify-center p-4 animate-in fade-in duration-200" dir="rtl">
+          <div className="w-full max-w-md bg-slate-900 border border-cyan-500/40 rounded-3xl p-6 shadow-2xl space-y-5 text-right animate-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="flex items-center gap-3 pb-3 border-b border-slate-800">
+              <div className="w-10 h-10 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+                <HelpCircle size={22} />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-black text-slate-100">
+                  تعليمات الإيداع عبر {
+                    method === "vodafone" ? "فودافون كاش / المحافظ الإلكترونية" :
+                    method === "instapay" ? "انستاباي (InstaPay)" :
+                    method === "barq" ? "برق (Barq)" :
+                    method === "bank" ? "التحويل البنكي (Bank Transfer)" :
+                    "وسيلة الدفع"
+                  } 📋
+                </h3>
+                <p className="text-xs text-slate-400 font-semibold mt-0.5">
+                  يرجى اتباع الخطوات التالية بدقة لإتمام الإيداع بنجاح:
+                </p>
+              </div>
+            </div>
+
+            {/* Step List */}
+            <div className="space-y-3 my-4 max-h-[55vh] overflow-y-auto pr-1">
+              {(siteInstructions[method] || [
+                "ارسل المبلغ أولا",
+                "قم بكتابه الرقم الخاص بك الذي قمت بالتحويل لنا من خلاله في الخانه المطلوبه",
+                "اكتب المبلغ الذي قمت بتحويله في الخانه المطلوبه",
+                "اضغط على تأكيد الايداع",
+              ]).map((step: string, idx: number) => (
+                <div key={idx} className="flex items-start gap-3 bg-slate-950/70 p-3.5 rounded-2xl border border-slate-800/80 shadow-sm">
+                  <span className="w-7 h-7 rounded-xl bg-cyan-500/20 text-cyan-400 font-black text-xs flex items-center justify-center shrink-0 border border-cyan-500/30 mt-0.5 font-mono">
+                    {idx + 1}
+                  </span>
+                  <p className="text-xs sm:text-sm font-bold text-slate-200 leading-relaxed pt-0.5">
+                    {step}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* Action Button - GOT IT! */}
+            <button
+              type="button"
+              onClick={() => setShowInstructionsModal(false)}
+              className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-500 text-slate-950 font-black text-sm sm:text-base shadow-xl shadow-cyan-500/25 hover:brightness-110 active:scale-98 transition-all cursor-pointer flex items-center justify-center gap-2"
+            >
+              <CheckCircle size={18} />
+              <span>فهمت</span>
+            </button>
+          </div>
+        </div>
+      )}
     </AppShell>
   );
 }

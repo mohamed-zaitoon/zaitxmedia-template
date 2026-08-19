@@ -1818,6 +1818,33 @@ export function WalletsTab() {
   const [wallets, setWallets] = useState<any[]>([]);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
+  const [selectedInstructionMethod, setSelectedInstructionMethod] = useState("vodafone");
+  const [methodInstructions, setMethodInstructions] = useState<Record<string, string[]>>({
+    vodafone: [
+      "ارسل المبلغ أولا",
+      "قم بكتابه الرقم الخاص بك الذي قمت بالتحويل لنا من خلاله في الخانه المطلوبه",
+      "اكتب المبلغ الذي قمت بتحويله في الخانه المطلوبه",
+      "اضغط على تأكيد الايداع",
+    ],
+    instapay: [
+      "أرسل المبلغ إلى حسابنا البنكي عبر InstaPay",
+      "اكتب الرقم المرجعي للتحويل من رسالة SMS",
+      "اكتب المبلغ الذي أرسلته بالجنيه المصري",
+      "اضغط على تأكيد الايداع",
+    ],
+    barq: [
+      "أرسل المبلغ إلى حسابنا في تطبيق برق (Barq)",
+      "اكتب اسم المحول باللغة الإنجليزية كما هو في التطبيق",
+      "اكتب المبلغ بالريال السعودي",
+      "اضغط على تأكيد الايداع",
+    ],
+    bank: [
+      "أرسل المبلغ إلى حسابنا البنكي المعروض",
+      "ارفع صورة إيصال التحويل البنكي بوضوح",
+      "اكتب المبلغ الإجمالي المحول",
+      "اضغط على تأكيد الايداع",
+    ],
+  });
   const [availableCountries, setAvailableCountries] = useState<any[]>([
     { id: "EG", label: "🇪🇬 مصر (EGP)" },
     { id: "SA", label: "🇸🇦 السعودية (SAR)" },
@@ -1831,6 +1858,9 @@ export function WalletsTab() {
     fetchAdminData("settings/site").then((result) => {
       if (result.exists) {
         try {
+          if (result.data.methodInstructions && typeof result.data.methodInstructions === "object") {
+            setMethodInstructions((prev) => ({ ...prev, ...result.data.methodInstructions }));
+          }
           const raw = result.data.wallets || [];
           const normalized = raw.map((w: any) => ({
             ...w,
@@ -1894,7 +1924,7 @@ export function WalletsTab() {
     await writeAdminData({
       action: "setDocument",
       resource: "settings/site",
-      data: { wallets },
+      data: { wallets, methodInstructions },
     });
     setMsg("✅ تم الحفظ");
     setBusy(false);
@@ -2165,6 +2195,94 @@ export function WalletsTab() {
       <FloatingAddButton onClick={add} label="إضافة طريقة دفع / محفظة جديدة ➕" />
       <FloatingSaveBar onClick={save} busy={busy} label="حفظ المحافظ ووسائل الإيداع" msg={msg} />
     </Card>
+
+    {/* 📋 قسم التحكم في تعليمات الإيداع لكل وسيلة دفع */}
+    <div className="mt-6">
+      <Card title="📋 التحكم في تعليمات الإيداع التي تظهر للعميل لكل وسيلة دفع">
+        <div className="space-y-4">
+          <p className="text-xs text-slate-400 font-semibold">
+            اختر وسيلة الدفع أدناه لتعديل أو إضافة الخطوات والتعليمات التي تظهر في المربع المنبثق للعميل عند فتح الإيداع:
+          </p>
+          
+          <div className="flex items-center gap-2 flex-wrap">
+            {[
+              { id: "vodafone", label: "📱 فودافون كاش / المحافظ" },
+              { id: "instapay", label: "⚡ انستاباي InstaPay" },
+              { id: "barq", label: "✨ برق Barq" },
+              { id: "bank", label: "🏦 تحويل بنكي Bank" },
+              ...Array.from(new Set(wallets.map(w => w.type).filter(t => !["vodafone", "instapay", "barq", "bank"].includes(t)))).map(t => ({ id: t, label: `💳 ${t}` }))
+            ].map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => setSelectedInstructionMethod(m.id)}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                  selectedInstructionMethod === m.id
+                    ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/40 shadow-sm"
+                    : "bg-slate-900/60 text-slate-400 border-slate-700 hover:bg-slate-800"
+                }`}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-black text-slate-200">
+                خطوات تعليمات ({selectedInstructionMethod}):
+              </h4>
+              <button
+                type="button"
+                onClick={() => {
+                  const currentArr = methodInstructions[selectedInstructionMethod] || [];
+                  setMethodInstructions({ ...methodInstructions, [selectedInstructionMethod]: [...currentArr, "خطوة جديدة..."] });
+                }}
+                className="text-xs font-bold text-cyan-400 hover:text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 px-3 py-1.5 rounded-xl border border-cyan-500/30 transition-all cursor-pointer inline-flex items-center gap-1.5"
+              >
+                <Plus size={14} />
+                <span>إضافة خطوة جديدة</span>
+              </button>
+            </div>
+
+            {(methodInstructions[selectedInstructionMethod] || [
+              "ارسل المبلغ أولا",
+              "قم بكتابه الرقم الخاص بك الذي قمت بالتحويل لنا من خلاله في الخانه المطلوبه",
+              "اكتب المبلغ الذي قمت بتحويله في الخانه المطلوبه",
+              "اضغط على تأكيد الايداع",
+            ]).map((stepText, sIdx) => (
+              <div key={sIdx} className="flex items-center gap-2">
+                <span className="w-7 h-7 rounded-xl bg-cyan-500/20 text-cyan-400 text-xs font-mono font-black flex items-center justify-center shrink-0 border border-cyan-500/30">
+                  {sIdx + 1}
+                </span>
+                <input
+                  type="text"
+                  value={stepText}
+                  onChange={(e) => {
+                    const newArr = [...(methodInstructions[selectedInstructionMethod] || [])];
+                    newArr[sIdx] = e.target.value;
+                    setMethodInstructions({ ...methodInstructions, [selectedInstructionMethod]: newArr });
+                  }}
+                  className="flex-1 bg-slate-900 border border-slate-700 text-slate-100 text-xs sm:text-sm font-bold px-4 py-2.5 rounded-xl outline-none focus:border-cyan-500"
+                  placeholder={`الخطوة رقم ${sIdx + 1}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newArr = (methodInstructions[selectedInstructionMethod] || []).filter((_, idx) => idx !== sIdx);
+                    setMethodInstructions({ ...methodInstructions, [selectedInstructionMethod]: newArr });
+                  }}
+                  className="p-2.5 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 transition-all cursor-pointer"
+                  title="حذف الخطوة"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Card>
+    </div>
     </div>
   );
 }
