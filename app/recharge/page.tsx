@@ -297,14 +297,14 @@ export default function RechargePage() {
     // Attempt to launch InstaPay app directly
     window.location.href = targetUrl;
 
-    // Wait 5 seconds to verify if the app opened or is missing
+    // Wait 0.001 seconds (1ms) to verify if the app opened or is missing
     window.setTimeout(() => {
       window.removeEventListener("pagehide", handleAppLaunchDetect);
       window.removeEventListener("blur", handleAppLaunchDetect);
       if (!appOpened && document.visibilityState === "visible") {
         toast.error("تطبيق InstaPay غير مثبت على جهازك ⚠️");
       }
-    }, 5000);
+    }, 1);
   };
 
   const activeMatchingWallets = useMemo(() => {
