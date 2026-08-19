@@ -721,10 +721,10 @@ export default function RechargePage() {
                     <button
                       type="button"
                       onClick={handleOpenInstaPayApp}
-                      className="inline-flex md:hidden h-14 w-full items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 font-black text-black hover:opacity-90 transition-all shadow-lg active:scale-95 cursor-pointer text-sm md:text-base my-1"
+                      className="inline-flex md:hidden h-14 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 font-black text-black hover:opacity-90 transition-all shadow-lg active:scale-95 cursor-pointer text-xs sm:text-sm md:text-base my-1 whitespace-nowrap"
                     >
                       <Zap size={18} className="fill-black shrink-0" />
-                      <span dir="rtl" className="inline-flex items-center gap-1.5">
+                      <span dir="rtl" className="inline-flex items-center gap-1.5 whitespace-nowrap">
                         <span>التحويل المباشر من</span>
                         <span dir="ltr" className="font-mono">InstaPay</span>
                       </span>
@@ -816,10 +816,10 @@ export default function RechargePage() {
                           href={selected.link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="btn-ultra-primary w-full text-sm font-black py-4 text-slate-950 bg-gradient-to-r from-red-500 via-amber-400 to-emerald-400 hover:brightness-110 flex items-center justify-center gap-2.5 rounded-2xl transition-all shadow-lg cursor-pointer"
+                          className="btn-ultra-primary w-full text-xs sm:text-sm font-black py-4 text-slate-950 bg-gradient-to-r from-red-500 via-amber-400 to-emerald-400 hover:brightness-110 flex items-center justify-center gap-2 rounded-2xl transition-all shadow-lg cursor-pointer whitespace-nowrap"
                         >
                           <Zap size={18} className="fill-slate-950 shrink-0" />
-                          <span>التحويل المباشر من تطبيق محفظتك</span>
+                          <span className="whitespace-nowrap">التحويل المباشر من تطبيق محفظتك</span>
                         </a>
                       </div>
                     )}
