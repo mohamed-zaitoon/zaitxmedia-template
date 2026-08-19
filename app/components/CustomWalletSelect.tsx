@@ -94,9 +94,11 @@ export default function CustomWalletSelect({ value, onChange, options }: CustomW
               </button>
             </div>
 
-            {/* List of Custom Options */}
-            {options.map((w, index) => {
-              const isSelected = w.type === value;
+            {/* List of Custom Options (Unique per payment method type) */}
+            {options
+              .filter((w, idx, self) => self.findIndex((item) => item.type === w.type) === idx)
+              .map((w, index) => {
+                const isSelected = w.type === value;
               return (
                 <button
                   key={index}
