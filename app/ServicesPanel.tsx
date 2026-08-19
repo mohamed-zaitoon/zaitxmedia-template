@@ -821,20 +821,22 @@ export default function ServicesPanel({
                         ) : (
                           <>
                             <span>
-                              {convertPrice(
-                                grossDepositRequiredForNet(
-                                  finalPrice,
-                                  getMethodFeePercent("wallet", siteSettings),
-                                  2
-                                )
-                              ).amount.toFixed(2)}
+                              {Math.round(
+                                convertPrice(
+                                  grossDepositRequiredForNet(
+                                    finalPrice,
+                                    getMethodFeePercent("wallet", siteSettings),
+                                    0
+                                  )
+                                ).amount
+                              )}
                             </span>
                             <span>
                               {convertPrice(
                                 grossDepositRequiredForNet(
                                   finalPrice,
                                   getMethodFeePercent("wallet", siteSettings),
-                                  2
+                                  0
                                 )
                               ).symbol}
                             </span>

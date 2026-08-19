@@ -130,13 +130,14 @@ const menu = [
   },
 ];
 
+import { isolateLtr } from "../../lib/bidi";
+
 export default function CategoryPage() {
   const params = useParams();
-  // حماية ضد القيمة الفارغة (null/undefined) لمنع توقف السيرفر (500 Error)
   const category = (params?.category as string) || "tiktok";
 
   const { user, loading } = useAuth();
-  const { convertPrice } = useCurrency();
+  const { convertPrice, selectedCurrency } = useCurrency();
   const { addToCart } = useCart();
   const [p, setP] = useState<any>(null);
 
@@ -550,7 +551,10 @@ export default function CategoryPage() {
                         <div style={{ fontSize: 13, color: "#fbbf24", fontWeight: "bold", background: "rgba(251,191,36,0.08)", padding: "10px 14px", borderRadius: 12, border: "1px solid rgba(251,191,36,0.25)" }} className="flex items-center justify-between flex-wrap gap-2">
                           <span className="text-amber-400 font-extrabold text-xs md:text-sm">💳 السعر برسوم الإيداع =</span>
                           <strong className="text-amber-300 text-base md:text-lg font-mono font-black" dir="ltr">
-                            {convertPrice(grossDepositRequiredForNet(Number(price), getMethodFeePercent("wallet", pricingSettings), 2)).formatted}
+                            {selectedCurrency === "USD" 
+                              ? convertPrice(grossDepositRequiredForNet(Number(price), getMethodFeePercent("wallet", pricingSettings), 2)).formatted
+                              : isolateLtr(`${Math.round(convertPrice(grossDepositRequiredForNet(Number(price), getMethodFeePercent("wallet", pricingSettings), 0)).amount)} ${convertPrice(Number(price)).symbol}`)
+                            }
                           </strong>
                         </div>
                       </div>
