@@ -36,7 +36,6 @@ export async function GET(request: Request) {
           id: document.id,
           ...document.data(),
         })),
-        fazerItems: [],
       });
     }
     if (!readableDocuments.has(resource)) {

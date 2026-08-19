@@ -1,12 +1,12 @@
 <div align="center">
 
-# 👑 ZAITX MEDIA — VIP Example & Template Edition
+# 👑 ZAITX MEDIA — Primary Production System
 
 <p align="center">
-  <a href="https://mohamed-zaitoon.github.io/zaitxmedia-example">
-    <img src="https://img.shields.io/badge/🌐_Live_Demo-mohamed--zaitoon.github.io%2Fzaitxmedia--example-f59e0b?style=for-the-badge&logo=github&logoColor=white" alt="Live Demo" />
+  <a href="https://zaitxmedia.com">
+    <img src="https://img.shields.io/badge/ Production_URL-zaitxmedia.com-f59e0b?style=for-the-badge&logo=vercel&logoColor=white" alt="Production URL" />
   </a>
-  <a href="https://github.com/mohamed-zaitoon/zaitxmedia-example">
+  <a href="https://github.com/mohamed-zaitoon/zaitxmedia">
     <img src="https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github" alt="Repository" />
   </a>
 </p>
@@ -86,7 +86,7 @@ graph TD
 | **Language** | **TypeScript 5.0** | Strict mode, zero build errors |
 | **Backend & Security** | **Python 3.11 + Node.js** | Security auditor scripts, HMAC verification |
 | **Database** | **Firebase Firestore** | Real-time listeners for rates and settings |
-| **Deployment** | **GitHub Pages + Vercel** | Automated GitHub Actions Pages deployment |
+| **Deployment** | **Vercel Production** | High availability production deployment |
 
 ---
 
@@ -94,8 +94,8 @@ graph TD
 
 ### 1. Clone & Install
 ```bash
-git clone https://github.com/mohamed-zaitoon/zaitxmedia-example.git
-cd zaitxmedia-example
+git clone https://github.com/mohamed-zaitoon/zaitxmedia.git
+cd zaitxmedia
 npm install
 ```
 
@@ -104,12 +104,7 @@ npm install
 python3 scripts/security_auditor.py
 ```
 
-### 3. Generate Clean Example Database Seed
-```bash
-python3 scripts/reset_example_database.py
-```
-
-### 4. Start Local Development Server
+### 3. Start Local Development Server
 ```bash
 npm run dev
 ```
@@ -120,6 +115,6 @@ npm run dev
 
 **Developed with ❤️ by Mohamed Zaitoon & Antigravity AI Team**
 
-[![GitHub Pages](https://img.shields.io/badge/Deployed_with-GitHub_Pages-222222?style=for-the-badge&logo=github)](https://mohamed-zaitoon.github.io/zaitxmedia-example)
+[![Production URL](https://img.shields.io/badge/Production-zaitxmedia.com-f59e0b?style=for-the-badge&logo=vercel)](https://zaitxmedia.com)
 
 </div>

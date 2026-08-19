@@ -74,7 +74,6 @@ export default function OrderPayPage({ params }: { params: Promise<{ id: string 
           
           activeWallets.forEach((w: any) => {
              let t = w.type || "vodafone";
-             if (t === "fazer") t = "vodafone";
              if (!grouped[t]) grouped[t] = [];
              grouped[t].push({ ...w, type: t });
           });

@@ -209,7 +209,6 @@ function CustomDropdown({ options, value, onChange, placeholder, isOpen: externa
 
 export default function ServicesPanel({
   usdRate,
-  fazerUsdRate,
   sarRate,
   siteSettings,
   services,
@@ -462,10 +461,6 @@ export default function ServicesPanel({
       let p = 0;
       if (s.isManual) {
         p = calculateManualServicePriceEgp(s, Number(usdRate), globalDiscountConfig);
-      } else if (s.isFazer) {
-        const S = parseFloat(s.rate);
-        const D = Number(fazerUsdRate);
-        p = S * D;
       } else {
         const S = parseFloat(s.rate);
         const D = Number(usdRate);
@@ -815,7 +810,6 @@ export default function ServicesPanel({
           quantity={Number(effectiveQuantity)}
           priceEGP={finalPrice}
           link={link}
-          fazerUsdRate={fazerUsdRate}
           settings={siteSettings}
           userProfile={userProfile}
           onClose={() => setShowCheckout(false)}

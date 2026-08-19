@@ -114,7 +114,6 @@ export default function RechargePage() {
       const grouped: Record<string, any[]> = {};
       allWallets.forEach((w: any) => {
         let t = w.type || "vodafone";
-        if (t === "fazer") t = "vodafone";
         if (!grouped[t]) grouped[t] = [];
         grouped[t].push({ ...w, type: t });
       });
@@ -290,7 +289,7 @@ export default function RechargePage() {
 
   const selected = useMemo(
     () => wallets.find((w) => {
-      const type = w.type === "fazer" ? "vodafone" : w.type;
+      const type = w.type;
       return type === method;
     }),
     [wallets, method],

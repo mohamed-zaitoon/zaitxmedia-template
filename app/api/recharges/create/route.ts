@@ -45,7 +45,7 @@ export async function POST(request: Request) {
       ? siteSettings.data()!.wallets
       : [];
     const paymentWallet = wallets.find((wallet: any) => {
-      let walletType = wallet.type === "fazer" ? "vodafone" : wallet.type;
+      let walletType = wallet.type;
       
       if (method === "barq" && walletType === "vodafone") {
          walletType = "barq";

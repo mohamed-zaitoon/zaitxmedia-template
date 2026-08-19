@@ -3218,7 +3218,6 @@ export function ExternalCustomerCalculatorTab() {
   const [services, setServices] = useState<any[]>([]);
   const [usdRate, setUsdRate] = useState(0);
   const [smmRate, setSmmRate] = useState(0);
-  const [fazerRate, setFazerRate] = useState(0);
   const [tiers, setTiers] = useState<TikTokPricingTier[]>([]);
   const [depositFeePercent, setDepositFeePercent] = useState(0.75);
   const [loading, setLoading] = useState(true);
@@ -3236,7 +3235,6 @@ export function ExternalCustomerCalculatorTab() {
       const currentUsdRate = Number(pricing.usd_rate || pricing.tiktok_usd_rate || 0);
       setUsdRate(currentUsdRate);
       setSmmRate(Number(pricing.smm_usd_rate || 0));
-      setFazerRate(Number(pricing.fazer_usd_rate || 0));
       const configuredFee = Number(pricing.deposit_fee_percent ?? pricing.depositFeePercent ?? 0.75);
       setDepositFeePercent(Number.isFinite(configuredFee) && configuredFee >= 0 ? configuredFee : 0.75);
       const loadedTiers = (tiersResult.items || []).sort(
