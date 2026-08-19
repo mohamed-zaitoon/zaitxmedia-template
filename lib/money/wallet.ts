@@ -30,6 +30,11 @@ export function getMethodFeePercent(method: string, pricingConfig?: any): number
     const val = Number(pricingConfig.barq_fee_percent ?? pricingConfig.barqFeePercent);
     if (Number.isFinite(val) && val >= 0) return val;
   }
+  if (m === "binance_pay" || m === "binance") {
+    const val = Number(pricingConfig.binance_pay_fee_percent ?? pricingConfig.binancePayFeePercent);
+    if (Number.isFinite(val) && val >= 0) return val;
+    return 0;
+  }
 
   const globalVal = Number(pricingConfig.deposit_fee_percent ?? pricingConfig.depositFeePercent ?? pricingConfig.feePercent);
   if (Number.isFinite(globalVal) && globalVal >= 0) return globalVal;

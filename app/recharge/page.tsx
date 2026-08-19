@@ -451,19 +451,28 @@ export default function RechargePage() {
   const minimumEgp = isSarCurrency ? rawMin * validSarRate : rawMin;
   const maximumEgp = isSarCurrency ? rawMax * validSarRate : rawMax;
 
-  const grossEgp = isSarCurrency ? numericAmount * validSarRate : numericAmount;
+  const grossEgp = isBinancePay
+    ? numericAmount * (rates.usd || 54.55)
+    : isSarCurrency
+      ? numericAmount * validSarRate
+      : numericAmount;
 
   const amountWithinLimits = Number.isFinite(numericAmount)
     && numericAmount > 0
     && numericAmount >= minimumInCurrency - 0.01
     && numericAmount <= maximumInCurrency + 0.01;
 
-  const effectiveMinFeeEgp = isSarCurrency && Number(pricingConfig?.sarDepositFeeMin ?? pricingConfig?.sar_deposit_fee_min) > 0
-    ? Number(pricingConfig?.sarDepositFeeMin ?? pricingConfig?.sar_deposit_fee_min) * validSarRate
-    : depositFeeMinEgp;
-  const effectiveMaxFeeEgp = isSarCurrency && Number(pricingConfig?.sarDepositFeeMax ?? pricingConfig?.sar_deposit_fee_max) > 0
-    ? Number(pricingConfig?.sarDepositFeeMax ?? pricingConfig?.sar_deposit_fee_max) * validSarRate
-    : depositFeeMaxEgp;
+  const effectiveMinFeeEgp = isBinancePay
+    ? 0
+    : isSarCurrency && Number(pricingConfig?.sarDepositFeeMin ?? pricingConfig?.sar_deposit_fee_min) > 0
+      ? Number(pricingConfig?.sarDepositFeeMin ?? pricingConfig?.sar_deposit_fee_min) * validSarRate
+      : depositFeeMinEgp;
+
+  const effectiveMaxFeeEgp = isBinancePay
+    ? 0
+    : isSarCurrency && Number(pricingConfig?.sarDepositFeeMax ?? pricingConfig?.sar_deposit_fee_max) > 0
+      ? Number(pricingConfig?.sarDepositFeeMax ?? pricingConfig?.sar_deposit_fee_max) * validSarRate
+      : depositFeeMaxEgp;
 
   const effectiveGrossEgp = amountWithinLimits ? grossEgp : 0;
   const feeCalc = calculateDepositFee(
@@ -473,8 +482,17 @@ export default function RechargePage() {
     effectiveMaxFeeEgp
   );
 
-  const displayFeeInCurrency = isSarCurrency ? feeCalc.depositFee / validSarRate : feeCalc.depositFee;
-  const displayNetInCurrency = isSarCurrency ? feeCalc.netAmount / validSarRate : feeCalc.netAmount;
+  const displayFeeInCurrency = isBinancePay
+    ? feeCalc.depositFee / (rates.usd || 54.55)
+    : isSarCurrency
+      ? feeCalc.depositFee / validSarRate
+      : feeCalc.depositFee;
+
+  const displayNetInCurrency = isBinancePay
+    ? feeCalc.netAmount / (rates.usd || 54.55)
+    : isSarCurrency
+      ? feeCalc.netAmount / validSarRate
+      : feeCalc.netAmount;
   const estimatedNetEgp = feeCalc.netAmount;
   const formatDepositBalance = (amountEgp: number) => {
     if (!Number.isFinite(amountEgp)) amountEgp = 0;
