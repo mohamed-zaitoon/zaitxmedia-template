@@ -1,71 +1,83 @@
-<div align="center" dir="rtl">
+# 👑 منصة زايت إكس ميديا (ZaitXMedia Core Production Engine)
 
-<h1>👑 منصة ZAITX MEDIA — النسخة القالب (Template Edition)</h1>
+[![Production URL](https://img.shields.io/badge/الموقع_المباشر-zaitxmedia.com-00F0FF?style=for-the-badge&logo=vercel)](https://zaitxmedia.com)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5-black?style=for-the-badge&logo=nextdotjs)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org)
+[![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python)](https://www.python.org)
+[![Firebase](https://img.shields.io/badge/Firebase-Firestore-FFCA28?style=for-the-badge&logo=firebase)](https://firebase.google.com)
 
-<p>
-  <a href="https://mohamed-zaitoon.github.io/zaitxmedia-template">
-    <img src="https://img.shields.io/badge/🌐_المعاينة_المباشرة-mohamed--zaitoon.github.io%2Fzaitxmedia--template-f59e0b?style=for-the-badge&logo=github&logoColor=white" alt="المعاينة المباشرة" />
-  </a>
-  <a href="https://github.com/mohamed-zaitoon/zaitxmedia-template">
-    <img src="https://img.shields.io/badge/GitHub-zaitxmedia--template-181717?style=for-the-badge&logo=github" alt="المستودع البرمجي" />
-  </a>
-</p>
+> **ZaitXMedia** هي المنصة البرمجية الرئيسية المستقلة والمباشرة لخدمات التسويق الرقمي وشحن عملات تيك توك، تعتمد على معمارية الخدمات المصغرة السحابية، التحقق اللحظي من إيداعات الرسائل النصية، والربط الديناميكي مع الدول والعملات المخصصة.
 
-<p>
-  <img src="https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js" />
-  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
-  <img src="https://img.shields.io/badge/TailwindCSS-3-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="TailwindCSS" />
-  <img src="https://img.shields.io/badge/Firebase-Firestore-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase" />
-</p>
+---
 
-<p><b>متجر رقمي متكامل ونظام تسعير وحساب عملات متعدد الدول</b><br />
-طابع ملكي ذهبي وأسود عميق • تحقق جغرافي حي مباشر • أداة حماية وتدقيق برمجية بلغة بايثون</p>
+## 🌟 الميزات الهندسية والتحسينات الرئيسية
 
-<hr />
+### 🌍 1. نظام إضافة وتخصيص الدول وطرق الدفع المشفرة:
+- **إدارة الدول المخصصة (Country Manager)**: تمكين الأدمن من إضافة أي دولة جديدة فوراً بالاسم، الرمز (ISO)، رمز العملة والعلم.
+- **توجيه وسائل الدفع حسب الدولة**:
+  - 🇪🇬 **مصر**: فودافون كاش، انستا باي، والتحويل البنكي.
+  - 🇸🇦 **السعودية**: تطبيق برق والتحويل البنكي.
+  - 🌐 **كافة الدول الأخرى**: التحويل البنكي العام متاح لجميع دول العالم.
+- **تذكر التفضيلات وعدم التكرار**: حفظ تفضيلات وسائل الدفع في `localStorage` لمنع ظهور النافذة المنبثقة مجدداً بعد الحفظ.
 
-</div>
+### 🐍 2. محرك بايثون وأسعار الصرف الديناميكية:
+- **خادم خدمات بايثون المصغرة (`python_services/main.py`)**:
+  - خادم عالي السرعة (FastAPI) لحساب باقات وعملات تيك توك وتوليد مخرجات JSON آمنة.
+- **إلغاء الأسعار الثابتة**:
+  - يتم سحب أسعار الدولار والريال ونسب العمولات ديناميكياً من قاعدة بيانات Firestore `settings/pricing` ومشاركتها مع كود بايثون فورياً.
 
-<div dir="rtl">
+### 🔐 3. نظام الأمان المشدد وحماية المتصفح:
+- **حظر تتبع سجلات الكونسول (`security-logger.ts`)**:
+  - كتم وإلغاء دوال `console.log`, `console.info`, `console.debug` تلقائياً للمستخدمين العاديين في بيئة الإنتاج لمنع التجسس عبر DevTools.
+  - منح الصلاحية الكاملة للتتبع وتصحيح الأخطاء حصرياً لحسابات الأدمن المعتمدة.
+- **إخفاء مسارات الإدارة**:
+  - أي محاولة دخول لغير المصرح لهم إلى `/admin` أو `/api/admin/*` ترجع فوراً استجابة `404 Not Found`.
 
-<table align="center" width="100%">
-  <tr>
-    <td align="center" width="50%">
-      <h3>🌙 الوضع المظلم (الافتراضي)</h3>
-      <p>أسود ملكي عميق (<code>#060a12</code>) مع ألوان ذهبية دافئة (<code>#f59e0b</code>)</p>
-    </td>
-    <td align="center" width="50%">
-      <h3>☀️ الوضع النهاري</h3>
-      <p>تباين عالي ووضوح ممتاز مع حدود ذهبية فاخرة</p>
-    </td>
-  </tr>
-</table>
+---
 
-<h3>⚡ المميزات الرئيسية</h3>
+## 🛠️ تقنيات ولغات البرمجة
 
-<ul>
-  <li><b>🔣 محرك الرموز الديناميكية للعملات:</b> إظهار <code>£</code> (الجنيه)، <code>﷼</code> (الريال)، و <code>$</code> (الدولار) بتنسيق ثابت <code>45.27 ﷼</code>.</li>
-  <li><b>📍 التحقق الجغرافي الحي من الـ IP:</b> فحص موقع الزائر الفعلي عند تغيير الدولة ورفض التغيير غير المطابق.</li>
-  <li><b>🐍 أداة أمان وحماية ببايثون:</b> فحص توقيعات HMAC المشفرة لرسائل الـ SMS وتدقيق البيئة (<code>scripts/security_auditor.py</code>).</li>
-  <li><b>👑 لوحة تحكم ملكية للأدمن:</b> شريط حفظ علوي وقائمة موبايل تخرج بسلاسة من الأسفل للأعلى.</li>
-</ul>
+| المكون / التقنية | اللغة المستخدمة | الدور الهندسي |
+| :--- | :--- | :--- |
+| **واجهة المستخدم** | **Next.js 15 (React 19) / TypeScript** | البناء التفاعلي، التصميم الزجاجي Modern Glassmorphism، ودعم الجوال والكمبيوتر. |
+| **التنسيقات والأنيميشن** | **CSS 3 + TailwindCSS** | الألوان الداكنة، المسافات المرنة (`px-5 py-3.5`) والأنيميشن التفاعلي. |
+| **الخادم والـ API Backend** | **TypeScript (Node.js API Routes)** | معالجة الطلبات، المعاملات المالية، واستقبال الـ Webhooks. |
+| **محرك الأتمتة** | **Python 3.11 (FastAPI & Scripts)** | خادم الخدمات المصغرة وحاسبة باقات وعملات تيك توك. |
+| **قاعدة البيانات** | **Firebase Firestore** | تخزين بيانات المستخدمين، الطلبات، وسجلات الإيداع والإعدادات. |
+| **نظام المصادقة** | **Clerk Auth + Passkeys** | تسجيل الدخول بدون كلمة سر، وتأمين الجلسات. |
+| **الشبكة ومعالجة الرسائل** | **Cloudflare Workers (Wrangler)** | استقبال وتوجيه رسائل إيداعات SMS ومطابقتها على الـ Edge. |
 
-<h3>🚀 دليل التشغيل السريع</h3>
+---
 
-<pre>
-<code>git clone https://github.com/mohamed-zaitoon/zaitxmedia-template.git
-cd zaitxmedia-template
+## 📁 هيكل المجلدات والملفات
+
+```
+.
+├── app/                      # تطبيق Next.js (الواجهات، الصفحات، ومسارات الـ API)
+│   ├── (store)/              # المتجر الرئيسي وكتالوج الخدمات
+│   ├── account/              # حساب المستخدم وتفضيلات الدفع
+│   ├── admin/                # لوحة التحكم وإدارة الدول
+│   ├── api/                  # مسارات API السيرفر (بوابات الدفع وجسر بايثون)
+│   ├── components/           # المكونات التفاعلية (نافذة وسائل الدفع)
+│   └── lib/                  # مصفوفة سياق الأمان، العملات، والمصادقة
+├── lib/                      # منطق العمل التجاري (تحويل العملات ومطابقة الرسائل)
+├── python_services/          # خادم محرك بايثون المستقل (FastAPI & Scripts)
+│   ├── main.py               # خادم FastAPI للربط السريع
+│   ├── scripts/              # سكربتات بايثون المستقلة (tiktok_helper.py)
+│   └── requirements.txt      # مكتبات بايثون
+├── worker/                   # خادم Cloudflare Worker لبوابة رسائل الدفع
+├── firestore.rules           # قواعد حماية واستعلامات Firestore
+├── next.config.ts            # إعدادات Next.js
+└── wrangler.jsonc            # إعدادات Cloudflare Worker
+```
+
+---
+
+## 🚀 التشغيل المباشر والنشر على Vercel
+
+```bash
 npm install
-npm run dev</code>
-</pre>
-
-<hr />
-
-<div align="center">
-  <p><b>تم التطوير بنجاح بواسطة محمد زيتون ❤️</b></p>
-  <a href="https://mohamed-zaitoon.github.io/zaitxmedia-template">
-    <img src="https://img.shields.io/badge/مرفوع_عبر-GitHub_Pages-222222?style=for-the-badge&logo=github" alt="GitHub Pages" />
-  </a>
-</div>
-
-</div>
+pip install -r python_services/requirements.txt
+npm run dev
+npx vercel --prod
+```
