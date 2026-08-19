@@ -148,6 +148,9 @@ export async function POST(request: Request) {
     const data: Record<string, unknown> = {
       userId,
       userEmail: profile.data()?.email || "",
+      userPhone: profile.data()?.phone || profile.data()?.phone_number || reference || "",
+      payerPhone: reference || "",
+      payerPhoneNormalized: normalized,
       client_ip: clientIp || null,
       amount,
       currency,
@@ -155,6 +158,7 @@ export async function POST(request: Request) {
       paymentMethodKey: method,
       paymentWalletIdentifier: paymentWallet.number || paymentWallet.link || "",
       originalReference: reference,
+      referenceNumber: reference,
       receiptUrl: receiptUrl || null,
       expectedPaymentAmountMinor: Math.round(amount * 100),
       paymentStatus: isManualReviewRequired ? "manual_review" : "verifying",

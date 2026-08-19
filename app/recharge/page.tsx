@@ -439,12 +439,8 @@ export default function RechargePage() {
       toast.error("هذه الوسيلة غير متاحة حالياً، يرجى اختيار وسيلة أخرى");
       return;
     }
-    if ((method === "bank" || method === "barq") && !receiptUrl) {
-      toast.error(
-        method === "barq"
-          ? "يرجى رفع صورة إيصال التحويل لخدمة برق لتأكيد الإيداع"
-          : "يرجى رفع صورة إيصال التحويل البنكي لتأكيد الإيداع"
-      );
+    if (method === "bank" && !receiptUrl) {
+      toast.error("يرجى رفع صورة إيصال التحويل البنكي لتأكيد الإيداع");
       return;
     }
     setBusy(true);
@@ -532,10 +528,25 @@ export default function RechargePage() {
                   : "في انتظار رسالة التحويل"}
             </h2>
             {!["verified", "approved", "manual_review"].includes(recharge?.status) && (
-              <div className="mx-auto mb-4 w-fit rounded-xl border border-border bg-background px-5 py-3 font-mono text-3xl font-black" dir="ltr">
-                {String(Math.floor(remainingSeconds / 60)).padStart(2, "0")}:
-                {String(remainingSeconds % 60).padStart(2, "0")}
-              </div>
+              <>
+                <div className="mx-auto mb-4 w-fit rounded-2xl border border-amber-500/40 bg-amber-500/10 px-6 py-3.5 font-mono text-3xl md:text-4xl font-black text-amber-400 shadow-xl" dir="ltr">
+                  {String(Math.floor(remainingSeconds / 60)).padStart(2, "0")}:
+                  {String(remainingSeconds % 60).padStart(2, "0")}
+                </div>
+
+                <div className="my-5 rounded-2xl border border-red-500/40 bg-red-500/10 p-4 md:p-5 text-center text-xs md:text-sm text-red-300 font-bold space-y-2 leading-relaxed shadow-lg">
+                  <div className="flex items-center justify-center gap-2 text-red-400 font-black text-sm md:text-base">
+                    <ShieldAlert size={20} className="shrink-0 animate-bounce" />
+                    ⚠️ تحذير هام جداً بناءً على شروط الاستخدام:
+                  </div>
+                  <p>
+                    يرجى عدم إغلاق هذه الصفحة أو الخروج منها نهائياً أثناء جاري التحقق التلقائي من الإيداع (مدة 5 دقائق).
+                  </p>
+                  <p className="text-amber-300 font-black underline">
+                    الخروج من الصفحة قبل انتهاء التحقق يُسقط حقك في المراجعة التلقائية وتطبيقاً لشروط استخدام الموقع (المال غير قابل للاسترداد).
+                  </p>
+                </div>
+              </>
             )}
             <p className="text-sm leading-7 text-muted-foreground">
               صافي الرصيد المتوقع: {formatDepositBalance(
@@ -904,38 +915,40 @@ export default function RechargePage() {
               </div>
             )}
 
-            {/* Receipt upload box for Bank Transfer and manual proofs */}
-            <div className="rounded-2xl border border-cyan-500/25 bg-cyan-500/5 p-4 space-y-3 text-right">
-              <label className="block text-sm font-bold text-cyan-400">
-                📄 رفع صورة إيصال التحويل {(method === "bank" || method === "barq") ? "(إجباري)" : "(اختياري)"}
-              </label>
-              <div className="flex flex-col items-center justify-center border-2 border-dashed border-cyan-500/30 rounded-xl p-4 bg-background/50 hover:bg-background/80 transition-all cursor-pointer">
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/heic"
-                  disabled={uploadingReceipt}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setReceiptFile(file);
-                      handleReceiptUpload(file);
-                    }
-                  }}
-                  className="w-full text-xs text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer"
-                />
-                {uploadingReceipt && (
-                  <p className="mt-2 text-xs text-cyan-400 font-bold animate-pulse">جاري رفع صورة الإيصال إلى الخادم السحابي...</p>
-                )}
-                {receiptUrl && (
-                  <div className="mt-3 flex items-center gap-2 text-xs text-emerald-400 font-bold">
-                    <CheckCircle size={15} /> تم رفع الإيصال بنجاح
-                    <a href={receiptUrl} target="_blank" rel="noopener noreferrer" className="underline text-cyan-400 mr-2 font-mono">
-                      معاينة الإيصال
-                    </a>
-                  </div>
-                )}
+            {/* Receipt upload box ONLY for Bank Transfer */}
+            {method === "bank" && (
+              <div className="rounded-2xl border border-cyan-500/25 bg-cyan-500/5 p-4 space-y-3 text-right">
+                <label className="block text-sm font-bold text-cyan-400">
+                  📄 رفع صورة إيصال التحويل البنكي (إجباري)
+                </label>
+                <div className="flex flex-col items-center justify-center border-2 border-dashed border-cyan-500/30 rounded-xl p-4 bg-background/50 hover:bg-background/80 transition-all cursor-pointer">
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/heic"
+                    disabled={uploadingReceipt}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setReceiptFile(file);
+                        handleReceiptUpload(file);
+                      }
+                    }}
+                    className="w-full text-xs text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer"
+                  />
+                  {uploadingReceipt && (
+                    <p className="mt-2 text-xs text-cyan-400 font-bold animate-pulse">جاري رفع صورة الإيصال إلى الخادم السحابي...</p>
+                  )}
+                  {receiptUrl && (
+                    <div className="mt-3 flex items-center gap-2 text-xs text-emerald-400 font-bold">
+                      <CheckCircle size={15} /> تم رفع الإيصال بنجاح
+                      <a href={receiptUrl} target="_blank" rel="noopener noreferrer" className="underline text-cyan-400 mr-2 font-mono">
+                        معاينة الإيصال
+                      </a>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
             <div className={`grid grid-cols-1 gap-2 ${user?.country_code === "SA" ? "sm:grid-cols-2" : ""}`}>
               <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-center">
                 <span className="block text-xs text-muted-foreground">سعر الدولار</span>
