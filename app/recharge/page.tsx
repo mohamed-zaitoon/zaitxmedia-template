@@ -285,8 +285,26 @@ export default function RechargePage() {
     if (typeof window === "undefined") return;
 
     const targetUrl = selected?.link || "ipn://";
+    let appOpened = false;
 
+    const handleAppLaunchDetect = () => {
+      appOpened = true;
+    };
+
+    window.addEventListener("pagehide", handleAppLaunchDetect, { once: true });
+    window.addEventListener("blur", handleAppLaunchDetect, { once: true });
+
+    // Attempt to launch InstaPay app directly
     window.location.href = targetUrl;
+
+    // Wait 5 seconds to verify if the app opened or is missing
+    window.setTimeout(() => {
+      window.removeEventListener("pagehide", handleAppLaunchDetect);
+      window.removeEventListener("blur", handleAppLaunchDetect);
+      if (!appOpened && document.visibilityState === "visible") {
+        toast.error("تطبيق InstaPay غير مثبت على جهازك ⚠️");
+      }
+    }, 5000);
   };
 
   const activeMatchingWallets = useMemo(() => {
