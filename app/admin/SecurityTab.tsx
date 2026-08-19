@@ -17,7 +17,7 @@ import {
   Server,
   Zap,
 } from "lucide-react";
-import Swal from "sweetalert2";
+import { toast } from "sonner";
 
 export function SecurityTab() {
   const [running, setRunning] = useState(false);
@@ -66,15 +66,7 @@ export function SecurityTab() {
     });
     setRunning(false);
 
-    Swal.fire({
-      icon: "success",
-      title: "تم الفحص الأمني بنجاح 🛡️",
-      text: "جميع التوقيعات، أنظمة التشفير، وقواعد الأمان تعمل بكفاءة 100%.",
-      confirmButtonText: "موافق",
-      confirmButtonColor: "#10b981",
-      background: "#0f172a",
-      color: "#fff",
-    });
+    toast.success("تم الفحص الأمني بنجاح 🛡️ — المنظومة آمنة 100%");
   };
 
   useEffect(() => {
