@@ -27,7 +27,7 @@ export default function CustomWalletSelect({ value, onChange, options }: CustomW
     if (w.type === "instapay") return "انستاباي (InstaPay)";
     if (w.type === "barq") return "برق (Barq)";
     if (w.type === "bank") return "تحويل بنكي (Bank Transfer)";
-    if (w.type === "binance_pay" || w.type === "binance") return "باينانس باي (Binance Pay - USD)";
+    if (w.type === "binance_pay" || w.type === "binance") return "Binance Pay";
     return w.customName || w.title || w.name || "وسيلة دفع مخصصة";
   };
 

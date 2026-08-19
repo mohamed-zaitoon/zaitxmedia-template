@@ -277,7 +277,7 @@ export default function RechargePage() {
             type: "binance_pay",
             countryCode: "GLOBAL",
             number: "405960486",
-            name: "باينانس باي (Binance Pay - USD)",
+            name: "Binance Pay",
             min: 1,
             max: 10000,
             isActive: true,
@@ -936,7 +936,7 @@ export default function RechargePage() {
                   </div>
                 ) : (selected.type === "binance_pay" || selected.type === "binance") ? (
                   <div className="flex flex-col gap-4">
-                    <span className="block text-xs font-bold text-amber-400 mb-1">وسيلة الدفع: باينانس باي (Binance Pay - USD) 🟡</span>
+                    <span className="block text-xs font-bold text-amber-400 mb-1">وسيلة الدفع: Binance Pay 🟡</span>
 
                     {/* Binance Pay ID Box */}
                     <div className="text-sm bg-slate-900/90 p-4 rounded-2xl border border-amber-500/30 flex justify-between items-center gap-3 shadow-md">

@@ -1923,7 +1923,7 @@ export function WalletsTab() {
               type: "binance_pay",
               countryCode: "GLOBAL",
               number: "405960486",
-              name: "باينانس باي (Binance Pay - USD)",
+              name: "Binance Pay",
               min: 1,
               max: 10000,
               isActive: true,
@@ -2053,7 +2053,7 @@ export function WalletsTab() {
               { value: "vodafone", label: "فودافون كاش / محفظه الكترونية" },
               { value: "instapay", label: "انستاباي (InstaPay)" },
               { value: "barq", label: "برق (Barq - السعودية)" },
-              { value: "binance_pay", label: "🟡 باينانس باي (Binance Pay - USD)" },
+              { value: "binance_pay", label: "🟡 Binance Pay" },
               { value: "bank", label: "حساب بنكي (Bank Transfer)" },
               { value: "custom", label: "➕ طريقة دفع مخصصة جديدة" },
             ]}
@@ -2244,7 +2244,7 @@ export function WalletsTab() {
               { id: "vodafone", label: "📱 فودافون كاش / المحافظ" },
               { id: "instapay", label: "⚡ انستاباي InstaPay" },
               { id: "barq", label: "✨ برق Barq" },
-              { id: "binance_pay", label: "🟡 باينانس باي Binance Pay" },
+              { id: "binance_pay", label: "🟡 Binance Pay" },
               { id: "bank", label: "🏦 تحويل بنكي Bank" },
               ...Array.from(new Set(wallets.map(w => w.type).filter(t => !["vodafone", "instapay", "barq", "binance_pay", "binance", "bank"].includes(t)))).map(t => ({ id: t, label: `💳 ${t}` }))
             ].map((m) => (
