@@ -994,18 +994,18 @@ export default function RechargePage() {
               <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-center">
                 <span className="block text-xs text-muted-foreground">سعر الدولار</span>
                 <div className="mt-1 flex items-center justify-center gap-1.5 text-sm font-bold text-primary font-mono" dir="ltr">
-                  <span>1 $ =</span>
-                  <span>{user?.country_code === "SA" ? (rates.usd / rates.sar).toFixed(2) : rates.usd.toFixed(2)}</span>
                   <span>{user?.country_code === "SA" ? (symbols.sar || "﷼") : (symbols.egp || "£")}</span>
+                  <span>{user?.country_code === "SA" ? (rates.usd / rates.sar).toFixed(2) : rates.usd.toFixed(2)} =</span>
+                  <span>$1</span>
                 </div>
               </div>
               {user?.country_code === "SA" && (
                 <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-center">
                   <span className="block text-xs text-muted-foreground">سعر الريال</span>
                   <div className="mt-1 flex items-center justify-center gap-1.5 text-sm font-bold text-primary font-mono" dir="ltr">
-                    <span>1 ﷼ =</span>
-                    <span>{rates.sar.toFixed(2)}</span>
                     <span>{symbols.egp || "£"}</span>
+                    <span>{rates.sar.toFixed(2)} =</span>
+                    <span>1 ﷼</span>
                   </div>
                 </div>
               )}
