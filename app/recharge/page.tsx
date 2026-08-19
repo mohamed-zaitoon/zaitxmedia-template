@@ -625,55 +625,54 @@ export default function RechargePage() {
   };
 
   if (loading) return null;
+
   return (
     <AppShell>
-      <div className="mx-auto w-full max-w-3xl py-3 font-['Cairo']" dir="rtl">
-        <h1 className="mb-5 flex items-center justify-center gap-2 text-xl font-bold text-primary">
+      <div className="mx-auto w-full max-w-5xl py-2 px-2 sm:px-4 font-['Cairo'] text-right" dir="rtl">
+        <h1 className="mb-3 flex items-center justify-center gap-2 text-lg sm:text-xl font-bold text-primary">
           <Wallet size={22} /> شحن المحفظة
         </h1>
         {requiredEgp > 0 && !rechargeId && (
-          <div className="mx-0 mb-4 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-4 text-center sm:mx-1 sm:px-5">
-            <strong className="block text-emerald-400">
+          <div className="mx-0 mb-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-center">
+            <strong className="block text-emerald-400 text-sm">
               شحن الرصيد لإتمام الطلب
             </strong>
             {requestedService && (
-              <span className="mt-1 block text-sm text-foreground">
+              <span className="mt-0.5 block text-xs text-foreground font-semibold">
                 {requestedService}
               </span>
             )}
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              <div className="rounded-xl border border-primary/20 bg-background/60 px-3 py-3">
-                <span className="block text-xs text-muted-foreground">
+            <div className="mt-2.5 grid grid-cols-2 gap-2">
+              <div className="rounded-xl border border-primary/20 bg-background/60 px-3 py-2">
+                <span className="block text-[11px] text-muted-foreground">
                   إجمالي سعر الطلب
                 </span>
-                <strong className="mt-1 block text-lg text-primary" dir="ltr">
+                <strong className="mt-0.5 block text-base text-primary font-mono" dir="ltr">
                   {formattedOrderAmount}
                 </strong>
               </div>
-              <div className="rounded-xl border border-emerald-500/25 bg-background/60 px-3 py-3">
-                <span className="block text-xs text-muted-foreground">
+              <div className="rounded-xl border border-emerald-500/25 bg-background/60 px-3 py-2">
+                <span className="block text-[11px] text-muted-foreground">
                   المبلغ المطلوب تحويله
                 </span>
-                <strong className="mt-1 block text-lg text-emerald-400" dir="ltr">
+                <strong className="mt-0.5 block text-base text-emerald-400 font-mono" dir="ltr">
                   {formattedTransferAmount}
                 </strong>
               </div>
             </div>
-            <span className="mt-3 block text-xs leading-6 text-muted-foreground">
-              تم حساب مبلغ التحويل بدقة لضمان إضافة الرصيد الكافي لإتمام طلبك.
-            </span>
           </div>
         )}
+
         {rechargeId ? (
-          <div className="mx-0 rounded-2xl border border-primary/30 bg-card px-4 py-7 text-center sm:mx-1 sm:px-6">
+          <div className="mx-auto max-w-2xl rounded-2xl border border-primary/30 bg-card p-5 text-center shadow-xl">
             {["verified", "approved"].includes(recharge?.status) ? (
-              <CheckCircle className="mx-auto mb-4 text-emerald-500" size={54} />
+              <CheckCircle className="mx-auto mb-3 text-emerald-500" size={48} />
             ) : recharge?.status === "manual_review" ? (
-              <ShieldAlert className="mx-auto mb-4 text-amber-500" size={54} />
+              <ShieldAlert className="mx-auto mb-3 text-amber-500" size={48} />
             ) : (
-              <Clock className="mx-auto mb-4 animate-pulse text-primary" size={54} />
+              <Clock className="mx-auto mb-3 animate-pulse text-primary" size={48} />
             )}
-            <h2 className="mb-3 text-xl font-bold">
+            <h2 className="mb-2 text-lg font-bold">
               {["verified", "approved"].includes(recharge?.status)
                 ? "تمت إضافة الرصيد"
                 : recharge?.status === "manual_review"
@@ -682,26 +681,23 @@ export default function RechargePage() {
             </h2>
             {!["verified", "approved", "manual_review"].includes(recharge?.status) && (
               <>
-                <div className="mx-auto mb-4 w-fit rounded-2xl border border-amber-500/40 bg-amber-500/10 px-6 py-3.5 font-mono text-3xl md:text-4xl font-black text-amber-400 shadow-xl" dir="ltr">
+                <div className="mx-auto mb-3 w-fit rounded-2xl border border-amber-500/40 bg-amber-500/10 px-5 py-2.5 font-mono text-2xl md:text-3xl font-black text-amber-400 shadow-lg" dir="ltr">
                   {String(Math.floor(remainingSeconds / 60)).padStart(2, "0")}:
                   {String(remainingSeconds % 60).padStart(2, "0")}
                 </div>
 
-                <div className="my-5 rounded-2xl border border-red-500/40 bg-red-500/10 p-4 md:p-5 text-center text-xs md:text-sm text-red-300 font-bold space-y-2 leading-relaxed shadow-lg">
-                  <div className="flex items-center justify-center gap-2 text-red-400 font-black text-sm md:text-base">
-                    <ShieldAlert size={20} className="shrink-0 animate-bounce" />
+                <div className="my-3 rounded-xl border border-red-500/40 bg-red-500/10 p-3.5 text-center text-xs text-red-300 font-bold space-y-1.5 leading-relaxed">
+                  <div className="flex items-center justify-center gap-2 text-red-400 font-black text-xs sm:text-sm">
+                    <ShieldAlert size={18} className="shrink-0 animate-bounce" />
                     ⚠️ تحذير هام جداً بناءً على شروط الاستخدام:
                   </div>
                   <p>
-                    يرجى عدم إغلاق هذه الصفحة أو الخروج منها نهائياً أثناء جاري التحقق التلقائي من الإيداع (مدة 5 دقائق).
-                  </p>
-                  <p className="text-amber-300 font-black underline">
-                    الخروج من الصفحة قبل انتهاء التحقق يُسقط حقك في المراجعة التلقائية وتطبيقاً لشروط استخدام الموقع (المال غير قابل للاسترداد).
+                    يرجى عدم إغلاق هذه الصفحة أثناء جاري التحقق التلقائي من الإيداع (مدة 5 دقائق).
                   </p>
                 </div>
               </>
             )}
-            <p className="text-sm leading-7 text-muted-foreground">
+            <p className="text-xs sm:text-sm leading-6 text-muted-foreground">
               صافي الرصيد المتوقع: {formatDepositBalance(
                 Number(recharge?.netDepositEgp)
                 || Number(recharge?.estimatedCreditUsd || 0) * rates.usd,
@@ -709,548 +705,363 @@ export default function RechargePage() {
             </p>
             {recharge?.status === "manual_review" && (
               <>
-                <p className="mt-4 text-sm leading-7 text-amber-400">
+                <p className="mt-3 text-xs sm:text-sm leading-6 text-amber-400">
                   سيظهر الطلب للأدمن للموافقة اليدوية، ويمكنك أيضًا بدء تحقق تلقائي جديد.
                 </p>
                 <button
                   onClick={retryVerification}
                   disabled={retrying}
-                  className="mt-4 inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 font-bold text-black disabled:opacity-50"
+                  className="mt-3 inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-xs font-bold text-black disabled:opacity-50"
                 >
-                  <RefreshCw size={17} className={retrying ? "animate-spin" : ""} />
+                  <RefreshCw size={15} className={retrying ? "animate-spin" : ""} />
                   {retrying ? "جاري المحاولة..." : "إعادة المحاولة"}
                 </button>
               </>
             )}
           </div>
         ) : (
-          <div className="mx-0 space-y-7 md:space-y-8 rounded-3xl border border-border/80 bg-card/95 p-6 md:p-10 shadow-2xl backdrop-blur-xl">
-            <div>
-              <label className="mb-2.5 block text-sm font-bold text-slate-200">اختر وسيلة الإيداع</label>
-              <CustomWalletSelect
-                value={method}
-                onChange={(val) => {
-                  setMethod(val);
-                  setShowInstructionsModal(true);
-                  if (typeof window !== "undefined") localStorage.setItem("preferred_payment_method", val);
-                }}
-                options={wallets}
-              />
-            </div>
-             {selected?.disabled ? (
-              <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-6 text-center text-sm font-bold text-amber-400 space-y-3 my-4">
-                <div className="text-base font-black flex items-center justify-center gap-2">
-                  <ShieldAlert size={22} />
-                  وسيلة الإيداع هذه ({selected.type === "vodafone" ? "فودافون كاش / محفظه الكترونية" : selected.type === "instapay" ? "InstaPay" : selected.type === "barq" ? "برق" : "التحويل البنكي"}) غير متاحة حالياً.
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-4 sm:p-5 shadow-xl">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+              
+              {/* Right Column: Wallet Selection + Embedded Instructions + Transfer Details */}
+              <div className="lg:col-span-6 space-y-3">
+                <div>
+                  <label className="mb-1.5 block text-xs font-bold text-slate-200">اختر وسيلة الإيداع</label>
+                  <CustomWalletSelect
+                    value={method}
+                    onChange={(val) => {
+                      setMethod(val);
+                      if (typeof window !== "undefined") localStorage.setItem("preferred_payment_method", val);
+                    }}
+                    options={wallets}
+                  />
                 </div>
-                <p className="text-xs text-muted-foreground/90 font-medium">
-                  يرجى اختيار وسيلة إيداع أخرى متاحة من القائمة أعلاه لإكمال عملية الشحن.
-                </p>
-              </div>
-            ) : selected ? (
-              <div className="rounded-2xl border border-primary/30 bg-primary/5 p-5 md:p-7 flex flex-col gap-4 my-4 shadow-sm">
-                {selected.type === "bank" ? (
-                  <>
-                    <span className="block text-xs font-bold text-slate-300 mb-1">بيانات التحويل البنكي:</span>
-                    {selected.bankName && (
-                      <div className="text-sm bg-background/80 p-4 rounded-xl border border-border flex justify-between items-center gap-3 shadow-sm">
-                        <div className="flex flex-col gap-1 min-w-0 flex-1">
-                          <span className="text-xs text-muted-foreground font-semibold">اسم البنك:</span>
-                          <strong className="text-foreground font-bold text-base">{selected.bankName}</strong>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => copyToClipboard(selected.bankName, "تم نسخ اسم البنك بنجاح 📋")}
-                          className="rounded-xl bg-primary/15 hover:bg-primary/25 p-3 text-primary transition-all duration-300 shrink-0 cursor-pointer"
-                          aria-label="نسخ"
-                        >
-                          <Copy size={16} />
-                        </button>
-                      </div>
-                    )}
-                    {selected.holderName && (
-                      <div className="text-sm bg-background/80 p-4 rounded-xl border border-border flex justify-between items-center gap-3 shadow-sm">
-                        <div className="flex flex-col gap-1 min-w-0 flex-1">
-                          <span className="text-xs text-muted-foreground font-semibold">صاحب الحساب / المستفيد:</span>
-                          <strong className="text-foreground font-bold text-base">{selected.holderName}</strong>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => copyToClipboard(selected.holderName, "تم نسخ اسم صاحب الحساب بنجاح 📋")}
-                          className="rounded-xl bg-primary/15 hover:bg-primary/25 p-3 text-primary transition-all duration-300 shrink-0 cursor-pointer"
-                          aria-label="نسخ"
-                        >
-                          <Copy size={16} />
-                        </button>
-                      </div>
-                    )}
-                    {!selected.bankName && !selected.holderName && selected.name && (
-                      <div className="text-sm bg-background/80 p-4 rounded-xl border border-border flex justify-between items-center gap-3 shadow-sm">
-                        <div className="flex flex-col gap-1 min-w-0 flex-1">
-                          <span className="text-xs text-muted-foreground font-semibold">البنك والمستفيد:</span>
-                          <strong className="text-foreground font-bold text-base">{selected.name}</strong>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => copyToClipboard(selected.name, "تم نسخ بيانات الحساب بنجاح 📋")}
-                          className="rounded-xl bg-primary/15 hover:bg-primary/25 p-3 text-primary transition-all duration-300 shrink-0 cursor-pointer"
-                          aria-label="نسخ"
-                        >
-                          <Copy size={16} />
-                        </button>
-                      </div>
-                    )}
-                    {selected.number && (
-                      <div className="text-sm bg-background/80 p-4 rounded-xl border border-border flex justify-between items-center gap-3 shadow-sm">
-                        <div className="flex flex-col gap-1 min-w-0 flex-1">
-                          <span className="text-xs text-muted-foreground font-semibold">رقم الحساب:</span>
-                          <strong className="font-mono text-base text-foreground break-all" dir="ltr">{selected.number}</strong>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => copyToClipboard(selected.number, "تم نسخ رقم الحساب بنجاح 📋")}
-                          className="rounded-xl bg-primary/15 hover:bg-primary/25 p-3 text-primary transition-all duration-300 shrink-0 cursor-pointer"
-                          aria-label="نسخ"
-                        >
-                          <Copy size={16} />
-                        </button>
-                      </div>
-                    )}
-                    {selected.link && (
-                      <div className="text-sm bg-background/80 p-4 rounded-xl border border-border flex justify-between items-center gap-3 shadow-sm">
-                        <div className="flex flex-col gap-1 min-w-0 flex-1">
-                          <span className="text-xs text-muted-foreground font-semibold">رقم الحساب الدولي (IBAN):</span>
-                          <strong className="font-mono text-base text-foreground break-all" dir="ltr">{selected.link}</strong>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => copyToClipboard(selected.link, "تم نسخ رقم الحساب الدولي (IBAN) بنجاح 📋")}
-                          className="rounded-xl bg-primary/15 hover:bg-primary/25 p-3 text-primary transition-all duration-300 shrink-0 cursor-pointer"
-                          aria-label="نسخ"
-                        >
-                          <Copy size={16} />
-                        </button>
-                      </div>
-                    )}
-                    {selected.swift && (
-                      <div className="text-sm bg-background/80 p-4 rounded-xl border border-border flex justify-between items-center gap-3 shadow-sm">
-                        <div className="flex flex-col gap-1 min-w-0 flex-1">
-                          <span className="text-xs text-muted-foreground font-semibold">السويفت كود (Swift Code):</span>
-                          <strong className="font-mono text-base text-foreground break-all" dir="ltr">{selected.swift}</strong>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => copyToClipboard(selected.swift, "تم نسخ السويفت كود (Swift) بنجاح 📋")}
-                          className="rounded-xl bg-primary/15 hover:bg-primary/25 p-3 text-primary transition-all duration-300 shrink-0 cursor-pointer"
-                          aria-label="نسخ"
-                        >
-                          <Copy size={16} />
-                        </button>
-                      </div>
-                    )}
-                  </>
-                ) : selected.type === "instapay" ? (
-                  <div className="flex flex-col gap-4">
-                    <span className="block text-xs font-bold text-slate-300 mb-1">وسيلة الدفع: انستاباي (InstaPay)</span>
 
-                    {/* Native App Launch Button (Mobile Only) */}
-                    <button
-                      type="button"
-                      onClick={handleOpenInstaPayApp}
-                      className="inline-flex md:hidden h-14 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 font-black text-black hover:opacity-90 transition-all shadow-lg active:scale-95 cursor-pointer text-xs sm:text-sm md:text-base my-1 whitespace-nowrap"
-                    >
-                      <Zap size={18} className="fill-black shrink-0" />
-                      <span dir="rtl" className="inline-flex items-center gap-1.5 whitespace-nowrap">
-                        <span>التحويل المباشر من</span>
-                        <span dir="ltr" className="font-mono">InstaPay</span>
+                {/* Embedded Step-by-Step Instructions Box directly under Dropdown */}
+                {selected && (
+                  <div className="rounded-xl border border-cyan-500/30 bg-slate-950/80 p-3 space-y-2">
+                    <div className="flex items-center gap-2 pb-1.5 border-b border-slate-800/80">
+                      <HelpCircle size={16} className="text-cyan-400 shrink-0" />
+                      <span className="text-xs font-black text-slate-200">
+                        تعليمات الإيداع عبر {
+                          method === "vodafone" ? "فودافون كاش / المحافظ" :
+                          method === "instapay" ? "انستاباي (InstaPay)" :
+                          method === "barq" ? "برق (Barq)" :
+                          method === "binance_pay" || method === "binance" ? "Binance Pay" :
+                          method === "bank" ? "التحويل البنكي" : "وسيلة الدفع"
+                        } 📋
                       </span>
-                    </button>
-
-                    {/* Separated Number Box (Desktop Only) */}
-                    {selected.number && (
-                      <div className="hidden md:flex text-sm bg-background/80 p-4 rounded-xl border border-border justify-between items-center gap-3 shadow-sm">
-                        <div className="flex flex-col gap-1 min-w-0 flex-1">
-                          <span className="text-xs text-muted-foreground font-semibold">📱 رقم تحويل إنستاباي:</span>
-                          <strong className="font-mono text-base text-foreground break-all" dir="ltr">{selected.number}</strong>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => copyToClipboard(selected.number, "تم نسخ رقم تحويل انستاباي بنجاح 📋")}
-                          className="rounded-xl bg-primary/15 hover:bg-primary/25 p-3 text-primary transition-all duration-300 shrink-0 cursor-pointer"
-                          aria-label="نسخ"
-                        >
-                          <Copy size={16} />
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Separated Username / IPA Box */}
-                    {(selected.username || selected.ipa || (selected.link && selected.link.includes("@"))) && (() => {
-                      const ipaValue = selected.username || selected.ipa || selected.link;
-                      return (
-                        <div className="text-sm bg-background/80 p-4 rounded-xl border border-border flex justify-between items-center gap-3 shadow-sm">
-                          <div className="flex flex-col gap-1 min-w-0 flex-1">
-                            <span className="text-xs text-muted-foreground font-semibold">👤 اسم مستخدم إنستاباي / العنوان (IPA):</span>
-                            <strong className="font-mono text-base text-emerald-400 break-all" dir="ltr">{ipaValue}</strong>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => copyToClipboard(ipaValue, "تم نسخ اسم مستخدم انستاباي بنجاح 📋")}
-                            className="rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 p-3 text-emerald-400 border border-emerald-500/20 transition-all duration-300 shrink-0 cursor-pointer"
-                            aria-label="نسخ"
-                          >
-                            <Copy size={16} />
-                          </button>
-                        </div>
-                      );
-                    })()}
-
-                    {/* Account Holder Name */}
-                    {(selected.name || selected.holderName) && (() => {
-                      const holderNameStr = selected.holderName || selected.name;
-                      return (
-                        <div className="text-sm bg-background/80 p-3.5 rounded-xl border border-border/80 w-full flex items-center justify-between gap-3 shadow-sm">
-                          <strong className="text-foreground font-black text-base">{holderNameStr}</strong>
-                          <button
-                            type="button"
-                            onClick={() => copyToClipboard(holderNameStr, "تم النسخ بنجاح 📋")}
-                            className="rounded-xl bg-primary/15 hover:bg-primary/25 p-2 text-primary transition-all duration-300 shrink-0 cursor-pointer"
-                            aria-label="نسخ"
-                          >
-                            <Copy size={16} />
-                          </button>
-                        </div>
-                      );
-                    })()}
-
-                    {/* QR Code (Desktop Web Only) */}
-                    {selected.qr && (
-                      <div className="hidden md:flex flex-col items-center gap-3 bg-background/90 p-5 rounded-2xl border border-border shadow-sm text-center my-3">
-                        <span className="text-xs font-bold text-slate-200">امسح رمز الاستجابة السريعة (QR Code) للتحويل مباشرة:</span>
-                        <div className="bg-white p-3 rounded-2xl border border-border flex justify-center items-center shadow-md w-64 h-64 mx-auto">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={selected.qr} alt="InstaPay QR Code" className="w-full h-full max-w-[230px] max-h-[230px] object-contain rounded-xl" />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (selected.type === "binance_pay" || selected.type === "binance") ? (
-                  <div className="flex flex-col gap-4">
-                    <span className="block text-xs font-bold text-amber-400 mb-1">وسيلة الدفع: Binance Pay 🟡</span>
-
-                    {/* Binance Pay ID Box */}
-                    <div className="text-sm bg-slate-900/90 p-4 rounded-2xl border border-amber-500/30 flex justify-between items-center gap-3 shadow-md">
-                      <div className="flex flex-col gap-1 min-w-0 flex-1">
-                        <span className="text-xs text-amber-400 font-bold">🟡 Binance Pay ID الخاص بحسابنا:</span>
-                        <strong className="font-mono text-lg text-slate-100 break-all" dir="ltr">
-                          {selected?.number || "405960486"}
-                        </strong>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => copyToClipboard(selected?.number || "405960486", "تم نسخ Binance ID بنجاح 📋")}
-                        className="rounded-xl bg-amber-500/15 hover:bg-amber-500/25 p-3 text-amber-400 border border-amber-500/30 transition-all duration-300 shrink-0 cursor-pointer"
-                        aria-label="نسخ"
-                      >
-                        <Copy size={18} />
-                      </button>
                     </div>
+                    <div className="grid grid-cols-1 gap-1 text-xs">
+                      {(siteInstructions[method] || [
+                        "أرسل المبلغ أولاً",
+                        "اكتب المبلغ الخانة المطلوبة",
+                        "اكتب الرقم المرجعي أو رقم الهاتف",
+                        "اضغط على تأكيد الإيداع",
+                      ]).map((step: string, idx: number) => (
+                        <div key={idx} className="flex items-center gap-2 bg-slate-900/60 px-2.5 py-1.5 rounded-lg border border-slate-800/60">
+                          <span className="w-5 h-5 rounded-md bg-cyan-500/20 text-cyan-400 font-mono font-bold text-[11px] flex items-center justify-center shrink-0 border border-cyan-500/30">
+                            {idx + 1}
+                          </span>
+                          <span className="text-slate-300 font-semibold leading-snug text-xs">
+                            {step}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-                    {/* Order Details after creation */}
-                    {binancePayDetails && (
-                      <div className="bg-slate-950/90 p-4 rounded-2xl border border-slate-800 space-y-3 shadow-inner">
-                        <div className="flex items-center justify-between text-xs sm:text-sm">
-                          <span className="text-slate-400 font-semibold">رقم المعاملة (Order ID):</span>
-                          <div className="flex items-center gap-2">
-                            <strong className="font-mono text-cyan-400 font-bold" dir="ltr">{binancePayDetails.merchantTradeNo || binancePayDetails.depositId}</strong>
+                {/* Selected Wallet Details Box */}
+                {selected?.disabled ? (
+                  <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-center text-xs font-bold text-amber-400 space-y-2">
+                    <div className="text-sm font-black flex items-center justify-center gap-2">
+                      <ShieldAlert size={18} />
+                      وسيلة الإيداع هذه ({selected.type === "vodafone" ? "فودافون كاش / محفظه الكترونية" : selected.type === "instapay" ? "InstaPay" : selected.type === "barq" ? "برق" : selected.type === "binance_pay" || selected.type === "binance" ? "Binance Pay" : "التحويل البنكي"}) غير متاحة حالياً.
+                    </div>
+                    <p className="text-[11px] text-muted-foreground/90 font-medium">
+                      يرجى اختيار وسيلة إيداع أخرى متاحة من القائمة أعلاه.
+                    </p>
+                  </div>
+                ) : selected ? (
+                  <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5 flex flex-col gap-2.5 shadow-sm">
+                    {selected.type === "bank" ? (
+                      <>
+                        <span className="block text-xs font-bold text-slate-300">بيانات التحويل البنكي:</span>
+                        {selected.bankName && (
+                          <div className="text-xs bg-background/80 p-3 rounded-lg border border-border flex justify-between items-center gap-2">
+                            <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                              <span className="text-[10px] text-muted-foreground font-semibold">اسم البنك:</span>
+                              <strong className="text-foreground font-bold text-xs">{selected.bankName}</strong>
+                            </div>
                             <button
                               type="button"
-                              onClick={() => copyToClipboard(binancePayDetails.merchantTradeNo || binancePayDetails.depositId || "", "تم نسخ Order ID بنجax 📋")}
-                              className="text-xs p-1.5 rounded-lg bg-cyan-500/15 text-cyan-400 hover:bg-cyan-500/25 cursor-pointer"
+                              onClick={() => copyToClipboard(selected.bankName, "تم نسخ اسم البنك بنجاح 📋")}
+                              className="rounded-lg bg-primary/15 hover:bg-primary/25 p-2 text-primary shrink-0"
                             >
                               <Copy size={14} />
                             </button>
                           </div>
-                        </div>
-                        <div className="flex items-center justify-between text-xs sm:text-sm">
-                          <span className="text-slate-400 font-semibold">المبلغ المطلوب بالدولار:</span>
-                          <strong className="font-mono text-emerald-400 font-black">${binancePayDetails.amountUsd} USD</strong>
-                        </div>
-                        <div className="flex items-center justify-between text-xs sm:text-sm">
-                          <span className="text-slate-400 font-semibold">حالة الدفع:</span>
-                          <span className="px-3 py-1 rounded-xl text-xs font-black bg-amber-500/15 text-amber-400 border border-amber-500/30">
-                            في انتظار التحويل والخصم...
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <>
-                    {/* Direct Transfer Link Button (Cellular Data Only - Uses admin link directly) */}
-                    {selected.link && isCellularConnection && (
-                      <div className="my-2">
-                        <a
-                          href={selected.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="btn-ultra-primary w-full text-xs sm:text-sm font-black py-4 text-slate-950 bg-gradient-to-r from-red-500 via-amber-400 to-emerald-400 hover:brightness-110 flex items-center justify-center gap-2 rounded-2xl transition-all shadow-lg cursor-pointer whitespace-nowrap"
+                        )}
+                        {selected.holderName && (
+                          <div className="text-xs bg-background/80 p-3 rounded-lg border border-border flex justify-between items-center gap-2">
+                            <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                              <span className="text-[10px] text-muted-foreground font-semibold">المستفيد:</span>
+                              <strong className="text-foreground font-bold text-xs">{selected.holderName}</strong>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => copyToClipboard(selected.holderName, "تم نسخ اسم صاحب الحساب بنجاح 📋")}
+                              className="rounded-lg bg-primary/15 hover:bg-primary/25 p-2 text-primary shrink-0"
+                            >
+                              <Copy size={14} />
+                            </button>
+                          </div>
+                        )}
+                        {selected.number && (
+                          <div className="text-xs bg-background/80 p-3 rounded-lg border border-border flex justify-between items-center gap-2">
+                            <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                              <span className="text-[10px] text-muted-foreground font-semibold">رقم الحساب:</span>
+                              <strong className="font-mono text-xs text-foreground break-all" dir="ltr">{selected.number}</strong>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => copyToClipboard(selected.number, "تم نسخ رقم الحساب بنجاح 📋")}
+                              className="rounded-lg bg-primary/15 hover:bg-primary/25 p-2 text-primary shrink-0"
+                            >
+                              <Copy size={14} />
+                            </button>
+                          </div>
+                        )}
+                        {selected.link && (
+                          <div className="text-xs bg-background/80 p-3 rounded-lg border border-border flex justify-between items-center gap-2">
+                            <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                              <span className="text-[10px] text-muted-foreground font-semibold">IBAN:</span>
+                              <strong className="font-mono text-xs text-foreground break-all" dir="ltr">{selected.link}</strong>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => copyToClipboard(selected.link, "تم نسخ IBAN بنجاح 📋")}
+                              className="rounded-lg bg-primary/15 hover:bg-primary/25 p-2 text-primary shrink-0"
+                            >
+                              <Copy size={14} />
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    ) : selected.type === "instapay" ? (
+                      <div className="flex flex-col gap-2.5">
+                        <span className="block text-xs font-bold text-slate-300">وسيلة الدفع: انستاباي (InstaPay)</span>
+                        <button
+                          type="button"
+                          onClick={handleOpenInstaPayApp}
+                          className="inline-flex md:hidden h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 font-black text-black text-xs transition-all shadow-md active:scale-95 cursor-pointer whitespace-nowrap"
                         >
-                          <Zap size={18} className="fill-slate-950 shrink-0" />
-                          <span className="whitespace-nowrap">التحويل المباشر من تطبيق محفظتك</span>
-                        </a>
+                          <Zap size={16} className="fill-black shrink-0" />
+                          <span>التحويل المباشر من InstaPay</span>
+                        </button>
+                        {selected.number && (
+                          <div className="hidden md:flex text-xs bg-background/80 p-3 rounded-lg border border-border justify-between items-center gap-2">
+                            <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                              <span className="text-[10px] text-muted-foreground font-semibold">📱 رقم تحويل إنستاباي:</span>
+                              <strong className="font-mono text-xs text-foreground break-all" dir="ltr">{selected.number}</strong>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => copyToClipboard(selected.number, "تم نسخ رقم تحويل انستاباي بنجاح 📋")}
+                              className="rounded-lg bg-primary/15 hover:bg-primary/25 p-2 text-primary shrink-0 cursor-pointer"
+                            >
+                              <Copy size={14} />
+                            </button>
+                          </div>
+                        )}
+                        {(selected.username || selected.ipa || (selected.link && selected.link.includes("@"))) && (() => {
+                          const ipaValue = selected.username || selected.ipa || selected.link;
+                          return (
+                            <div className="text-xs bg-background/80 p-3 rounded-lg border border-border flex justify-between items-center gap-2">
+                              <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                                <span className="text-[10px] text-muted-foreground font-semibold">👤 اسم مستخدم IPA:</span>
+                                <strong className="font-mono text-xs text-emerald-400 break-all" dir="ltr">{ipaValue}</strong>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => copyToClipboard(ipaValue, "تم نسخ IPA بنجاح 📋")}
+                                className="rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 p-2 text-emerald-400 border border-emerald-500/20 shrink-0 cursor-pointer"
+                              >
+                                <Copy size={14} />
+                              </button>
+                            </div>
+                          );
+                        })()}
                       </div>
-                    )}
-
-                    {/* Always visible Transfer Phone Number Box */}
-                    {(selected.number || selected.link) && (
-                      <div className="mt-3 space-y-1.5">
-                        <span className="block text-xs font-bold text-slate-300">
-                          📱 رقم التحويل:
-                        </span>
-                        <div className="flex items-center justify-between gap-3 bg-background p-4 rounded-xl border border-border shadow-sm" dir="ltr">
-                          <strong className="break-all font-mono text-lg text-emerald-400">{selected.number || selected.link}</strong>
+                    ) : (selected.type === "binance_pay" || selected.type === "binance") ? (
+                      <div className="flex flex-col gap-2.5">
+                        <span className="block text-xs font-bold text-amber-400">وسيلة الدفع: Binance Pay 🟡</span>
+                        <div className="text-xs bg-slate-900/90 p-3 rounded-xl border border-amber-500/30 flex justify-between items-center gap-2 shadow-sm">
+                          <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                            <span className="text-[10px] text-amber-400 font-bold">🟡 Binance Pay ID الخاص بحسابنا:</span>
+                            <strong className="font-mono text-base text-slate-100 break-all" dir="ltr">
+                              {selected?.number || "405960486"}
+                            </strong>
+                          </div>
                           <button
                             type="button"
-                            onClick={copyWalletDetails}
-                            className={`rounded-xl bg-primary/15 hover:bg-primary/25 p-3 text-primary transition-all duration-300 shrink-0 cursor-pointer ${
-                              copied ? "scale-110 rotate-[-8deg] bg-emerald-500/20 text-emerald-400 border-emerald-500/30" : "hover:scale-105"
-                            }`}
-                            aria-label="نسخ بيانات التحويل"
-                          >
-                            {copied ? <CheckCircle size={18} className="animate-bounce" /> : <Copy size={16} />}
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                    {(selected.name || selected.holderName) && (() => {
-                      const holderNameStr = selected.holderName || selected.name;
-                      return (
-                        <div className="mt-2 text-sm bg-background/80 p-3.5 rounded-xl border border-border/80 w-full flex items-center justify-between gap-3 shadow-sm">
-                          <strong className="text-foreground font-black text-base">{holderNameStr}</strong>
-                          <button
-                            type="button"
-                            onClick={() => copyToClipboard(holderNameStr, "تم النسخ بنجاح 📋")}
-                            className="rounded-xl bg-primary/15 hover:bg-primary/25 p-2 text-primary transition-all duration-300 shrink-0 cursor-pointer"
-                            aria-label="نسخ"
+                            onClick={() => copyToClipboard(selected?.number || "405960486", "تم نسخ Binance ID بنجاح 📋")}
+                            className="rounded-lg bg-amber-500/15 hover:bg-amber-500/25 p-2 text-amber-400 border border-amber-500/30 shrink-0 cursor-pointer"
                           >
                             <Copy size={16} />
                           </button>
                         </div>
-                      );
-                    })()}
-
-                    {/* QR Code (Desktop Web Only) */}
-                    {selected.qr && (
-                      <div className="hidden md:flex flex-col items-center gap-3 bg-background/90 p-5 rounded-2xl border border-border shadow-sm text-center my-3">
-                        <span className="text-xs font-bold text-slate-200">امسح رمز الاستجابة السريعة (QR Code) للتحويل مباشرة:</span>
-                        <div className="bg-white p-3 rounded-2xl border border-border flex justify-center items-center shadow-md w-64 h-64 mx-auto">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={selected.qr} alt={`${selected.type} QR Code`} className="w-full h-full max-w-[230px] max-h-[230px] object-contain rounded-xl" />
-                        </div>
+                        {binancePayDetails && (
+                          <div className="bg-slate-950/90 p-3 rounded-xl border border-slate-800 space-y-2 text-xs">
+                            <div className="flex items-center justify-between">
+                              <span className="text-slate-400 font-semibold">Order ID:</span>
+                              <div className="flex items-center gap-1.5">
+                                <strong className="font-mono text-cyan-400 font-bold" dir="ltr">{binancePayDetails.merchantTradeNo || binancePayDetails.depositId}</strong>
+                                <button
+                                  type="button"
+                                  onClick={() => copyToClipboard(binancePayDetails.merchantTradeNo || binancePayDetails.depositId || "", "تم نسخ Order ID بنجاح 📋")}
+                                  className="text-[11px] p-1 rounded bg-cyan-500/15 text-cyan-400"
+                                >
+                                  <Copy size={12} />
+                                </button>
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-slate-400 font-semibold">المبلغ بالدولار:</span>
+                              <strong className="font-mono text-emerald-400 font-black">${binancePayDetails.amountUsd} USD</strong>
+                            </div>
+                          </div>
+                        )}
                       </div>
+                    ) : (
+                      <>
+                        {(selected.number || selected.link) && (
+                          <div className="space-y-1">
+                            <span className="block text-[10px] font-bold text-slate-300">📱 رقم التحويل:</span>
+                            <div className="flex items-center justify-between gap-2 bg-background p-3 rounded-lg border border-border" dir="ltr">
+                              <strong className="break-all font-mono text-sm text-emerald-400">{selected.number || selected.link}</strong>
+                              <button
+                                type="button"
+                                onClick={copyWalletDetails}
+                                className="rounded-lg bg-primary/15 hover:bg-primary/25 p-2 text-primary shrink-0"
+                              >
+                                {copied ? <CheckCircle size={16} className="animate-bounce" /> : <Copy size={14} />}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </>
                     )}
-                  </>
-                )}
+                  </div>
+                ) : null}
               </div>
-            ) : null}
-            <div className="space-y-3 my-4">
-              <label className="mb-2.5 block text-sm font-bold text-slate-200">
-                المبلغ (بـ {currencySymbol}) — أرقام صحيحة بدون كسور
-              </label>
-              <input
-                value={amount}
-                onChange={(e) => {
-                  let val = e.target.value.replace(/[^0-9]/g, "");
-                  setAmount(val);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "." || e.key === "," || e.key === "-" || e.key === "e" || e.key === "E") {
-                    e.preventDefault();
-                  }
-                }}
-                onPaste={(e) => {
-                  const pasted = e.clipboardData.getData("text");
-                  if (/[^0-9]/.test(pasted)) e.preventDefault();
-                }}
-                type="text"
-                inputMode="numeric"
-                min={minimumEgp}
-                max={maximumEgp}
-                pattern="[0-9]*"
-                placeholder="100"
-                className="h-14 w-full rounded-2xl border border-border/80 bg-input px-6 text-left font-mono text-base outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner my-2"
-                dir="ltr"
-              />
-              <div className="mt-3 flex items-center justify-between gap-4 text-xs font-semibold text-muted-foreground px-1">
-                <span>الحد الأدنى: <strong className="text-foreground">{minimumInCurrency} {currencySymbol}</strong></span>
-                <span>الحد الأقصى: <strong className="text-foreground">{maximumInCurrency} {currencySymbol}</strong></span>
-              </div>
-              {amount && !amountWithinLimits && (
-                <p className="mt-2.5 text-xs font-bold text-red-400 bg-red-500/10 p-3 rounded-xl border border-red-500/20">
-                  أدخل مبلغًا بين {minimumInCurrency} و{maximumInCurrency} {currencySymbol}
-                </p>
-              )}
-            </div>
-            {method !== "bank" && method !== "binance_pay" && method !== "binance" && (
-              <div className="space-y-2.5 my-4">
-                <label className="mb-2.5 block text-sm font-bold text-slate-200">
-                  {method === "barq" ? "اسم المحول بالإنجليزية" : method === "instapay" ? "الرقم المرجعي من رسالة SMS" : "رقم الهاتف المحول منه"}
-                </label>
-                <input value={reference} onChange={(e) => setReference(e.target.value)} className="h-14 w-full rounded-2xl border border-border/80 bg-input px-6 text-left font-mono text-base outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner" dir="ltr" />
-              </div>
-            )}
 
-            {/* Receipt upload box ONLY for Bank Transfer */}
-            {method === "bank" && (
-              <div className="rounded-2xl border border-cyan-500/25 bg-cyan-500/5 p-4 space-y-3 text-right">
-                <label className="block text-sm font-bold text-cyan-400">
-                  📄 رفع صورة إيصال التحويل البنكي (إجباري)
-                </label>
-                <div className="flex flex-col items-center justify-center border-2 border-dashed border-cyan-500/30 rounded-xl p-4 bg-background/50 hover:bg-background/80 transition-all cursor-pointer">
+              {/* Left Column: Inputs + Summary + Action Button */}
+              <div className="lg:col-span-6 space-y-3">
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-slate-200">
+                    المبلغ (بـ {currencySymbol}) — أرقام صحيحة بدون كسور
+                  </label>
                   <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp,image/heic"
-                    disabled={uploadingReceipt}
+                    value={amount}
                     onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setReceiptFile(file);
-                        handleReceiptUpload(file);
+                      let val = e.target.value.replace(/[^0-9]/g, "");
+                      setAmount(val);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "." || e.key === "," || e.key === "-" || e.key === "e" || e.key === "E") {
+                        e.preventDefault();
                       }
                     }}
-                    className="w-full text-xs text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer"
+                    onPaste={(e) => {
+                      const pasted = e.clipboardData.getData("text");
+                      if (/[^0-9]/.test(pasted)) e.preventDefault();
+                    }}
+                    type="text"
+                    inputMode="numeric"
+                    min={minimumEgp}
+                    max={maximumEgp}
+                    pattern="[0-9]*"
+                    placeholder="100"
+                    className="h-12 w-full rounded-xl border border-border/80 bg-input px-4 text-left font-mono text-base outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner"
+                    dir="ltr"
                   />
-                  {uploadingReceipt && (
-                    <p className="mt-2 text-xs text-cyan-400 font-bold animate-pulse">جاري رفع صورة الإيصال إلى الخادم السحابي...</p>
-                  )}
-                  {receiptUrl && (
-                    <div className="mt-3 flex items-center gap-2 text-xs text-emerald-400 font-bold">
-                      <CheckCircle size={15} /> تم رفع الإيصال بنجاح
-                      <a href={receiptUrl} target="_blank" rel="noopener noreferrer" className="underline text-cyan-400 mr-2 font-mono">
-                        معاينة الإيصال
-                      </a>
-                    </div>
+                  <div className="flex items-center justify-between gap-2 text-[11px] font-semibold text-muted-foreground px-1">
+                    <span>الحد الأدنى: <strong className="text-foreground">{minimumInCurrency} {currencySymbol}</strong></span>
+                    <span>الحد الأقصى: <strong className="text-foreground">{maximumInCurrency} {currencySymbol}</strong></span>
+                  </div>
+                  {amount && !amountWithinLimits && (
+                    <p className="text-xs font-bold text-red-400 bg-red-500/10 p-2.5 rounded-lg border border-red-500/20">
+                      أدخل مبلغًا بين {minimumInCurrency} و{maximumInCurrency} {currencySymbol}
+                    </p>
                   )}
                 </div>
-              </div>
-            )}
-            <div className={`grid grid-cols-1 gap-2 ${user?.country_code === "SA" ? "sm:grid-cols-2" : ""}`}>
-              <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-center">
-                <span className="block text-xs text-muted-foreground">سعر الدولار</span>
-                <div className="mt-1 flex items-center justify-center gap-1.5 text-sm font-bold text-primary font-mono" dir="ltr">
-                  <span>{user?.country_code === "SA" ? (symbols.sar || "﷼") : (symbols.egp || "£")}</span>
-                  <span>{user?.country_code === "SA" ? (rates.usd / rates.sar).toFixed(2) : rates.usd.toFixed(2)} =</span>
-                  <span>$1</span>
-                </div>
-              </div>
-              {user?.country_code === "SA" && (
-                <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-center">
-                  <span className="block text-xs text-muted-foreground">سعر الريال</span>
-                  <div className="mt-1 flex items-center justify-center gap-1.5 text-sm font-bold text-primary font-mono" dir="ltr">
-                    <span>{symbols.egp || "£"}</span>
-                    <span>{rates.sar.toFixed(2)} =</span>
-                    <span>1 ﷼</span>
+
+                {method !== "bank" && method !== "binance_pay" && method !== "binance" && (
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold text-slate-200">
+                      {method === "barq" ? "اسم المحول بالإنجليزية" : method === "instapay" ? "الرقم المرجعي من رسالة SMS" : "رقم الهاتف المحول منه"}
+                    </label>
+                    <input value={reference} onChange={(e) => setReference(e.target.value)} className="h-12 w-full rounded-xl border border-border/80 bg-input px-4 text-left font-mono text-base outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner" dir="ltr" />
+                  </div>
+                )}
+
+                {/* Receipt upload box ONLY for Bank Transfer */}
+                {method === "bank" && (
+                  <div className="rounded-xl border border-cyan-500/25 bg-cyan-500/5 p-3 space-y-2 text-right">
+                    <label className="block text-xs font-bold text-cyan-400">
+                      📄 رفع صورة إيصال التحويل البنكي (إجباري)
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/heic"
+                      disabled={uploadingReceipt}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setReceiptFile(file);
+                          handleReceiptUpload(file);
+                        }
+                      }}
+                      className="w-full text-xs text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer"
+                    />
+                    {receiptUrl && (
+                      <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-bold">
+                        <CheckCircle size={14} /> تم رفع الإيصال بنجاح
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-3 py-2.5 text-center">
+                  <span className="block text-[11px] text-muted-foreground mb-0.5">الرصيد الذي سيُضاف إلى المحفظة</span>
+                  <div className="flex flex-row items-center justify-center gap-1.5 text-xl font-black text-emerald-400 font-mono" dir="ltr">
+                    <span className="shrink-0">{currencySymbol}</span>
+                    <span>{amountWithinLimits ? displayNetInCurrency.toFixed(2) : "0.00"}</span>
                   </div>
                 </div>
-              )}
-            </div>
-            <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-4 text-center">
-              <span className="block text-xs text-muted-foreground mb-1">الرصيد الذي سيُضاف إلى المحفظة</span>
-              <div className="mt-1 flex flex-row items-center justify-center gap-2 text-2xl font-black text-emerald-400 font-mono" dir="ltr">
-                <span className="shrink-0">{currencySymbol}</span>
-                <span>{amountWithinLimits ? displayNetInCurrency.toFixed(2) : "0.00"}</span>
-              </div>
-            </div>
-            {amountWithinLimits && feeCalc.netAmount > 0 && tiktokCoins > 0 && tiktokCoins <= tiktokMaxCoins && (
-              <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 space-y-2 text-center">
-                <span className="block text-xs text-muted-foreground">العملات المتوقعة</span>
-                <strong className="block text-lg font-bold text-emerald-400">
-                  هذا المبلغ سوف يشحن لك {tiktokCoins.toLocaleString()} عمله تيك توك 🔥
-                </strong>
-                {originalTiktokCoins > 0 && tiktokCoins > originalTiktokCoins && (
-                  <span className="block text-xs text-amber-300 font-semibold bg-amber-500/10 py-1.5 px-3 rounded-lg border border-amber-500/20">
-                    (بدلاً من {originalTiktokCoins.toLocaleString()} عملة قبل الخصم — بزيادة هدية {(tiktokCoins - originalTiktokCoins).toLocaleString()} عملة 🔥!)
-                  </span>
+
+                {amountWithinLimits && feeCalc.netAmount > 0 && tiktokCoins > 0 && tiktokCoins <= tiktokMaxCoins && (
+                  <div className="rounded-xl border border-primary/20 bg-primary/5 p-2.5 space-y-1 text-center">
+                    <strong className="block text-xs font-bold text-emerald-400">
+                      هذا المبلغ يشحن لك {tiktokCoins.toLocaleString()} عمله تيك توك 🔥
+                    </strong>
+                  </div>
                 )}
-                <div className="h-[1px] bg-border my-1" />
-                <p className="text-xs text-muted-foreground leading-5">
-                  💡 للخدمات الأخرى: يرجى الدفع والطلب المباشر من خلال أقسام الموقع.
-                </p>
+
+                <button
+                  disabled={busy || uploadingReceipt || !user || !selected || selected.disabled || !amountWithinLimits || (method !== "bank" && method !== "binance_pay" && method !== "binance" && !reference) || (method === "bank" && !receiptUrl)}
+                  onClick={submit}
+                  className="btn-ultra-primary w-full h-12 py-3 text-sm font-black rounded-xl shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
+                >
+                  {busy ? "جاري المعالجة..." : "تأكيد الإيداع"}
+                </button>
               </div>
-            )}
-            {selected?.disabled && (
-              <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-center text-sm font-semibold text-red-400">
-                ⚠️ هذه الوسيلة غير متاحة حالياً — يرجى اختيار وسيلة أخرى أو التواصل مع الدعم
-              </div>
-            )}
-            <button
-              disabled={busy || uploadingReceipt || !user || !selected || selected.disabled || !amountWithinLimits || (method !== "bank" && !reference) || (method === "bank" && !receiptUrl)}
-              onClick={submit}
-              className="btn-ultra-primary w-full h-14 py-4 text-base font-black rounded-2xl shadow-xl shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:pointer-events-none"
-            >
-              {busy ? "جاري المعالجة..." : "تأكيد الإيداع"}
-            </button>
+            </div>
           </div>
         )}
       </div>
-
-      {/* Step-by-Step Payment Instructions Modal */}
-      {showInstructionsModal && (
-        <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-[99999] flex items-center justify-center p-4 animate-in fade-in duration-200" dir="rtl">
-          <div className="w-full max-w-md bg-slate-900 border border-cyan-500/40 rounded-3xl p-6 shadow-2xl space-y-5 text-right animate-in zoom-in-95 duration-200">
-            {/* Header */}
-            <div className="flex items-center gap-3 pb-3 border-b border-slate-800">
-              <div className="w-10 h-10 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
-                <HelpCircle size={22} />
-              </div>
-              <div>
-                <h3 className="text-base sm:text-lg font-black text-slate-100">
-                  تعليمات الإيداع عبر {
-                    method === "vodafone" ? "فودافون كاش / المحافظ الإلكترونية" :
-                    method === "instapay" ? "انستاباي (InstaPay)" :
-                    method === "barq" ? "برق (Barq)" :
-                    method === "bank" ? "التحويل البنكي (Bank Transfer)" :
-                    "وسيلة الدفع"
-                  } 📋
-                </h3>
-                <p className="text-xs text-slate-400 font-semibold mt-0.5">
-                  يرجى اتباع الخطوات التالية بدقة لإتمام الإيداع بنجاح:
-                </p>
-              </div>
-            </div>
-
-            {/* Step List */}
-            <div className="space-y-3 my-4 max-h-[55vh] overflow-y-auto pr-1">
-              {(siteInstructions[method] || [
-                "ارسل المبلغ أولا",
-                "اكتب المبلغ الذي قمت بتحويله في الخانه المطلوبه",
-                "قم بكتابه الرقم الخاص بك الذي قمت بالتحويل لنا من خلاله في الخانه المطلوبه",
-                "اضغط على تأكيد الايداع",
-              ]).map((step: string, idx: number) => (
-                <div key={idx} className="flex items-start gap-3 bg-slate-950/70 p-3.5 rounded-2xl border border-slate-800/80 shadow-sm">
-                  <span className="w-7 h-7 rounded-xl bg-cyan-500/20 text-cyan-400 font-black text-xs flex items-center justify-center shrink-0 border border-cyan-500/30 mt-0.5 font-mono">
-                    {idx + 1}
-                  </span>
-                  <p className="text-xs sm:text-sm font-bold text-slate-200 leading-relaxed pt-0.5">
-                    {step}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            {/* Action Button - GOT IT! */}
-            <button
-              type="button"
-              onClick={() => setShowInstructionsModal(false)}
-              className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-cyan-400 via-cyan-500 to-blue-500 text-slate-950 font-black text-sm sm:text-base shadow-xl shadow-cyan-500/25 hover:brightness-110 active:scale-98 transition-all cursor-pointer flex items-center justify-center gap-2"
-            >
-              <CheckCircle size={18} />
-              <span>فهمت</span>
-            </button>
-          </div>
-        </div>
-      )}
     </AppShell>
   );
 }
