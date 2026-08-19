@@ -280,9 +280,7 @@ export default function RechargePage() {
     e.preventDefault();
     if (typeof window === "undefined") return;
 
-    const targetUrl = (selected?.link && (selected.link.startsWith("ipn://") || selected.link.startsWith("http")))
-      ? selected.link
-      : "ipn://";
+    const targetUrl = selected?.link || "ipn://";
 
     window.location.href = targetUrl;
   };
@@ -809,8 +807,8 @@ export default function RechargePage() {
                   </div>
                 ) : (
                   <>
-                    {/* Direct Transfer Link Button (Cellular Data Only) */}
-                    {selected.link && selected.link.startsWith("http") && isCellularConnection && (
+                    {/* Direct Transfer Link Button (Cellular Data Only - Supports any scheme like vf-cash://) */}
+                    {selected.link && isCellularConnection && (
                       <div className="my-2">
                         <a
                           href={selected.link}
