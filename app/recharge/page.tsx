@@ -740,7 +740,18 @@ export default function RechargePage() {
             )}
           </div>
         ) : (
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-4 sm:p-5 shadow-xl">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-4 sm:p-5 shadow-xl space-y-4">
+            {/* Live USD Exchange Rate Banner */}
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 shadow-sm">
+              <div className="flex items-center gap-2">
+                <span className="text-base">💵</span>
+                <span className="text-xs sm:text-sm font-bold text-slate-200">سعر صرف الدولار المعتمَد بالموقع:</span>
+              </div>
+              <strong className="font-mono text-sm sm:text-base font-black text-emerald-400" dir="ltr">
+                1$ = {(rates.usd || 54.55).toFixed(2)} ج.م
+              </strong>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
               
               {/* Right Column: Wallet Selection + ALL Wallet & Transfer Details */}
