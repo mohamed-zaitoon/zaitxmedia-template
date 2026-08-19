@@ -1,110 +1,125 @@
-# 👑 ZaitXMedia Platform — Primary Production Core
+<div align="center">
 
-[![Production URL](https://img.shields.io/badge/Production-zaitxmedia.com-00F0FF?style=for-the-badge&logo=vercel)](https://zaitxmedia.com)
-[![Next.js](https://img.shields.io/badge/Next.js-15.5-black?style=for-the-badge&logo=nextdotjs)](https://nextjs.org)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org)
-[![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python)](https://www.python.org)
-[![Firebase](https://img.shields.io/badge/Firebase-Firestore-FFCA28?style=for-the-badge&logo=firebase)](https://firebase.google.com)
+# 👑 ZAITX MEDIA — VIP Example & Template Edition
 
-> **ZaitXMedia** is a state-of-the-art digital storefront, TikTok coin pricing engine, and automated multi-country payment management platform. Designed with high-availability serverless micro-services, real-time SMS payment gateway verification, and dynamic country-aware currency isolation.
+<p align="center">
+  <a href="https://mohamed-zaitoon.github.io/zaitxmedia-example">
+    <img src="https://img.shields.io/badge/🌐_Live_Demo-mohamed--zaitoon.github.io%2Fzaitxmedia--example-f59e0b?style=for-the-badge&logo=github&logoColor=white" alt="Live Demo" />
+  </a>
+  <a href="https://github.com/mohamed-zaitoon/zaitxmedia-example">
+    <img src="https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github" alt="Repository" />
+  </a>
+</p>
 
----
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-15.5-black?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js" />
+  <img src="https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
+  <img src="https://img.shields.io/badge/TailwindCSS-3.4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="TailwindCSS" />
+  <img src="https://img.shields.io/badge/Firebase-Firestore-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase" />
+  <img src="https://img.shields.io/badge/Security-HMAC_SHA256-10B981?style=for-the-badge&logo=shield" alt="Security" />
+</p>
 
-## 🌟 Key Features & Innovations
-
-### 🌍 1. Dynamic Custom Country & Isolated Payment Routing
-- **Custom Country Manager**: Admin can dynamically register any country (ISO code, currency, emoji flag, exchange rate).
-- **Location-Isolated Payment Methods**:
-  - 🇪🇬 **Egypt (EG)**: Vodafone Cash, InstaPay, and Bank Transfer.
-  - 🇸🇦 **Saudi Arabia (SA)**: Barq App and Bank Transfer.
-  - 🌐 **Global (USD / Custom)**: Bank Transfer available to all countries.
-- **Modal Preference Persistence**: `<PaymentSetupModal />` records user payment preferences to `localStorage` and profile storage, ensuring seamless onboarding with zero repeating popups.
-
-### 🐍 2. Python Automation & Dynamic Exchange Rate Engine
-- **FastAPI Microservice Engine** (`python_services/main.py`):
-  - Calculates TikTok Coin package boundaries, profit margins, and price tiers dynamically.
-- **Zero Hardcoded Rates**:
-  - Live rates (`usd_rate`, `sar_rate_override`, `deposit_fee_percent`) are fetched on-the-fly from Firestore `settings/pricing`.
-
-### 🔐 3. Hardened Security & Anti-Inspection Engine
-- **Console Log Interceptor** (`app/lib/security-logger.ts`):
-  - Automatically silences browser `console.log`, `console.info`, `console.debug`, and `console.warn` for regular users in production.
-  - Grants full unthrottled debugging privileges **only** to verified admin accounts.
-- **Obfuscated Admin Path Guarding**:
-  - Requests to `/admin` and `/api/admin/*` by non-administrators trigger an instant HTTP 404 response.
-- **Firestore Access Rule Hardening**:
-  - Client-side write access to `settings`, `pricing`, `financial_ledger`, and `admin_accounts` is strictly forbidden.
+### 👑 State-of-the-Art Digital Storefront & Multi-Currency Platform
+**Luxury Gold & Obsidian Dark Design • Real-time Location Verification • Automated Python Security Auditor**
 
 ---
 
-## 🛠️ Technology Stack
+</div>
 
-| Layer | Language / Tool | Purpose |
+## 🌓 Dark & Light Mode Adaptive Theme
+
+This repository is optimized for both **Dark Mode** and **Light Mode** viewing on GitHub:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/mohamed-zaitoon/zaitxmedia/main/public/favicon.ico">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/mohamed-zaitoon/zaitxmedia/main/public/favicon.ico">
+  <img alt="ZAITX MEDIA Theme" src="https://raw.githubusercontent.com/mohamed-zaitoon/zaitxmedia/main/public/favicon.ico" width="100">
+</picture>
+
+- 🌙 **Dark Mode (Default)**: Deep Obsidian Black (`#060a12`), Warm Rich Gold accents (`#f59e0b`), Crisp White text (`#ffffff`).
+- ☀️ **Light Mode**: High-contrast Gold-bordered elements with crisp readability.
+
+---
+
+## 🌟 Key Features
+
+### 1. 🔣 Universal Dynamic Currency Symbols Engine
+- Real-time symbol mapping for **`£`** (EGP), **`﷼`** (SAR), and **`$`** (USD).
+- Bidi-aware LTR numeric formatting: **`45.27 ﷼`** / **`100 £`** / **`10.50 $`**.
+- Automatic dynamic conversion via `useCurrency()` hook connected live to Firestore settings.
+
+### 2. 📍 Physical Real-time Geolocation Verification
+- Detects user's actual physical country via IP geolocation APIs (`ipapi.co` / `ip-api.com`).
+- Rejects unauthorized location switching if physical IP location does not match selected country:
+  > `تعذر تغيير الدولة: موقعك الجغرافي الفعلي (مصر 🇪🇬) لا يطابق الدولة المختارة (السعودية 🇸🇦) 📍`
+
+### 3. 🐍 Python Security & System Auditor
+- Embedded Python security suite (`scripts/security_auditor.py`).
+- Automated HMAC SHA-256 webhook signature validation and environment security checks.
+- Python database seeder script for clean zero-data templates (`scripts/reset_example_database.py`).
+
+### 4. 👑 Luxury VIP Admin Panel
+- **Non-overlapping Sticky Top Save Bar**: Luxury gold save header (`sticky top-2`) that never collides with card action buttons.
+- **Bottom-to-Top Mobile Menu Drawer**: Smooth bottom sheet drawer popping up from bottom of screen on mobile devices.
+- **2-Column Quick Action Control Hub**: Spacious control dashboard with large thick luxury buttons.
+
+---
+
+## 🛠️ Architecture & Tech Stack
+
+```mermaid
+graph TD
+    User[📱 Customer / Visitor] --> Store[🛒 Next.js 15 Storefront]
+    Admin[👑 VIP Admin Panel] --> Store
+    Store --> Geo[📍 IP Geolocation Service]
+    Store --> Money[🔣 Dynamic Currency Symbol Engine]
+    Store --> PyAuditor[🐍 Python Security Auditor]
+    PyAuditor --> HMAC[🔐 HMAC SHA256 Webhook Verification]
+    Store --> DB[(🔥 Firebase Firestore)]
+```
+
+| Layer | Technology | Description |
 | :--- | :--- | :--- |
-| **Frontend Framework** | **Next.js 15 (React 19)** / **TypeScript** | Responsive UI, Server Components, SSR/SSG rendering. |
-| **Design System** | **Vanilla CSS3 + TailwindCSS** | Glassmorphism UI tokens, custom animation keyframes, HSL color palettes. |
-| **Backend & APIs** | **Node.js (TypeScript API Routes)** | Server actions, profile handling, payment webhooks, and rate enforcement. |
-| **Automation Engine** | **Python 3.11 (FastAPI & Scripts)** | Package pricing algorithms, automation scripts, and helper tools. |
-| **Database** | **Firebase Firestore** | NoSQL document storage for users, orders, deposit records, and site settings. |
-| **Authentication** | **Clerk Auth & Passkeys** | Passwordless authentication, multi-factor security, session management. |
-| **Edge Compute** | **Cloudflare Workers (Wrangler)** | Webhook forwarding, rate limiting, and SMS payment gateway verification. |
+| **Frontend** | **Next.js 15 (React 19)** | App Router, Server & Client Components |
+| **Styling** | **Vanilla CSS + TailwindCSS** | Gold `#f59e0b`, Obsidian `#060a12`, White `#ffffff` |
+| **Language** | **TypeScript 5.0** | Strict mode, zero build errors |
+| **Backend & Security** | **Python 3.11 + Node.js** | Security auditor scripts, HMAC verification |
+| **Database** | **Firebase Firestore** | Real-time listeners for rates and settings |
+| **Deployment** | **GitHub Pages + Vercel** | Automated GitHub Actions Pages deployment |
 
 ---
 
-## 📁 Project Architecture & Layout
+## 🚀 Quick Setup Guide
 
-```
-.
-├── app/                      # Next.js App Router
-│   ├── (store)/              # Storefront & category product catalog
-│   ├── account/              # User account & preferred payment preferences
-│   ├── admin/                # Secure Admin Panel & Country Manager
-│   ├── api/                  # Server API routes (Webhooks, Python bridge)
-│   ├── components/           # UI Components (PaymentSetupModal, AppShell)
-│   └── lib/                  # Auth context, currency context, security logger
-├── lib/                      # Core business logic (Money minor units, SMS parser)
-├── python_services/          # Python FastAPI Microservice & Scripts
-│   ├── main.py               # FastAPI server script
-│   ├── scripts/              # Independent Python helpers (tiktok_helper.py)
-│   └── requirements.txt      # Python dependencies
-├── worker/                   # Cloudflare Worker SMS Payment Gateway
-├── firestore.rules           # Hardened Firestore Security Rules
-├── next.config.ts            # Next.js configuration
-└── wrangler.jsonc            # Cloudflare Worker configuration
-```
-
----
-
-## 🚀 Quick Setup & Deployment Guide
-
-### Prerequisites
-- **Node.js**: `v18.0.0` or higher
-- **Python**: `v3.10` or higher
-- **npm** / **yarn**
-
-### 1. Installation
+### 1. Clone & Install
 ```bash
+git clone https://github.com/mohamed-zaitoon/zaitxmedia-example.git
+cd zaitxmedia-example
 npm install
-pip install -r python_services/requirements.txt
 ```
 
-### 2. Run Next.js Local Server
+### 2. Run Python Security Auditor
+```bash
+python3 scripts/security_auditor.py
+```
+
+### 3. Generate Clean Example Database Seed
+```bash
+python3 scripts/reset_example_database.py
+```
+
+### 4. Start Local Development Server
 ```bash
 npm run dev
 ```
 
-### 3. Run Python Microservice
-```bash
-uvicorn python_services.main:app --reload --port 8000
-```
-
-### 4. Deploy to Vercel Production
-```bash
-npx vercel --prod
-```
-
 ---
 
-## 🌐 Arabic Documentation
+<div align="center">
 
-Detailed Arabic instructions are documented in [`README_AR.md`](./README_AR.md).
+**Developed with ❤️ by Mohamed Zaitoon & Antigravity AI Team**
+
+[![GitHub Pages](https://img.shields.io/badge/Deployed_with-GitHub_Pages-222222?style=for-the-badge&logo=github)](https://mohamed-zaitoon.github.io/zaitxmedia-example)
+
+</div>
