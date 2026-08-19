@@ -723,7 +723,7 @@ export default function RechargePage() {
           <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-4 sm:p-5 shadow-xl">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
               
-              {/* Right Column: Wallet Selection + Embedded Instructions + Transfer Details */}
+              {/* Right Column: Wallet Selection + ALL Wallet & Transfer Details */}
               <div className="lg:col-span-6 space-y-3">
                 <div>
                   <label className="mb-1.5 block text-xs font-bold text-slate-200">اختر وسيلة الإيداع</label>
@@ -737,42 +737,7 @@ export default function RechargePage() {
                   />
                 </div>
 
-                {/* Embedded Step-by-Step Instructions Box directly under Dropdown */}
-                {selected && (
-                  <div className="rounded-xl border border-cyan-500/30 bg-slate-950/80 p-3 space-y-2">
-                    <div className="flex items-center gap-2 pb-1.5 border-b border-slate-800/80">
-                      <HelpCircle size={16} className="text-cyan-400 shrink-0" />
-                      <span className="text-xs font-black text-slate-200">
-                        تعليمات الإيداع عبر {
-                          method === "vodafone" ? "فودافون كاش / المحافظ" :
-                          method === "instapay" ? "انستاباي (InstaPay)" :
-                          method === "barq" ? "برق (Barq)" :
-                          method === "binance_pay" || method === "binance" ? "Binance Pay" :
-                          method === "bank" ? "التحويل البنكي" : "وسيلة الدفع"
-                        } 📋
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-1 gap-1 text-xs">
-                      {(siteInstructions[method] || [
-                        "أرسل المبلغ أولاً",
-                        "اكتب المبلغ الخانة المطلوبة",
-                        "اكتب الرقم المرجعي أو رقم الهاتف",
-                        "اضغط على تأكيد الإيداع",
-                      ]).map((step: string, idx: number) => (
-                        <div key={idx} className="flex items-center gap-2 bg-slate-900/60 px-2.5 py-1.5 rounded-lg border border-slate-800/60">
-                          <span className="w-5 h-5 rounded-md bg-cyan-500/20 text-cyan-400 font-mono font-bold text-[11px] flex items-center justify-center shrink-0 border border-cyan-500/30">
-                            {idx + 1}
-                          </span>
-                          <span className="text-slate-300 font-semibold leading-snug text-xs">
-                            {step}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Selected Wallet Details Box */}
+                {/* Selected Wallet Transfer Details Box */}
                 {selected?.disabled ? (
                   <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-center text-xs font-bold text-amber-400 space-y-2">
                     <div className="text-sm font-black flex items-center justify-center gap-2">
@@ -797,7 +762,7 @@ export default function RechargePage() {
                             <button
                               type="button"
                               onClick={() => copyToClipboard(selected.bankName, "تم نسخ اسم البنك بنجاح 📋")}
-                              className="rounded-lg bg-primary/15 hover:bg-primary/25 p-2 text-primary shrink-0"
+                              className="rounded-lg bg-primary/15 hover:bg-primary/25 p-2 text-primary shrink-0 cursor-pointer"
                             >
                               <Copy size={14} />
                             </button>
@@ -812,7 +777,7 @@ export default function RechargePage() {
                             <button
                               type="button"
                               onClick={() => copyToClipboard(selected.holderName, "تم نسخ اسم صاحب الحساب بنجاح 📋")}
-                              className="rounded-lg bg-primary/15 hover:bg-primary/25 p-2 text-primary shrink-0"
+                              className="rounded-lg bg-primary/15 hover:bg-primary/25 p-2 text-primary shrink-0 cursor-pointer"
                             >
                               <Copy size={14} />
                             </button>
@@ -827,7 +792,7 @@ export default function RechargePage() {
                             <button
                               type="button"
                               onClick={() => copyToClipboard(selected.number, "تم نسخ رقم الحساب بنجاح 📋")}
-                              className="rounded-lg bg-primary/15 hover:bg-primary/25 p-2 text-primary shrink-0"
+                              className="rounded-lg bg-primary/15 hover:bg-primary/25 p-2 text-primary shrink-0 cursor-pointer"
                             >
                               <Copy size={14} />
                             </button>
@@ -842,7 +807,7 @@ export default function RechargePage() {
                             <button
                               type="button"
                               onClick={() => copyToClipboard(selected.link, "تم نسخ IBAN بنجاح 📋")}
-                              className="rounded-lg bg-primary/15 hover:bg-primary/25 p-2 text-primary shrink-0"
+                              className="rounded-lg bg-primary/15 hover:bg-primary/25 p-2 text-primary shrink-0 cursor-pointer"
                             >
                               <Copy size={14} />
                             </button>
@@ -851,7 +816,7 @@ export default function RechargePage() {
                       </>
                     ) : selected.type === "instapay" ? (
                       <div className="flex flex-col gap-2.5">
-                        <span className="block text-xs font-bold text-slate-300">وسيلة الدفع: انستاباي (InstaPay)</span>
+                        <span className="block text-xs font-bold text-slate-300">بيانات تحويل إنستاباي (InstaPay)</span>
                         <button
                           type="button"
                           onClick={handleOpenInstaPayApp}
@@ -893,6 +858,35 @@ export default function RechargePage() {
                             </div>
                           );
                         })()}
+                        {/* Account Holder Name */}
+                        {(selected.name || selected.holderName) && (() => {
+                          const holderNameStr = selected.holderName || selected.name;
+                          return (
+                            <div className="text-xs bg-background/80 p-3 rounded-lg border border-border flex justify-between items-center gap-2">
+                              <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                                <span className="text-[10px] text-muted-foreground font-semibold">اسم صاحب الحساب:</span>
+                                <strong className="text-foreground font-bold text-xs">{holderNameStr}</strong>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => copyToClipboard(holderNameStr, "تم النسخ بنجاح 📋")}
+                                className="rounded-lg bg-primary/15 hover:bg-primary/25 p-2 text-primary shrink-0 cursor-pointer"
+                              >
+                                <Copy size={14} />
+                              </button>
+                            </div>
+                          );
+                        })()}
+                        {/* QR Code (Desktop Web Only) */}
+                        {selected.qr && (
+                          <div className="hidden md:flex flex-col items-center gap-2 bg-background/90 p-3 rounded-xl border border-border shadow-sm text-center">
+                            <span className="text-[11px] font-bold text-slate-200">امسح رمز QR للتحويل المباشر:</span>
+                            <div className="bg-white p-2 rounded-xl border border-border flex justify-center items-center shadow-md w-44 h-44 mx-auto">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={selected.qr} alt="InstaPay QR Code" className="w-full h-full max-w-[160px] max-h-[160px] object-contain rounded-lg" />
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ) : (selected.type === "binance_pay" || selected.type === "binance") ? (
                       <div className="flex flex-col gap-2.5">
@@ -921,7 +915,7 @@ export default function RechargePage() {
                                 <button
                                   type="button"
                                   onClick={() => copyToClipboard(binancePayDetails.merchantTradeNo || binancePayDetails.depositId || "", "تم نسخ Order ID بنجاح 📋")}
-                                  className="text-[11px] p-1 rounded bg-cyan-500/15 text-cyan-400"
+                                  className="text-[11px] p-1 rounded bg-cyan-500/15 text-cyan-400 cursor-pointer"
                                 >
                                   <Copy size={12} />
                                 </button>
@@ -944,10 +938,37 @@ export default function RechargePage() {
                               <button
                                 type="button"
                                 onClick={copyWalletDetails}
-                                className="rounded-lg bg-primary/15 hover:bg-primary/25 p-2 text-primary shrink-0"
+                                className="rounded-lg bg-primary/15 hover:bg-primary/25 p-2 text-primary shrink-0 cursor-pointer"
                               >
                                 {copied ? <CheckCircle size={16} className="animate-bounce" /> : <Copy size={14} />}
                               </button>
+                            </div>
+                          </div>
+                        )}
+                        {(selected.name || selected.holderName) && (() => {
+                          const holderNameStr = selected.holderName || selected.name;
+                          return (
+                            <div className="text-xs bg-background/80 p-3 rounded-lg border border-border flex justify-between items-center gap-2">
+                              <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                                <span className="text-[10px] text-muted-foreground font-semibold">اسم صاحب الحساب:</span>
+                                <strong className="text-foreground font-bold text-xs">{holderNameStr}</strong>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => copyToClipboard(holderNameStr, "تم النسخ بنجاح 📋")}
+                                className="rounded-lg bg-primary/15 hover:bg-primary/25 p-2 text-primary shrink-0 cursor-pointer"
+                              >
+                                <Copy size={14} />
+                              </button>
+                            </div>
+                          );
+                        })()}
+                        {selected.qr && (
+                          <div className="hidden md:flex flex-col items-center gap-2 bg-background/90 p-3 rounded-xl border border-border shadow-sm text-center">
+                            <span className="text-[11px] font-bold text-slate-200">امسح رمز QR للتحويل المباشر:</span>
+                            <div className="bg-white p-2 rounded-xl border border-border flex justify-center items-center shadow-md w-44 h-44 mx-auto">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={selected.qr} alt={`${selected.type} QR Code`} className="w-full h-full max-w-[160px] max-h-[160px] object-contain rounded-lg" />
                             </div>
                           </div>
                         )}
@@ -957,8 +978,44 @@ export default function RechargePage() {
                 ) : null}
               </div>
 
-              {/* Left Column: Inputs + Summary + Action Button */}
+              {/* Left Column: Embedded Instructions + Inputs + Summary + Action Button */}
               <div className="lg:col-span-6 space-y-3">
+                
+                {/* Embedded Step-by-Step Instructions Box */}
+                {selected && (
+                  <div className="rounded-xl border border-cyan-500/30 bg-slate-950/80 p-3 space-y-2">
+                    <div className="flex items-center gap-2 pb-1.5 border-b border-slate-800/80">
+                      <HelpCircle size={16} className="text-cyan-400 shrink-0" />
+                      <span className="text-xs font-black text-slate-200">
+                        تعليمات الإيداع عبر {
+                          method === "vodafone" ? "فودافون كاش / المحافظ" :
+                          method === "instapay" ? "انستاباي (InstaPay)" :
+                          method === "barq" ? "برق (Barq)" :
+                          method === "binance_pay" || method === "binance" ? "Binance Pay" :
+                          method === "bank" ? "التحويل البنكي" : "وسيلة الدفع"
+                        } 📋
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-1 text-xs">
+                      {(siteInstructions[method] || [
+                        "أرسل المبلغ أولاً",
+                        "اكتب المبلغ الخانة المطلوبة",
+                        "اكتب الرقم المرجعي أو رقم الهاتف",
+                        "اضغط على تأكيد الإيداع",
+                      ]).map((step: string, idx: number) => (
+                        <div key={idx} className="flex items-center gap-2 bg-slate-900/60 px-2.5 py-1.5 rounded-lg border border-slate-800/60">
+                          <span className="w-5 h-5 rounded-md bg-cyan-500/20 text-cyan-400 font-mono font-bold text-[11px] flex items-center justify-center shrink-0 border border-cyan-500/30">
+                            {idx + 1}
+                          </span>
+                          <span className="text-slate-300 font-semibold leading-snug text-xs">
+                            {step}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-2">
                   <label className="block text-xs font-bold text-slate-200">
                     المبلغ (بـ {currencySymbol}) — أرقام صحيحة بدون كسور
