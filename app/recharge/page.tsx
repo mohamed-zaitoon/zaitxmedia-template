@@ -721,15 +721,18 @@ export default function RechargePage() {
                     <button
                       type="button"
                       onClick={handleOpenInstaPayApp}
-                      className="inline-flex md:hidden h-14 w-full items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 font-black text-black hover:opacity-90 transition-all shadow-lg active:scale-95 cursor-pointer text-sm my-1"
+                      className="inline-flex md:hidden h-14 w-full items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 font-black text-black hover:opacity-90 transition-all shadow-lg active:scale-95 cursor-pointer text-sm md:text-base my-1"
                     >
-                      <Zap size={18} className="fill-black" />
-                      فتح تطبيق InstaPay مباشر للتحويل
+                      <Zap size={18} className="fill-black shrink-0" />
+                      <span dir="rtl" className="inline-flex items-center gap-1.5">
+                        <span>التحويل المباشر من</span>
+                        <span dir="ltr" className="font-mono">InstaPay</span>
+                      </span>
                     </button>
 
-                    {/* Separated Number Box */}
+                    {/* Separated Number Box (Desktop Only) */}
                     {selected.number && (
-                      <div className="text-sm bg-background/80 p-4 rounded-xl border border-border flex justify-between items-center gap-3 shadow-sm">
+                      <div className="hidden md:flex text-sm bg-background/80 p-4 rounded-xl border border-border justify-between items-center gap-3 shadow-sm">
                         <div className="flex flex-col gap-1 min-w-0 flex-1">
                           <span className="text-xs text-muted-foreground font-semibold">📱 رقم تحويل إنستاباي:</span>
                           <strong className="font-mono text-base text-foreground break-all" dir="ltr">{selected.number}</strong>
@@ -793,10 +796,10 @@ export default function RechargePage() {
                       );
                     })()}
 
-                    {/* QR Code (Desktop Web Only - enlarged +0.5x to 256px) */}
+                    {/* QR Code (Desktop Web Only) */}
                     {selected.qr && (
                       <div className="hidden md:flex flex-col items-center gap-3 bg-background/90 p-5 rounded-2xl border border-border shadow-sm text-center my-3">
-                        <span className="text-xs font-bold text-slate-200">امسح رمز الاستجابة السريع (QR Code) للتحويل:</span>
+                        <span className="text-xs font-bold text-slate-200">امسح رمز الاستجابة السريعة (QR Code) للتحويل مباشرة:</span>
                         <div className="bg-white p-3 rounded-2xl border border-border flex justify-center items-center shadow-md w-64 h-64 mx-auto">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={selected.qr} alt="InstaPay QR Code" className="w-full h-full max-w-[230px] max-h-[230px] object-contain rounded-xl" />
