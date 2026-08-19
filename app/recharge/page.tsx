@@ -745,10 +745,10 @@ export default function RechargePage() {
             <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 shadow-sm">
               <div className="flex items-center gap-2">
                 <span className="text-base">💵</span>
-                <span className="text-xs sm:text-sm font-bold text-slate-200">سعر صرف الدولار المعتمَد بالموقع:</span>
+                <span className="text-xs sm:text-sm font-bold text-slate-200">سعر الدولار لدينا:</span>
               </div>
               <strong className="font-mono text-sm sm:text-base font-black text-emerald-400" dir="ltr">
-                1$ = {(rates.usd || 54.55).toFixed(2)} ج.م
+                {(rates.usd || 54.55).toFixed(2)} ج.م = 1$
               </strong>
             </div>
 
@@ -938,8 +938,8 @@ export default function RechargePage() {
                           </button>
                         </div>
                         <div className="flex items-center justify-between bg-emerald-500/10 px-3 py-2 rounded-xl border border-emerald-500/25 text-xs">
-                          <span className="text-slate-300 font-bold">💵 سعر تحويل الدولار المعتمَد:</span>
-                          <strong className="text-emerald-400 font-mono font-black" dir="ltr">1$ = {(rates.usd || 54.55).toFixed(2)} ج.م</strong>
+                          <span className="text-slate-300 font-bold">💵 سعر الدولار لدينا:</span>
+                          <strong className="text-emerald-400 font-mono font-black" dir="ltr">{(rates.usd || 54.55).toFixed(2)} ج.م = 1$</strong>
                         </div>
                         {binancePayDetails && (
                           <div className="bg-slate-950/90 p-3 rounded-xl border border-slate-800 space-y-2 text-xs">
@@ -1085,8 +1085,8 @@ export default function RechargePage() {
                   </div>
                   {isBinancePay && (
                     <div className="flex items-center justify-between bg-cyan-500/10 px-3 py-2 rounded-xl border border-cyan-500/20 text-xs mt-1.5">
-                      <span className="text-slate-300 font-bold">💵 سعر صرف الدولار المعتمَد:</span>
-                      <strong className="text-cyan-400 font-mono font-black" dir="ltr">1$ = {(rates.usd || 54.55).toFixed(2)} ج.م</strong>
+                      <span className="text-slate-300 font-bold">💵 سعر الدولار لدينا:</span>
+                      <strong className="text-cyan-400 font-mono font-black" dir="ltr">{(rates.usd || 54.55).toFixed(2)} ج.م = 1$</strong>
                     </div>
                   )}
                   {amount && !amountWithinLimits && (
