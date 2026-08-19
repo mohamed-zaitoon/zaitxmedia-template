@@ -993,26 +993,29 @@ export default function RechargePage() {
             <div className={`grid grid-cols-1 gap-2 ${user?.country_code === "SA" ? "sm:grid-cols-2" : ""}`}>
               <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-center">
                 <span className="block text-xs text-muted-foreground">سعر الدولار</span>
-                <bdi className="mt-1 block text-sm font-bold text-primary" dir="ltr">
-                  {user?.country_code === "SA"
-                    ? `1 $ = ${(rates.usd / rates.sar).toFixed(2)} ${symbols.sar || "﷼"}`
-                    : `1 $ = ${rates.usd.toFixed(2)} ${symbols.egp || "£"}`}
-                </bdi>
+                <div className="mt-1 flex items-center justify-center gap-1.5 text-sm font-bold text-primary font-mono" dir="ltr">
+                  <span>1 $ =</span>
+                  <span>{user?.country_code === "SA" ? (rates.usd / rates.sar).toFixed(2) : rates.usd.toFixed(2)}</span>
+                  <span>{user?.country_code === "SA" ? (symbols.sar || "﷼") : (symbols.egp || "£")}</span>
+                </div>
               </div>
               {user?.country_code === "SA" && (
                 <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-center">
                   <span className="block text-xs text-muted-foreground">سعر الريال</span>
-                  <bdi className="mt-1 block text-sm font-bold text-primary" dir="ltr">
-                    1 ﷼ = {rates.sar.toFixed(2)} {symbols.egp || "£"}
-                  </bdi>
+                  <div className="mt-1 flex items-center justify-center gap-1.5 text-sm font-bold text-primary font-mono" dir="ltr">
+                    <span>1 ﷼ =</span>
+                    <span>{rates.sar.toFixed(2)}</span>
+                    <span>{symbols.egp || "£"}</span>
+                  </div>
                 </div>
               )}
             </div>
             <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-4 text-center">
-              <span className="block text-xs text-muted-foreground">الرصيد الذي سيُضاف إلى المحفظة</span>
-              <strong className="mt-1 block text-2xl font-black text-emerald-400 font-mono" dir="ltr">
-                {currencySymbol} {amountWithinLimits ? displayNetInCurrency.toFixed(2) : "0.00"}
-              </strong>
+              <span className="block text-xs text-muted-foreground mb-1">الرصيد الذي سيُضاف إلى المحفظة</span>
+              <div className="mt-1 flex flex-row items-center justify-center gap-2 text-2xl font-black text-emerald-400 font-mono" dir="ltr">
+                <span className="shrink-0">{currencySymbol}</span>
+                <span>{amountWithinLimits ? displayNetInCurrency.toFixed(2) : "0.00"}</span>
+              </div>
             </div>
             {amountWithinLimits && feeCalc.netAmount > 0 && tiktokCoins > 0 && tiktokCoins <= tiktokMaxCoins && (
               <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 space-y-2 text-center">
