@@ -1092,7 +1092,7 @@ export default function RechargePage() {
                 </p>
               )}
             </div>
-            {method !== "bank" && (
+            {method !== "bank" && method !== "binance_pay" && method !== "binance" && (
               <div className="space-y-2.5 my-4">
                 <label className="mb-2.5 block text-sm font-bold text-slate-200">
                   {method === "barq" ? "اسم المحول بالإنجليزية" : method === "instapay" ? "الرقم المرجعي من رسالة SMS" : "رقم الهاتف المحول منه"}
