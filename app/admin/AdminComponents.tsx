@@ -1273,6 +1273,45 @@ export function SettingsTab() {
           })}
         </div>
 
+        {/* Currency Symbols Configuration Box */}
+        <div className="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/5 text-right space-y-3 mb-5">
+          <h4 className="text-xs font-extrabold text-amber-400 flex items-center gap-2">
+            <span>🔣 التحكم الإداري برموز وشكل العملات (رموز الجنيه والريال والدولار):</span>
+          </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label style={lbl}>🇪🇬 رمز الجنيه المصري (EGP Symbol)</label>
+              <input
+                type="text"
+                value={form.symbolEgp || "£"}
+                onChange={(e) => setForm({ ...form, symbolEgp: e.target.value })}
+                style={inp}
+                placeholder="مثال: £ أو ج.م"
+              />
+            </div>
+            <div>
+              <label style={lbl}>🇸🇦 رمز الريال السعودي (SAR Symbol)</label>
+              <input
+                type="text"
+                value={form.symbolSar || "﷼"}
+                onChange={(e) => setForm({ ...form, symbolSar: e.target.value })}
+                style={inp}
+                placeholder="مثال: ﷼ أو ر.س"
+              />
+            </div>
+            <div>
+              <label style={lbl}>🇺🇸 رمز الدولار الأمريكي (USD Symbol)</label>
+              <input
+                type="text"
+                value={form.symbolUsd || "$"}
+                onChange={(e) => setForm({ ...form, symbolUsd: e.target.value })}
+                style={inp}
+                placeholder="مثال: $"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Add New Custom Country Form */}
         <div id="add-country-section" className="p-4 rounded-2xl border border-cyan-500/30 bg-cyan-500/5 text-right space-y-3">
           <h4 className="text-xs font-extrabold text-cyan-400 flex items-center gap-2">
