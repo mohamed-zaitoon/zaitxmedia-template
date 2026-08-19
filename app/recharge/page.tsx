@@ -807,7 +807,7 @@ export default function RechargePage() {
                   </div>
                 ) : (
                   <>
-                    {/* Direct Transfer Link Button (Cellular Data Only - Supports any scheme like vf-cash://) */}
+                    {/* Direct Transfer Link Button (Cellular Data Only - Uses admin link directly) */}
                     {selected.link && isCellularConnection && (
                       <div className="my-2">
                         <a
@@ -822,12 +822,9 @@ export default function RechargePage() {
                       </div>
                     )}
 
-                    {/* Transfer Phone Number Box (Shown on Wi-Fi / Desktop or when direct link is absent) */}
-                    {(!isCellularConnection || !selected.link) && (selected.number || selected.link) && (
+                    {/* Always visible Transfer Phone Number Box (Backup without text label) */}
+                    {(selected.number || selected.link) && (
                       <div className="mt-3 space-y-1.5">
-                        <span className="block text-xs font-bold text-slate-300">
-                          📱 رقم التحويل:
-                        </span>
                         <div className="flex items-center justify-between gap-3 bg-background p-4 rounded-xl border border-border shadow-sm" dir="ltr">
                           <strong className="break-all font-mono text-lg text-emerald-400">{selected.number || selected.link}</strong>
                           <button
