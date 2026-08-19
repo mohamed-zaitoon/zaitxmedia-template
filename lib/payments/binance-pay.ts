@@ -135,15 +135,22 @@ export interface ParsedBinanceSms {
 export function parseBinanceSms(text: string): ParsedBinanceSms {
   if (!text) return { merchantTradeNo: null, amountUsd: null, currency: "USD" };
 
-  // 1. Extract merchantTradeNo / Order ID (e.g. BP_123456789_abcdef or Order ID: 123456)
-  const tradeNoMatch = text.match(/(BP_[\w]+|order\s*id[:\s]*([\w]+)|طلب[:\s]*([\w]+))/i);
-  const merchantTradeNo = tradeNoMatch ? (tradeNoMatch[1].startsWith("BP_") ? tradeNoMatch[1] : tradeNoMatch[2] || tradeNoMatch[3] || tradeNoMatch[1]) : null;
+  // 1. Extract merchantTradeNo / Order ID (e.g. 288655487944237057 or BP_123456789_abcdef)
+  const tradeNoMatch = text.match(/(BP_[\w]+|order\s*id[\s:\n]*([\w]+)|transaction\s*id[\s:\n]*([\w]+)|طلب[\s:\n]*([\w]+))/i);
+  let merchantTradeNo: string | null = null;
+  if (tradeNoMatch) {
+    if (tradeNoMatch[1].startsWith("BP_")) {
+      merchantTradeNo = tradeNoMatch[1];
+    } else {
+      merchantTradeNo = tradeNoMatch[2] || tradeNoMatch[3] || tradeNoMatch[4] || null;
+    }
+  }
 
-  // 2. Extract Amount (e.g. 10.00 USD, $10.00, or 10.00 USDT)
-  const usdMatch = text.match(/(\$?(\d+(?:\.\d{1,2})?)\s*(?:USD|USDT|\$)?)/i);
+  // 2. Extract Amount (e.g. +3 USDT, 3.00 USD, $10.00, or Amount\n+3\nUSDT)
+  const usdMatch = text.match(/(?:amount[\s:\n]*)?\+?\s*(\d+(?:\.\d{1,2})?)\s*(?:USD|USDT|\$)?/i);
   let amountUsd: number | null = null;
   if (usdMatch) {
-    const val = parseFloat(usdMatch[2] || usdMatch[1].replace("$", ""));
+    const val = parseFloat(usdMatch[1]);
     if (Number.isFinite(val) && val > 0) amountUsd = val;
   }
 

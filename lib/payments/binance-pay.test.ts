@@ -5,6 +5,7 @@ import {
   calculateBinanceSignature,
   generateNonce,
   mapBinanceStatusToInternal,
+  parseBinanceSms,
   usdToCents,
   verifyBinanceWebhookSignature,
 } from "./binance-pay";
@@ -57,4 +58,23 @@ test("5. Map Binance Pay official status to internal deposit status", () => {
   assert.equal(mapBinanceStatusToInternal("CANCELED"), "failed");
   assert.equal(mapBinanceStatusToInternal("FAILED"), "failed");
   assert.equal(mapBinanceStatusToInternal("UNKNOWN"), "manual_review");
+});
+
+test("6. Parse real Binance Pay receipt notification text", () => {
+  const sampleText = `Payment Details
+Amount
++3
+USDT
+Completed
+Crypto has been sent to your Funding Wallet
+From
+User-7ea8e
+Time
+2024-04-04 19:41:26
+Order ID
+288655487944237057`;
+
+  const parsed = parseBinanceSms(sampleText);
+  assert.equal(parsed.merchantTradeNo, "288655487944237057");
+  assert.equal(parsed.amountUsd, 3);
 });
