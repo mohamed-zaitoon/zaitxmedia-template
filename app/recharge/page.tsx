@@ -809,20 +809,42 @@ export default function RechargePage() {
                   </div>
                 ) : (
                   <>
-                    <span className="block text-xs font-bold text-slate-300 mb-1">حوّل إلى</span>
-                    <div className="mt-2 flex items-center justify-between gap-3 bg-background p-4 rounded-xl border border-border shadow-sm" dir="ltr">
-                      <strong className="break-all font-mono text-lg">{selected.number || selected.link}</strong>
-                      <button
-                        type="button"
-                        onClick={copyWalletDetails}
-                        className={`rounded-xl bg-primary/15 hover:bg-primary/25 p-3 text-primary transition-all duration-300 shrink-0 cursor-pointer ${
-                          copied ? "scale-110 rotate-[-8deg] bg-emerald-500/20 text-emerald-400 border-emerald-500/30" : "hover:scale-105"
-                        }`}
-                        aria-label="نسخ بيانات التحويل"
-                      >
-                        {copied ? <CheckCircle size={18} className="animate-bounce" /> : <Copy size={16} />}
-                      </button>
-                    </div>
+                    {/* Direct Transfer Link Button */}
+                    {selected.link && selected.link.startsWith("http") && (
+                      <div className="my-2">
+                        <a
+                          href={selected.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn-ultra-primary w-full text-sm font-black py-4 text-slate-950 bg-gradient-to-r from-red-500 via-amber-400 to-emerald-400 hover:brightness-110 flex items-center justify-center gap-2.5 rounded-2xl transition-all shadow-lg cursor-pointer"
+                        >
+                          <Zap size={18} className="fill-slate-950 shrink-0" />
+                          <span>التحويل المباشر من تطبيق محفظتك</span>
+                        </a>
+                      </div>
+                    )}
+
+                    {/* Always visible Transfer Phone Number Box (Backup for Orange, Etisalat, WE, etc.) */}
+                    {(selected.number || selected.link) && (
+                      <div className="mt-3 space-y-1.5">
+                        <span className="block text-xs font-bold text-slate-300">
+                          📱 رقم التحويل احتياطياً (لجميع المحافظ والأرقام):
+                        </span>
+                        <div className="flex items-center justify-between gap-3 bg-background p-4 rounded-xl border border-border shadow-sm" dir="ltr">
+                          <strong className="break-all font-mono text-lg text-emerald-400">{selected.number || selected.link}</strong>
+                          <button
+                            type="button"
+                            onClick={copyWalletDetails}
+                            className={`rounded-xl bg-primary/15 hover:bg-primary/25 p-3 text-primary transition-all duration-300 shrink-0 cursor-pointer ${
+                              copied ? "scale-110 rotate-[-8deg] bg-emerald-500/20 text-emerald-400 border-emerald-500/30" : "hover:scale-105"
+                            }`}
+                            aria-label="نسخ بيانات التحويل"
+                          >
+                            {copied ? <CheckCircle size={18} className="animate-bounce" /> : <Copy size={16} />}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                     {(selected.name || selected.holderName) && (() => {
                       const holderNameStr = selected.holderName || selected.name;
                       return (
@@ -843,7 +865,7 @@ export default function RechargePage() {
                       );
                     })()}
 
-                    {/* QR Code (Desktop Web Only - enlarged +0.5x to 256px) */}
+                    {/* QR Code (Desktop Web Only) */}
                     {selected.qr && (
                       <div className="hidden md:flex flex-col items-center gap-3 bg-background/90 p-5 rounded-2xl border border-border shadow-sm text-center my-3">
                         <span className="text-xs font-bold text-slate-200">امسح رمز الاستجابة السريعة (QR Code) للتحويل مباشرة:</span>
@@ -851,20 +873,6 @@ export default function RechargePage() {
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={selected.qr} alt={`${selected.type} QR Code`} className="w-full h-full max-w-[230px] max-h-[230px] object-contain rounded-xl" />
                         </div>
-                      </div>
-                    )}
-
-                    {/* Direct Transfer Link Button (MOBILE PHONE & CELLULAR DATA ONLY - Hidden on Desktop Web & Wi-Fi) */}
-                    {selected.link && selected.link.startsWith("http") && isCellularConnection && (
-                      <div className="mt-3">
-                        <a
-                          href={selected.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="btn-ultra-primary w-full text-xs font-black py-3.5 text-slate-950 bg-gradient-to-r from-red-500 via-amber-400 to-emerald-400 hover:brightness-110 flex items-center justify-center gap-2 rounded-xl transition-all shadow-lg"
-                        >
-                          <Zap size={16} className="fill-slate-950" /> فتح رابط التحويل المباشر ⚡
-                        </a>
                       </div>
                     )}
                   </>
