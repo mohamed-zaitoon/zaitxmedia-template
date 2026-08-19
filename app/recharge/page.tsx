@@ -926,6 +926,10 @@ export default function RechargePage() {
                             <Copy size={16} />
                           </button>
                         </div>
+                        <div className="flex items-center justify-between bg-emerald-500/10 px-3 py-2 rounded-xl border border-emerald-500/25 text-xs">
+                          <span className="text-slate-300 font-bold">💵 سعر تحويل الدولار المعتمَد:</span>
+                          <strong className="text-emerald-400 font-mono font-black" dir="ltr">1$ = {(rates.usd || 54.55).toFixed(2)} ج.م</strong>
+                        </div>
                         {binancePayDetails && (
                           <div className="bg-slate-950/90 p-3 rounded-xl border border-slate-800 space-y-2 text-xs">
                             <div className="flex items-center justify-between">
@@ -1068,6 +1072,12 @@ export default function RechargePage() {
                     <span>الحد الأدنى: <strong className="text-foreground">{minimumInCurrency} {currencySymbol}</strong></span>
                     <span>الحد الأقصى: <strong className="text-foreground">{maximumInCurrency} {currencySymbol}</strong></span>
                   </div>
+                  {isBinancePay && (
+                    <div className="flex items-center justify-between bg-cyan-500/10 px-3 py-2 rounded-xl border border-cyan-500/20 text-xs mt-1.5">
+                      <span className="text-slate-300 font-bold">💵 سعر صرف الدولار المعتمَد:</span>
+                      <strong className="text-cyan-400 font-mono font-black" dir="ltr">1$ = {(rates.usd || 54.55).toFixed(2)} ج.م</strong>
+                    </div>
+                  )}
                   {amount && !amountWithinLimits && (
                     <p className="text-xs font-bold text-red-400 bg-red-500/10 p-2.5 rounded-lg border border-red-500/20">
                       أدخل مبلغًا بين {minimumInCurrency} و{maximumInCurrency} {currencySymbol}
