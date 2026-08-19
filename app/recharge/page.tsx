@@ -68,8 +68,22 @@ export default function RechargePage() {
       "ارفع صورة إيصال التحويل البنكي بوضوح",
       "اضغط على تأكيد الايداع",
     ],
+    binance_pay: [
+      "أرسل المبلغ بالدولار الأمريكي (USD) عبر Binance Pay",
+      "اكتب المبلغ المطلوب بالدولار في الخانة المخصصة",
+      "انسخ Binance ID الخاص بحسابنا (405960486) وقم بالتحويل من تطبيق Binance",
+      "اضغط على تأكيد الإيداع لمتابعة حالة الطلب",
+    ],
   });
   const [showInstructionsModal, setShowInstructionsModal] = useState(true);
+  const [binancePayDetails, setBinancePayDetails] = useState<{
+    depositId?: string;
+    merchantTradeNo?: string;
+    recipientBinanceId?: string;
+    amountUsd?: number;
+    checkoutUrl?: string;
+    qrcodeLink?: string;
+  } | null>(null);
 
   useEffect(() => {
     const checkNetwork = () => {
@@ -236,21 +250,21 @@ export default function RechargePage() {
 
       // Build wallet list per country (strictly isolated per country)
       let relevantTypes: string[] = [];
-      const customTypes = Object.keys(grouped).filter(t => !["vodafone", "instapay", "barq", "bank"].includes(t) || t === "custom");
+      const customTypes = Object.keys(grouped).filter(t => !["vodafone", "instapay", "barq", "bank", "binance_pay", "binance"].includes(t) || t === "custom");
 
       if (countryCode === "SA") {
-        // Saudi Arabia (SA): 1) Barq (برق) FIRST & DEFAULT -> 2) Bank Transfer (تحويل بنكي)
-        relevantTypes = ["barq", "bank", ...customTypes].filter(t => t !== "vodafone" && t !== "instapay");
+        // Saudi Arabia (SA): Barq, Binance Pay, Bank Transfer
+        relevantTypes = ["barq", "binance_pay", "bank", ...customTypes].filter(t => t !== "vodafone" && t !== "instapay");
       } else {
-        // Egypt (EG) & International: 1) InstaPay FIRST & DEFAULT -> 2) Vodafone Cash -> 3) Bank Transfer
-        relevantTypes = ["instapay", "vodafone", "bank", ...customTypes].filter(t => t !== "barq");
+        // Egypt (EG) & International: InstaPay, Vodafone Cash, Binance Pay, Bank Transfer
+        relevantTypes = ["instapay", "vodafone", "binance_pay", "bank", ...customTypes].filter(t => t !== "barq");
       }
 
       const finalWallets: any[] = [];
       const initialIndices: Record<string, number> = {};
 
       for (const type of relevantTypes) {
-        const list = (grouped[type] || []).filter((w: any) => {
+        const list = (grouped[type] || grouped[type === "binance_pay" ? "binance" : type] || []).filter((w: any) => {
           if (!w.countryCode) return true;
           return w.countryCode === countryCode || w.countryCode === "GLOBAL";
         });
@@ -258,6 +272,16 @@ export default function RechargePage() {
         if (activeList.length > 0) {
           finalWallets.push(...activeList);
           initialIndices[type] = Math.floor(Math.random() * activeList.length);
+        } else if (type === "binance_pay") {
+          finalWallets.push({
+            type: "binance_pay",
+            countryCode: "GLOBAL",
+            number: "405960486",
+            name: "باينانس باي (Binance Pay - USD)",
+            min: 1,
+            max: 10000,
+            isActive: true,
+          });
         } else if (list.length > 0) {
           finalWallets.push({ ...list[0], disabled: true });
         } else {
@@ -404,19 +428,20 @@ export default function RechargePage() {
     const idx = selectedWalletIndexMap[method] ?? 0;
     return activeMatchingWallets[idx % activeMatchingWallets.length];
   }, [activeMatchingWallets, selectedWalletIndexMap, method, wallets]);
-  const isSaudiUser = selectedCurrency === "SAR" || user?.country === "SA" || method === "barq";
-  const currencySymbol = isSaudiUser ? (symbols.sar || "﷼") : (symbols.egp || "£");
+  const isBinancePay = method === "binance_pay" || method === "binance";
+  const isSaudiUser = !isBinancePay && (selectedCurrency === "SAR" || user?.country === "SA" || method === "barq");
+  const currencySymbol = isBinancePay ? "$" : isSaudiUser ? (symbols.sar || "﷼") : (symbols.egp || "£");
   const fee = getMethodFeePercent(method, pricingConfig);
   const numericAmount = Number(amount);
 
-  const isSarCurrency = isSaudiUser || method === "barq" || selected?.countryCode === "SA";
+  const isSarCurrency = !isBinancePay && (isSaudiUser || method === "barq" || selected?.countryCode === "SA");
 
   const rawMin = Number.isFinite(Number(selected?.min)) && Number(selected?.min) > 0
     ? Number(selected.min)
-    : (isSarCurrency ? 8 : 80);
+    : (isBinancePay ? 1 : isSarCurrency ? 8 : 80);
   const rawMax = Number.isFinite(Number(selected?.max)) && Number(selected?.max) > 0
     ? Number(selected.max)
-    : (isSarCurrency ? 100000 : 1000000);
+    : (isBinancePay ? 10000 : isSarCurrency ? 100000 : 1000000);
 
   const minimumInCurrency = rawMin;
   const maximumInCurrency = rawMax;
@@ -555,6 +580,24 @@ export default function RechargePage() {
     }
     setBusy(true);
     try {
+      if (method === "binance_pay" || method === "binance") {
+        const response = await fetch("/api/v1/payment/binance-pay/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amountUsd: numericAmount,
+            currency: "USD",
+          }),
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || "تعذر إنشاء طلب الإيداع عبر Binance Pay");
+        const bDetails = data.data || data;
+        setRechargeId(bDetails.depositId || bDetails.merchantTradeNo);
+        setBinancePayDetails(bDetails);
+        toast.success("تم إنشاء طلب الإيداع بنجاح 🟡 في انتظار التحويل عبر Binance Pay");
+        return;
+      }
+
       const response = await fetch("/api/recharges/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -887,6 +930,57 @@ export default function RechargePage() {
                         <div className="bg-white p-3 rounded-2xl border border-border flex justify-center items-center shadow-md w-64 h-64 mx-auto">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={selected.qr} alt="InstaPay QR Code" className="w-full h-full max-w-[230px] max-h-[230px] object-contain rounded-xl" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (selected.type === "binance_pay" || selected.type === "binance") ? (
+                  <div className="flex flex-col gap-4">
+                    <span className="block text-xs font-bold text-amber-400 mb-1">وسيلة الدفع: باينانس باي (Binance Pay - USD) 🟡</span>
+
+                    {/* Binance Pay ID Box */}
+                    <div className="text-sm bg-slate-900/90 p-4 rounded-2xl border border-amber-500/30 flex justify-between items-center gap-3 shadow-md">
+                      <div className="flex flex-col gap-1 min-w-0 flex-1">
+                        <span className="text-xs text-amber-400 font-bold">🟡 Binance Pay ID الخاص بحسابنا:</span>
+                        <strong className="font-mono text-lg text-slate-100 break-all" dir="ltr">
+                          {selected?.number || "405960486"}
+                        </strong>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(selected?.number || "405960486", "تم نسخ Binance ID بنجاح 📋")}
+                        className="rounded-xl bg-amber-500/15 hover:bg-amber-500/25 p-3 text-amber-400 border border-amber-500/30 transition-all duration-300 shrink-0 cursor-pointer"
+                        aria-label="نسخ"
+                      >
+                        <Copy size={18} />
+                      </button>
+                    </div>
+
+                    {/* Order Details after creation */}
+                    {binancePayDetails && (
+                      <div className="bg-slate-950/90 p-4 rounded-2xl border border-slate-800 space-y-3 shadow-inner">
+                        <div className="flex items-center justify-between text-xs sm:text-sm">
+                          <span className="text-slate-400 font-semibold">رقم المعاملة (Order ID):</span>
+                          <div className="flex items-center gap-2">
+                            <strong className="font-mono text-cyan-400 font-bold" dir="ltr">{binancePayDetails.merchantTradeNo || binancePayDetails.depositId}</strong>
+                            <button
+                              type="button"
+                              onClick={() => copyToClipboard(binancePayDetails.merchantTradeNo || binancePayDetails.depositId || "", "تم نسخ Order ID بنجax 📋")}
+                              className="text-xs p-1.5 rounded-lg bg-cyan-500/15 text-cyan-400 hover:bg-cyan-500/25 cursor-pointer"
+                            >
+                              <Copy size={14} />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between text-xs sm:text-sm">
+                          <span className="text-slate-400 font-semibold">المبلغ المطلوب بالدولار:</span>
+                          <strong className="font-mono text-emerald-400 font-black">${binancePayDetails.amountUsd} USD</strong>
+                        </div>
+                        <div className="flex items-center justify-between text-xs sm:text-sm">
+                          <span className="text-slate-400 font-semibold">حالة الدفع:</span>
+                          <span className="px-3 py-1 rounded-xl text-xs font-black bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                            في انتظار التحويل والخصم...
+                          </span>
                         </div>
                       </div>
                     )}

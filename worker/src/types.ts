@@ -221,6 +221,9 @@ export interface Env {
   CRON_SECRET?: string;
   PAYMENT_VERIFICATION_DELAY_SECONDS?: string;
   PROVIDER_WEBHOOK_HMAC_SECRET?: string;
+  BINANCE_PAY_API_KEY?: string;
+  BINANCE_PAY_SECRET?: string;
+  BINANCE_PAY_RECIPIENT_ID?: string;
   ONESIGNAL_APP_ID?: string;
   ONESIGNAL_REST_API_KEY?: string;
   CORS_ORIGIN?: string;

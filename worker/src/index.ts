@@ -8,6 +8,7 @@ import { handleNotificationsRequest } from './notifications';
 import { handleSettingsRequest } from './settings';
 import { handleServicesRequest } from './services';
 import { handleWebhookRequest } from './webhooks';
+import { handleBinancePayRequest } from './binance-pay';
 import { handleProviderRequest } from './provider';
 import { checkRateLimit, RATE_LIMITS, getClientIp, handleInternalUpload, handleInternalDelete } from './utils';
 
@@ -125,6 +126,8 @@ export default {
         response = await handleSettingsRequest(request, env, path);
       } else if (path.startsWith('/api/services')) {
         response = await handleServicesRequest(request, env, path);
+      } else if (path.startsWith('/v1/payment/binance-pay')) {
+        response = await handleBinancePayRequest(request, env, path, ctx);
       } else if (path.startsWith('/api/webhook/') || path.startsWith('/v1/')) {
         response = await handleWebhookRequest(request, env, path, ctx);
       } else if (path === '/health') {

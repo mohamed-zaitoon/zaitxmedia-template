@@ -1844,6 +1844,12 @@ export function WalletsTab() {
       "ارفع صورة إيصال التحويل البنكي بوضوح",
       "اضغط على تأكيد الايداع",
     ],
+    binance_pay: [
+      "أرسل المبلغ بالدولار الأمريكي (USD) عبر Binance Pay",
+      "اكتب المبلغ المطلوب بالدولار في الخانة المخصصة",
+      "انسخ Binance ID الخاص بحسابنا (405960486) وقم بالتحويل من تطبيق Binance",
+      "اضغط على تأكيد الإيداع لمتابعة حالة الطلب",
+    ],
   });
   const [availableCountries, setAvailableCountries] = useState<any[]>([
     { id: "EG", label: "🇪🇬 مصر (EGP)" },
@@ -1879,12 +1885,13 @@ export function WalletsTab() {
           const raw = result.data.wallets || [];
           const normalized = raw.map((w: any) => ({
             ...w,
-            countryCode: w.countryCode || (w.type === "barq" ? "SA" : w.type === "bank" ? "GLOBAL" : "EG"),
+            countryCode: w.countryCode || (w.type === "barq" ? "SA" : (w.type === "bank" || w.type === "binance_pay" || w.type === "binance") ? "GLOBAL" : "EG"),
           }));
 
-          // Ensure Barq (SA) and Bank (GLOBAL) exist so SA and other countries are never empty!
+          // Ensure Barq (SA), Bank (GLOBAL), and Binance Pay (GLOBAL) exist!
           const hasBarq = normalized.some((w: any) => w.type === "barq");
           const hasBank = normalized.some((w: any) => w.type === "bank");
+          const hasBinancePay = normalized.some((w: any) => w.type === "binance_pay" || w.type === "binance");
 
           if (!hasBarq) {
             normalized.push({
@@ -1907,6 +1914,18 @@ export function WalletsTab() {
               bankName: "البنك الأهلي / الراجحي",
               min: 10,
               max: 50000,
+              isActive: true,
+            });
+          }
+
+          if (!hasBinancePay) {
+            normalized.push({
+              type: "binance_pay",
+              countryCode: "GLOBAL",
+              number: "405960486",
+              name: "باينانس باي (Binance Pay - USD)",
+              min: 1,
+              max: 10000,
               isActive: true,
             });
           }
@@ -2034,6 +2053,7 @@ export function WalletsTab() {
               { value: "vodafone", label: "فودافون كاش / محفظه الكترونية" },
               { value: "instapay", label: "انستاباي (InstaPay)" },
               { value: "barq", label: "برق (Barq - السعودية)" },
+              { value: "binance_pay", label: "🟡 باينانس باي (Binance Pay - USD)" },
               { value: "bank", label: "حساب بنكي (Bank Transfer)" },
               { value: "custom", label: "➕ طريقة دفع مخصصة جديدة" },
             ]}
@@ -2224,8 +2244,9 @@ export function WalletsTab() {
               { id: "vodafone", label: "📱 فودافون كاش / المحافظ" },
               { id: "instapay", label: "⚡ انستاباي InstaPay" },
               { id: "barq", label: "✨ برق Barq" },
+              { id: "binance_pay", label: "🟡 باينانس باي Binance Pay" },
               { id: "bank", label: "🏦 تحويل بنكي Bank" },
-              ...Array.from(new Set(wallets.map(w => w.type).filter(t => !["vodafone", "instapay", "barq", "bank"].includes(t)))).map(t => ({ id: t, label: `💳 ${t}` }))
+              ...Array.from(new Set(wallets.map(w => w.type).filter(t => !["vodafone", "instapay", "barq", "binance_pay", "binance", "bank"].includes(t)))).map(t => ({ id: t, label: `💳 ${t}` }))
             ].map((m) => (
               <button
                 key={m.id}
