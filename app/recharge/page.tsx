@@ -116,17 +116,51 @@ export default function RechargePage() {
     }
   }, []);
 
+  const copyToClipboard = async (text: string, label: string = "تم النسخ بنجاح 📋") => {
+    if (!text) return;
+    try {
+      if (typeof window !== "undefined" && navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        textArea.remove();
+      }
+      setCopied(true);
+      toast.success(label);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      try {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        textArea.remove();
+        setCopied(true);
+        toast.success(label);
+        window.setTimeout(() => setCopied(false), 2000);
+      } catch {
+        toast.error("تعذر النسخ، يرجى النسخ يدوياً ⚠️");
+      }
+    }
+  };
+
   const copyWalletDetails = async () => {
     const value = selected?.number || selected?.link;
     if (!value) return;
-    try {
-      await navigator.clipboard.writeText(value);
-      setCopied(true);
-      toast.success("تم النسخ بنجاح");
-      window.setTimeout(() => setCopied(false), 1800);
-    } catch {
-      toast.error("تعذر النسخ، حاول مرة أخرى");
-    }
+    await copyToClipboard(value, "تم نسخ رقم التحويل بنجاح 📋");
   };
 
   const hasFetchedWallets = useRef(false);
@@ -683,10 +717,7 @@ export default function RechargePage() {
                         </div>
                         <button
                           type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText(selected.bankName);
-                            toast.success("تم نسخ اسم البنك بنجاح 📋");
-                          }}
+                          onClick={() => copyToClipboard(selected.bankName, "تم نسخ اسم البنك بنجاح 📋")}
                           className="rounded-xl bg-primary/15 hover:bg-primary/25 p-3 text-primary transition-all duration-300 shrink-0 cursor-pointer"
                           aria-label="نسخ"
                         >
@@ -702,10 +733,7 @@ export default function RechargePage() {
                         </div>
                         <button
                           type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText(selected.holderName);
-                            toast.success("تم نسخ اسم صاحب الحساب بنجاح 📋");
-                          }}
+                          onClick={() => copyToClipboard(selected.holderName, "تم نسخ اسم صاحب الحساب بنجاح 📋")}
                           className="rounded-xl bg-primary/15 hover:bg-primary/25 p-3 text-primary transition-all duration-300 shrink-0 cursor-pointer"
                           aria-label="نسخ"
                         >
@@ -721,10 +749,7 @@ export default function RechargePage() {
                         </div>
                         <button
                           type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText(selected.name);
-                            toast.success("تم نسخ بيانات الحساب بنجاح 📋");
-                          }}
+                          onClick={() => copyToClipboard(selected.name, "تم نسخ بيانات الحساب بنجاح 📋")}
                           className="rounded-xl bg-primary/15 hover:bg-primary/25 p-3 text-primary transition-all duration-300 shrink-0 cursor-pointer"
                           aria-label="نسخ"
                         >
@@ -740,12 +765,9 @@ export default function RechargePage() {
                         </div>
                         <button
                           type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText(selected.number);
-                            setCopied(true);
-                            setTimeout(() => setCopied(false), 2000);
-                          }}
-                          className="rounded-xl bg-primary/15 hover:bg-primary/25 p-3 text-primary transition-all duration-300"
+                          onClick={() => copyToClipboard(selected.number, "تم نسخ رقم الحساب بنجاح 📋")}
+                          className="rounded-xl bg-primary/15 hover:bg-primary/25 p-3 text-primary transition-all duration-300 shrink-0 cursor-pointer"
+                          aria-label="نسخ"
                         >
                           <Copy size={16} />
                         </button>
@@ -759,12 +781,9 @@ export default function RechargePage() {
                         </div>
                         <button
                           type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText(selected.link);
-                            setCopied(true);
-                            setTimeout(() => setCopied(false), 2000);
-                          }}
-                          className="rounded-xl bg-primary/15 hover:bg-primary/25 p-3 text-primary transition-all duration-300"
+                          onClick={() => copyToClipboard(selected.link, "تم نسخ رقم الحساب الدولي (IBAN) بنجاح 📋")}
+                          className="rounded-xl bg-primary/15 hover:bg-primary/25 p-3 text-primary transition-all duration-300 shrink-0 cursor-pointer"
+                          aria-label="نسخ"
                         >
                           <Copy size={16} />
                         </button>
@@ -778,12 +797,9 @@ export default function RechargePage() {
                         </div>
                         <button
                           type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText(selected.swift);
-                            setCopied(true);
-                            setTimeout(() => setCopied(false), 2000);
-                          }}
-                          className="rounded-xl bg-primary/15 hover:bg-primary/25 p-3 text-primary transition-all duration-300"
+                          onClick={() => copyToClipboard(selected.swift, "تم نسخ السويفت كود (Swift) بنجاح 📋")}
+                          className="rounded-xl bg-primary/15 hover:bg-primary/25 p-3 text-primary transition-all duration-300 shrink-0 cursor-pointer"
+                          aria-label="نسخ"
                         >
                           <Copy size={16} />
                         </button>
@@ -816,10 +832,7 @@ export default function RechargePage() {
                         </div>
                         <button
                           type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText(selected.number);
-                            toast.success("تم نسخ رقم تحويل انستاباي بنجاح 📋");
-                          }}
+                          onClick={() => copyToClipboard(selected.number, "تم نسخ رقم تحويل انستاباي بنجاح 📋")}
                           className="rounded-xl bg-primary/15 hover:bg-primary/25 p-3 text-primary transition-all duration-300 shrink-0 cursor-pointer"
                           aria-label="نسخ"
                         >
@@ -839,10 +852,7 @@ export default function RechargePage() {
                           </div>
                           <button
                             type="button"
-                            onClick={() => {
-                              navigator.clipboard.writeText(ipaValue);
-                              toast.success("تم نسخ اسم مستخدم انستاباي بنجاح 📋");
-                            }}
+                            onClick={() => copyToClipboard(ipaValue, "تم نسخ اسم مستخدم انستاباي بنجاح 📋")}
                             className="rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 p-3 text-emerald-400 border border-emerald-500/20 transition-all duration-300 shrink-0 cursor-pointer"
                             aria-label="نسخ"
                           >
@@ -860,10 +870,7 @@ export default function RechargePage() {
                           <strong className="text-foreground font-black text-base">{holderNameStr}</strong>
                           <button
                             type="button"
-                            onClick={() => {
-                              navigator.clipboard.writeText(holderNameStr);
-                              toast.success("تم النسخ بنجاح 📋");
-                            }}
+                            onClick={() => copyToClipboard(holderNameStr, "تم النسخ بنجاح 📋")}
                             className="rounded-xl bg-primary/15 hover:bg-primary/25 p-2 text-primary transition-all duration-300 shrink-0 cursor-pointer"
                             aria-label="نسخ"
                           >
@@ -929,10 +936,7 @@ export default function RechargePage() {
                           <strong className="text-foreground font-black text-base">{holderNameStr}</strong>
                           <button
                             type="button"
-                            onClick={() => {
-                              navigator.clipboard.writeText(holderNameStr);
-                              toast.success("تم النسخ بنجاح 📋");
-                            }}
+                            onClick={() => copyToClipboard(holderNameStr, "تم النسخ بنجاح 📋")}
                             className="rounded-xl bg-primary/15 hover:bg-primary/25 p-2 text-primary transition-all duration-300 shrink-0 cursor-pointer"
                             aria-label="نسخ"
                           >
