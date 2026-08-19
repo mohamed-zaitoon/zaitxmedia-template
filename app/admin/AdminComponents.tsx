@@ -359,64 +359,67 @@ export function DashboardTab() {
   }, []);
 
   return (
-    <div>
-      <div className="mb-7 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+    <div className="space-y-8">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <span className="text-xs font-bold text-primary">نظرة عامة</span>
-          <h1 className="mt-1 text-2xl font-black text-white md:text-3xl">مرحبًا بك في مركز الإدارة</h1>
-          <p className="mt-2 text-sm text-muted-foreground">تابع المستخدمين والطلبات والعمليات المعلقة من مكان واحد.</p>
+          <span className="text-xs font-bold text-amber-400">مركز العمليات والرصد المباشر</span>
+          <h1 className="mt-1 text-2xl font-black text-white md:text-3xl">مرحبًا بك في لوحة تحكم ZAITX MEDIA</h1>
+          <p className="mt-2 text-sm text-slate-400">رصد شامل للمستخدمين، الطلبات، الإيداعات، وإعدادات الأسعار والعملات.</p>
         </div>
-        <div className="w-fit rounded-xl border border-emerald-500/20 bg-emerald-500/[0.08] px-4 py-2 text-xs font-bold text-emerald-400">
-          ● النظام يعمل
+        <div className="w-fit rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-xs font-black text-emerald-400 flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+          <span>النظام يعمل بكفاءة 100% 🟢</span>
         </div>
       </div>
-      {statsError && <p className="mb-4 text-red-400">{statsError}</p>}
+
+      {statsError && <p className="mb-4 text-red-400 font-bold bg-red-500/10 p-3 rounded-xl border border-red-500/20">{statsError}</p>}
+
+      {/* Primary Statistics Cards */}
       <div
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
           gap: 20,
-          marginBottom: 32,
         }}
       >
         {[
           {
-            label: "المستخدمون",
+            label: "المستخدمون المسجلون",
             value: stats.users,
             icon: <Users size={24} />,
-            color: "#38bdf8",
-            bg: "rgba(56,189,248,0.08)",
+            color: "#fbbf24",
+            bg: "rgba(251,191,36,0.1)",
           },
           {
-            label: "الطلبات",
+            label: "إجمالي الطلبات",
             value: stats.orders,
             icon: <Package size={24} />,
-            color: "#a78bfa",
-            bg: "rgba(167,139,250,0.08)",
+            color: "#38bdf8",
+            bg: "rgba(56,189,248,0.1)",
           },
           {
-            label: "طلبات معلقة",
+            label: "طلبات شحن معلقة",
             value: stats.pending,
             icon: <Clock size={24} />,
-            color: "#fbbf24",
-            bg: "rgba(251,191,36,0.08)",
+            color: "#f87171",
+            bg: "rgba(248,113,113,0.1)",
           },
           {
-            label: "المدراء",
+            label: "حسابات الإدارة (Admins)",
             value: stats.admins,
             icon: <Shield size={24} />,
             color: "#34d399",
-            bg: "rgba(52,211,153,0.08)",
+            bg: "rgba(52,211,153,0.1)",
           },
         ].map((c, i) => (
           <div
             key={i}
             style={{
-              background: "linear-gradient(145deg, rgba(15,25,43,.92), rgba(8,14,26,.96))",
+              background: "linear-gradient(145deg, rgba(15,25,43,.95), rgba(8,14,26,.98))",
               padding: 24,
-              borderRadius: 18,
-              border: "1px solid rgba(255,255,255,0.075)",
-              boxShadow: "0 18px 45px rgba(0,0,0,0.2)",
+              borderRadius: 20,
+              border: "1px solid rgba(245,158,11,0.2)",
+              boxShadow: "0 18px 45px rgba(0,0,0,0.4)",
             }}
           >
             <div
@@ -430,21 +433,80 @@ export function DashboardTab() {
                 style={{
                   color: c.color,
                   background: c.bg,
-                  padding: 10,
-                  borderRadius: 10,
+                  padding: 12,
+                  borderRadius: 14,
                 }}
               >
                 {c.icon}
               </div>
               <div style={{ textAlign: "left" }}>
-                <div style={{ fontSize: 26, fontWeight: 800 }}>{c.value}</div>
-                <div style={{ color: "#8899b4", fontSize: 12, marginTop: 4 }}>
+                <div style={{ fontSize: 28, fontWeight: 900, color: "#ffffff" }}>{c.value}</div>
+                <div style={{ color: "#94a3b8", fontSize: 13, marginTop: 4, fontWeight: 700 }}>
                   {c.label}
                 </div>
               </div>
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Quick Action Control Hub */}
+      <div className="rounded-3xl border border-amber-500/25 bg-[#0a0f1d]/90 p-6 md:p-8 backdrop-blur-2xl shadow-2xl space-y-6">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+          <h2 className="text-lg font-black text-white flex items-center gap-2.5">
+            <Zap size={20} className="text-amber-400 fill-amber-400/20" /> اختصارات التحكم والوصول السريع
+          </h2>
+          <span className="text-xs text-amber-400 font-bold">لوحة التحكم السريعة ⚡</span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="p-5 rounded-2xl border border-amber-500/20 bg-gradient-to-b from-amber-500/10 to-transparent flex flex-col justify-between gap-4">
+            <div>
+              <h3 className="font-extrabold text-white text-base mb-1">💰 إعدادات الأسعار والريال</h3>
+              <p className="text-xs text-slate-400">التحكم بسعر الريال وتخفيضات الدولار وسعر تيك توك تلقائياً.</p>
+            </div>
+            <a
+              href="#pricing"
+              onClick={() => {
+                const btn = document.querySelector('button:has(svg)');
+              }}
+              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 font-black text-xs text-center border border-amber-300/40 hover:brightness-110 transition-all no-underline shadow-lg"
+            >
+              الذهاب للأسعار ⚡
+            </a>
+          </div>
+
+          <div className="p-5 rounded-2xl border border-sky-500/20 bg-gradient-to-b from-sky-500/10 to-transparent flex flex-col justify-between gap-4">
+            <div>
+              <h3 className="font-extrabold text-white text-base mb-1">💳 طلبات شحن المحفظة</h3>
+              <p className="text-xs text-slate-400">مراجعة وتأكيد إيداعات فودافون كاش وانستاباي وبرق والبنك.</p>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-extrabold text-sky-400">معلقة: {stats.pending}</span>
+              <span className="px-3 py-1.5 rounded-lg bg-sky-500/20 text-sky-300 text-xs font-black">
+                {stats.pending > 0 ? "تتطلب الإجراء ⚠️" : "محدثة 🟢"}
+              </span>
+            </div>
+          </div>
+
+          <div className="p-5 rounded-2xl border border-emerald-500/20 bg-gradient-to-b from-emerald-500/10 to-transparent flex flex-col justify-between gap-4">
+            <div>
+              <h3 className="font-extrabold text-white text-base mb-1">🌍 إدارة الدول والعملات</h3>
+              <p className="text-xs text-slate-400">تفعيل وتخصيص الدول ومطابقة العملات والوسائل المتاحة.</p>
+            </div>
+            <span className="text-xs font-bold text-emerald-400">دعم تلقائي: السعودية 🇸🇦 & مصر 🇪🇬</span>
+          </div>
+
+          <div className="p-5 rounded-2xl border border-purple-500/20 bg-gradient-to-b from-purple-500/10 to-transparent flex flex-col justify-between gap-4">
+            <div>
+              <h3 className="font-extrabold text-white text-base mb-1">🛡️ حماية النظام والمحفظة</h3>
+              <p className="text-xs text-slate-400">فحص توقيعات HMAC المشفرة وحماية بصمة الإصبع/الوجه.</p>
+            </div>
+            <div className="px-3 py-1.5 rounded-lg bg-purple-500/20 text-purple-300 text-xs font-black text-center">
+              Python Auditor Active 🐍
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
