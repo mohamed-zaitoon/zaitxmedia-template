@@ -1859,7 +1859,22 @@ export function WalletsTab() {
       if (result.exists) {
         try {
           if (result.data.methodInstructions && typeof result.data.methodInstructions === "object") {
-            setMethodInstructions((prev) => ({ ...prev, ...result.data.methodInstructions }));
+            const loadedInstr: Record<string, string[]> = { ...result.data.methodInstructions };
+            Object.keys(loadedInstr).forEach((k) => {
+              const list = [...(loadedInstr[k] || [])];
+              if (list.length >= 3) {
+                const s1 = list[1] || "";
+                const s2 = list[2] || "";
+                const isS1Ref = /رقم|الرقم|مرجعي|اسم|إيصال|ايصال/i.test(s1);
+                const isS2Amount = /مبلغ|المبلغ/i.test(s2);
+                if (isS1Ref && isS2Amount) {
+                  list[1] = s2;
+                  list[2] = s1;
+                  loadedInstr[k] = list;
+                }
+              }
+            });
+            setMethodInstructions((prev) => ({ ...prev, ...loadedInstr }));
           }
           const raw = result.data.wallets || [];
           const normalized = raw.map((w: any) => ({

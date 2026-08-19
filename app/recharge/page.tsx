@@ -138,7 +138,22 @@ export default function RechargePage() {
       const siteData = snapshot.data();
       const allWallets: any[] = siteData?.wallets || [];
       if (siteData?.methodInstructions && typeof siteData.methodInstructions === "object") {
-        setSiteInstructions((prev) => ({ ...prev, ...siteData.methodInstructions }));
+        const loadedInstr: Record<string, string[]> = { ...siteData.methodInstructions };
+        Object.keys(loadedInstr).forEach((k) => {
+          const list = [...(loadedInstr[k] || [])];
+          if (list.length >= 3) {
+            const s1 = list[1] || "";
+            const s2 = list[2] || "";
+            const isS1Ref = /رقم|الرقم|مرجعي|اسم|إيصال|ايصال/i.test(s1);
+            const isS2Amount = /مبلغ|المبلغ/i.test(s2);
+            if (isS1Ref && isS2Amount) {
+              list[1] = s2;
+              list[2] = s1;
+              loadedInstr[k] = list;
+            }
+          }
+        });
+        setSiteInstructions((prev) => ({ ...prev, ...loadedInstr }));
       }
       const countryCode = user?.country_code || "EG";
 
