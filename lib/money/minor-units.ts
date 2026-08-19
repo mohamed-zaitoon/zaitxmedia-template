@@ -32,7 +32,8 @@ export function parseAmountToMinorUnits(input: string | number, currency: Curren
 export function formatMinorUnits(amountMinor: number, currency: Currency): string {
   const pounds = amountMinor / 100;
   const symbol = currency === "EGP" ? "£" : "﷼";
-  return `${pounds.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${symbol}`;
+  const numStr = pounds.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return `\u2066${numStr} ${symbol}\u2069`;
 }
 
 /**

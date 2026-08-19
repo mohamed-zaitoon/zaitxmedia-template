@@ -34,8 +34,8 @@ r = validateMoneyInput("abc", "EGP");
 assert(!r.valid, "Rejects non-numeric");
 
 console.log("\n=== Format ===");
-assert(formatMinorUnits(150225, "EGP") === "1,502.25 £", "150225 → 1,502.25 £");
-assert(formatMinorUnits(150225, "SAR") === "1,502.25 ﷼", "150225 → 1,502.25 ﷼");
+assert(formatMinorUnits(150225, "EGP") === "\u20661,502.25 £\u2069", "150225 → 1,502.25 £");
+assert(formatMinorUnits(150225, "SAR") === "\u20661,502.25 ﷼\u2069", "150225 → 1,502.25 ﷼");
 
 console.log("\n=== Normalize input ===");
 assert(normalizeNumericInput("1,502.25 ج.م") === "1502.25", "Strip ج.م and comma");
