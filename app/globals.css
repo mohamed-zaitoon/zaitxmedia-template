@@ -1547,17 +1547,17 @@ body {
 @media (max-width: 900px) {
   .admin-sidebar {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
     top: auto;
-    width: 100%;
-    max-height: 70vh;
-    border-radius: 28px 28px 0 0;
-    border-top: 2px solid rgba(245, 158, 11, 0.4);
-    transform: translateY(105%);
+    width: calc(100% - 20px);
+    max-height: 68vh;
+    border-radius: 28px;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    transform: translateY(110%);
     transition: transform .3s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.9);
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.95);
     z-index: 999;
   }
   .admin-sidebar.open {
