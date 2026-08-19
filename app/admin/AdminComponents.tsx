@@ -43,6 +43,8 @@ import {
   Bell,
   Clock,
   CheckCircle,
+  Globe,
+  ShieldCheck,
   XCircle,
   AlertCircle,
   Search,
@@ -451,59 +453,106 @@ export function DashboardTab() {
       </div>
 
       {/* Quick Action Control Hub */}
-      <div className="rounded-3xl border border-amber-500/25 bg-[#0a0f1d]/90 p-6 md:p-8 backdrop-blur-2xl shadow-2xl space-y-6">
+      <div className="rounded-3xl border border-amber-500/25 bg-[#0a0f1d]/95 p-6 md:p-8 backdrop-blur-2xl shadow-2xl space-y-6">
         <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-          <h2 className="text-lg font-black text-white flex items-center gap-2.5">
-            <Zap size={20} className="text-amber-400 fill-amber-400/20" /> اختصارات التحكم والوصول السريع
+          <h2 className="text-xl font-black text-white flex items-center gap-3">
+            <Zap size={24} className="text-amber-400 fill-amber-400/20" /> اختصارات التحكم والوصول السريع
           </h2>
-          <span className="text-xs text-amber-400 font-bold">لوحة التحكم السريعة ⚡</span>
+          <span className="text-xs text-amber-400 font-extrabold px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20">لوحة التحكم المركزية ⚡</span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-5 rounded-2xl border border-amber-500/20 bg-gradient-to-b from-amber-500/10 to-transparent flex flex-col justify-between gap-4">
-            <div>
-              <h3 className="font-extrabold text-white text-base mb-1">💰 إعدادات الأسعار والريال</h3>
-              <p className="text-xs text-slate-400">التحكم بسعر الريال وتخفيضات الدولار وسعر تيك توك تلقائياً.</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="p-6 rounded-2xl border border-amber-500/25 bg-gradient-to-b from-amber-500/10 via-slate-900/50 to-transparent flex flex-col justify-between gap-6 shadow-xl">
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                  <DollarSign size={22} />
+                </div>
+                <h3 className="font-black text-white text-lg">💰 إعدادات الأسعار والريال والخصومات</h3>
+              </div>
+              <p className="text-sm text-slate-300 leading-relaxed pt-2">
+                التحكم المباشر بسعر صرف الريال السعودي، التخفيضات العامة، تكلفة 1000 تيك توك، وتعديل أسعار الشرائح فورياً.
+              </p>
             </div>
-            <a
-              href="#pricing"
+            <button
+              type="button"
               onClick={() => {
-                const btn = document.querySelector('button:has(svg)');
+                const btn = document.querySelector('button[key="pricing"]') || document.querySelectorAll('nav button')[2];
+                if (btn) (btn as HTMLElement).click();
               }}
-              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 font-black text-xs text-center border border-amber-300/40 hover:brightness-110 transition-all no-underline shadow-lg"
+              className="h-14 w-full rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 text-slate-950 font-black text-sm md:text-base text-center border border-amber-300/40 hover:scale-[1.01] active:scale-95 transition-all duration-200 cursor-pointer shadow-xl shadow-amber-500/20 flex items-center justify-center gap-2"
             >
-              الذهاب للأسعار ⚡
-            </a>
+              <span>التحكم في الأسعار والشرائح ⚡</span>
+            </button>
           </div>
 
-          <div className="p-5 rounded-2xl border border-sky-500/20 bg-gradient-to-b from-sky-500/10 to-transparent flex flex-col justify-between gap-4">
-            <div>
-              <h3 className="font-extrabold text-white text-base mb-1">💳 طلبات شحن المحفظة</h3>
-              <p className="text-xs text-slate-400">مراجعة وتأكيد إيداعات فودافون كاش وانستاباي وبرق والبنك.</p>
+          <div className="p-6 rounded-2xl border border-sky-500/25 bg-gradient-to-b from-sky-500/10 via-slate-900/50 to-transparent flex flex-col justify-between gap-6 shadow-xl">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 rounded-xl bg-sky-500/20 text-sky-400 border border-sky-500/30">
+                    <Wallet size={22} />
+                  </div>
+                  <h3 className="font-black text-white text-lg">💳 طلبات شحن المحفظة</h3>
+                </div>
+                <span className="px-3.5 py-1.5 rounded-xl bg-sky-500/20 text-sky-300 text-xs font-black border border-sky-500/30">
+                  معلقة: {stats.pending}
+                </span>
+              </div>
+              <p className="text-sm text-slate-300 leading-relaxed pt-2">
+                مراجعة وتأكيد إيداعات الحسابات عبر فودافون كاش، انستاباي، تحويل برق، والإيداعات البنكية المباشرة.
+              </p>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-extrabold text-sky-400">معلقة: {stats.pending}</span>
-              <span className="px-3 py-1.5 rounded-lg bg-sky-500/20 text-sky-300 text-xs font-black">
-                {stats.pending > 0 ? "تتطلب الإجراء ⚠️" : "محدثة 🟢"}
-              </span>
-            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const btn = document.querySelectorAll('nav button')[7];
+                if (btn) (btn as HTMLElement).click();
+              }}
+              className="h-14 w-full rounded-2xl bg-gradient-to-r from-sky-400 via-cyan-500 to-blue-600 text-slate-950 font-black text-sm md:text-base text-center border border-sky-300/40 hover:scale-[1.01] active:scale-95 transition-all duration-200 cursor-pointer shadow-xl shadow-sky-500/20 flex items-center justify-center gap-2"
+            >
+              <span>مراجعة طلبات الشحن 💳</span>
+            </button>
           </div>
 
-          <div className="p-5 rounded-2xl border border-emerald-500/20 bg-gradient-to-b from-emerald-500/10 to-transparent flex flex-col justify-between gap-4">
-            <div>
-              <h3 className="font-extrabold text-white text-base mb-1">🌍 إدارة الدول والعملات</h3>
-              <p className="text-xs text-slate-400">تفعيل وتخصيص الدول ومطابقة العملات والوسائل المتاحة.</p>
+          <div className="p-6 rounded-2xl border border-emerald-500/25 bg-gradient-to-b from-emerald-500/10 via-slate-900/50 to-transparent flex flex-col justify-between gap-6 shadow-xl">
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  <Globe size={22} />
+                </div>
+                <h3 className="font-black text-white text-lg">🌍 إدارة الدول والعملات المخصصة</h3>
+              </div>
+              <p className="text-sm text-slate-300 leading-relaxed pt-2">
+                تفعيل وإلغاء الدول المتاحة للمستخدمين، وتخصيص العملات التلقائية لكل دولة (الريال السعودي 🇸🇦 والجنيه المصري 🇪🇬).
+              </p>
             </div>
-            <span className="text-xs font-bold text-emerald-400">دعم تلقائي: السعودية 🇸🇦 & مصر 🇪🇬</span>
+            <button
+              type="button"
+              onClick={() => {
+                const btn = document.querySelectorAll('nav button')[1];
+                if (btn) (btn as HTMLElement).click();
+              }}
+              className="h-14 w-full rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600 text-slate-950 font-black text-sm md:text-base text-center border border-emerald-300/40 hover:scale-[1.01] active:scale-95 transition-all duration-200 cursor-pointer shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-2"
+            >
+              <span>إدارة الدول وطرق الدفع 🌍</span>
+            </button>
           </div>
 
-          <div className="p-5 rounded-2xl border border-purple-500/20 bg-gradient-to-b from-purple-500/10 to-transparent flex flex-col justify-between gap-4">
-            <div>
-              <h3 className="font-extrabold text-white text-base mb-1">🛡️ حماية النظام والمحفظة</h3>
-              <p className="text-xs text-slate-400">فحص توقيعات HMAC المشفرة وحماية بصمة الإصبع/الوجه.</p>
+          <div className="p-6 rounded-2xl border border-purple-500/25 bg-gradient-to-b from-purple-500/10 via-slate-900/50 to-transparent flex flex-col justify-between gap-6 shadow-xl">
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                  <ShieldCheck size={22} />
+                </div>
+                <h3 className="font-black text-white text-lg">🛡️ حماية النظام والتدقيق المباشر</h3>
+              </div>
+              <p className="text-sm text-slate-300 leading-relaxed pt-2">
+                فحص التوقيعات المشفرة لرسائل الـ SMS، تتبع بصمة الأصبع والوجه، ومراقبة أمان الحسابات بالذكاء الاصطناعي.
+              </p>
             </div>
-            <div className="px-3 py-1.5 rounded-lg bg-purple-500/20 text-purple-300 text-xs font-black text-center">
-              Python Auditor Active 🐍
+            <div className="h-14 w-full rounded-2xl bg-purple-500/15 border border-purple-500/30 text-purple-300 font-black text-sm md:text-base flex items-center justify-center gap-2">
+              <span>Python Security Audit Active 🐍</span>
             </div>
           </div>
         </div>
