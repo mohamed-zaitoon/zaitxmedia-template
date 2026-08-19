@@ -553,7 +553,7 @@ export function DashboardTab() {
                 <h3 className="font-black text-white text-lg">🛡️ حماية النظام والتدقيق المباشر</h3>
               </div>
               <p className="text-sm text-slate-300 leading-relaxed pt-2">
-                فحص التوقيعات المشفرة لرسائل الـ SMS، تتبع بصمة الأصبع والوجه، ومراقبة أمان الحسابات بالذكاء الاصطناعي.
+                فحص التوقيعات المشفرة لرسائل الـ SMS، تتبع بصمة الأصبع والوجه، ومراقبة أمان الحسابات بنظام الحماية الفائق.
               </p>
             </div>
             <div className="h-14 w-full rounded-2xl bg-purple-500/15 border border-purple-500/30 text-purple-300 font-black text-sm md:text-base flex items-center justify-center gap-2">

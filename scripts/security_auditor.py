@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 ZAITX MEDIA - Python Security & System Auditor
-Author: Antigravity AI Team
+Author: Mohamed Zaitoon
 Description: Maximum security auditor script for validating HMAC webhooks, rate limiting, and environment security.
 """
 
