@@ -191,18 +191,23 @@ export default function AdminPage() {
       {mobileMenuOpen && (
         <div 
           onClick={() => setMobileMenuOpen(false)}
-          className="fixed inset-0 bg-black/80 backdrop-blur-md z-[80] md:hidden"
+          className="fixed inset-0 bg-black/80 backdrop-blur-md z-[80] md:hidden animate-in fade-in duration-200"
         />
       )}
       
-      {/* Sidebar */}
+      {/* Sidebar - Desktop relative sidebar & Mobile Bottom Sheet Drawer (Bottom to Top) */}
       <div
-        className={`w-64 bg-[#0a0f1d]/98 border-l border-amber-500/20 py-6 flex flex-col shrink-0 z-[90] backdrop-blur-2xl transition-all duration-300 ${
-          mobileMenuOpen ? "fixed top-[82px] right-0 left-0 bottom-0 w-full md:w-64 border-t border-amber-500/30" : "hidden md:flex relative top-0 bottom-0"
+        className={`bg-[#0a0f1d]/98 border-amber-500/20 py-6 flex flex-col shrink-0 z-[100] backdrop-blur-2xl transition-all duration-300 ${
+          mobileMenuOpen
+            ? "fixed bottom-0 left-0 right-0 w-full max-h-[85vh] rounded-t-3xl border-t-2 border-amber-500/40 shadow-[0_-20px_50px_rgba(0,0,0,0.85)] animate-in slide-in-from-bottom duration-300 md:hidden"
+            : "hidden md:flex relative top-0 bottom-0 w-64 border-l"
         }`}
       >
+        {/* Mobile Pull Handle Indicator */}
+        <div className="w-14 h-1.5 rounded-full bg-amber-500/40 mx-auto mb-3 shrink-0 md:hidden animate-pulse" />
+
         {/* Brand Header */}
-        <div className="px-6 pb-6 border-b border-slate-800/80 mb-3 flex items-center justify-between">
+        <div className="px-6 pb-4 border-b border-slate-800/80 mb-3 flex items-center justify-between">
           <div>
             <h2 className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-500 text-xl font-black flex items-center gap-2.5">
               <Zap size={22} className="text-amber-400 fill-amber-400/20 animate-pulse" /> ZAITX MEDIA
@@ -214,9 +219,9 @@ export default function AdminPage() {
           {mobileMenuOpen && (
             <button
               onClick={() => setMobileMenuOpen(false)}
-              className="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white"
+              className="w-9 h-9 rounded-2xl bg-slate-800/90 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white cursor-pointer"
             >
-              <X size={16} />
+              <X size={18} />
             </button>
           )}
         </div>
@@ -230,20 +235,20 @@ export default function AdminPage() {
         </div>
 
         {/* Navigation Tabs */}
-        <nav className="px-3 flex-1 overflow-y-auto space-y-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <nav className="px-4 flex-1 overflow-y-auto space-y-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden max-h-[60vh] md:max-h-none">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => { setActiveTab(tab.id); setMobileMenuOpen(false); }}
-                className={`w-full px-4 py-3 rounded-2xl border text-right transition-all flex items-center gap-3 text-xs font-black cursor-pointer ${
+                className={`w-full px-4 py-3.5 rounded-2xl border text-right transition-all flex items-center gap-3 text-xs md:text-sm font-black cursor-pointer ${
                   isActive
-                    ? "bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-transparent border-amber-500/80 text-amber-300 shadow-lg shadow-amber-500/10 scale-[1.01]"
-                    : "bg-transparent border-transparent text-slate-400 hover:bg-slate-900/80 hover:text-slate-200"
+                    ? "bg-gradient-to-r from-amber-500/25 via-amber-500/15 to-transparent border-amber-500/80 text-amber-300 shadow-lg shadow-amber-500/15 scale-[1.01]"
+                    : "bg-slate-900/40 border-transparent text-slate-400 hover:bg-slate-900/80 hover:text-slate-200"
                 }`}
               >
-                <div className={`p-1.5 rounded-xl ${isActive ? "bg-amber-500/20 text-amber-300" : "text-slate-400"}`}>
+                <div className={`p-2 rounded-xl ${isActive ? "bg-amber-500/20 text-amber-300 border border-amber-500/30" : "text-slate-400"}`}>
                   {tab.icon}
                 </div>
                 <span>{tab.label}</span>
@@ -261,9 +266,9 @@ export default function AdminPage() {
             onClick={async () => {
               await signOutUser();
             }}
-            className="w-full py-2.5 px-4 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-400 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full py-3 px-4 rounded-2xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-400 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
-            <LogOut size={15} /> تسجيل الخروج
+            <LogOut size={16} /> تسجيل الخروج
           </button>
         </div>
       </div>
