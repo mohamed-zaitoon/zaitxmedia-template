@@ -1553,7 +1553,14 @@ export function PricingTab() {
       }
       text += `⚠️ ملاحظة:\nالأسعار الموضحة أدناه سارية بتاريخ اليوم فقط، وقد ترتفع أو تنخفض في أي وقت حسب تغير سعر الصرف وتكلفة الشحن.\n\n`;
 
-      const lines = coinAmounts.map((coins) => {
+      const activeTiers = (tiers || []).filter((t: any) => t.disabled !== true && t.active !== false);
+      const activeCoinAmounts = activeTiers.length > 0
+        ? coinAmounts.filter((coins) => {
+            return activeTiers.some((t: any) => coins >= Number(t.min) && coins <= Number(t.max));
+          })
+        : coinAmounts;
+
+      const lines = activeCoinAmounts.map((coins) => {
         const origNetEgp = calculateTikTokOriginalPriceEgp(coins, tiers, usdRate);
         const discNetEgp = calculateTikTokPriceEgp(coins, tiers, usdRate, globalDiscountConfig);
 
