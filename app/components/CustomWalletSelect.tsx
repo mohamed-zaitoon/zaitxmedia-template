@@ -33,7 +33,7 @@ export default function CustomWalletSelect({ value, onChange, options }: CustomW
   };
 
   const getOptionIcon = (type: string) => {
-    return <PaymentMethodLogo type={type} size={32} />;
+    return <PaymentMethodLogo type={type} size={36} className="shrink-0" />;
   };
 
   const selectedOption = options.find((w) => w.type === value) || options[0];
@@ -44,11 +44,11 @@ export default function CustomWalletSelect({ value, onChange, options }: CustomW
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full min-h-[60px] rounded-2xl border border-cyan-500/40 bg-background/95 hover:bg-background/80 px-5 flex items-center justify-between gap-4 text-right font-bold outline-none focus:ring-2 focus:ring-cyan-500/40 transition-all shadow-md active:scale-[0.99] cursor-pointer"
+        className="w-full min-h-[64px] rounded-2xl border border-cyan-500/40 bg-background/95 hover:bg-background/80 px-4 sm:px-5 py-3 flex items-center justify-between gap-3 text-right font-bold outline-none focus:ring-2 focus:ring-cyan-500/40 transition-all shadow-md active:scale-[0.99] cursor-pointer"
       >
-        <div className="flex items-center gap-4 min-w-0 flex-1">
-          {selectedOption ? getOptionIcon(selectedOption.type) : <Wallet size={24} />}
-          <span className="truncate text-foreground font-black text-base sm:text-lg">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          {selectedOption ? getOptionIcon(selectedOption.type) : <Wallet size={24} className="shrink-0" />}
+          <span className="text-foreground font-black text-xs sm:text-sm md:text-base leading-snug whitespace-normal break-words">
             {selectedOption ? getOptionLabel(selectedOption) : "اختر وسيلة الإيداع"}
           </span>
           {selectedOption?.disabled && (
@@ -91,7 +91,7 @@ export default function CustomWalletSelect({ value, onChange, options }: CustomW
                         setIsOpen(false);
                       }
                     }}
-                    className={`w-full min-h-[64px] py-4 px-5 rounded-2xl border text-right transition-all flex items-center justify-between gap-4 text-base sm:text-lg font-black cursor-pointer ${
+                    className={`w-full min-h-[64px] py-3.5 px-4 sm:px-5 rounded-2xl border text-right transition-all flex items-center justify-between gap-3 text-sm sm:text-base font-black cursor-pointer ${
                       w.disabled
                         ? "opacity-40 cursor-not-allowed bg-slate-900/40 border-slate-800/80 text-slate-500"
                         : isSelected
@@ -99,9 +99,9 @@ export default function CustomWalletSelect({ value, onChange, options }: CustomW
                         : "bg-slate-900/90 hover:bg-slate-800/90 border-slate-800 text-slate-100 hover:border-cyan-500/40"
                     }`}
                   >
-                    <div className="flex items-center gap-4 min-w-0 flex-1">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
                       {getOptionIcon(w.type)}
-                      <span className="font-extrabold truncate text-slate-100 text-base sm:text-lg">
+                      <span className="font-extrabold text-slate-100 text-xs sm:text-sm md:text-base leading-snug whitespace-normal break-words">
                         {getOptionLabel(w)}
                       </span>
                     </div>

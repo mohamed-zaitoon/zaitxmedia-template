@@ -18,7 +18,7 @@ export function VodafoneLogo({ size = 28, className = "" }: { size?: number; cla
     >
       <svg
         viewBox="0 0 640 640"
-        className="w-full h-full p-1.5"
+        className="w-full h-full p-2 object-contain"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
@@ -40,7 +40,7 @@ export function InstaPayLogo({ size = 28, className = "" }: { size?: number; cla
     >
       <svg
         viewBox="0 0 569.2433 356.9567"
-        className="w-full h-full p-1"
+        className="w-full h-full p-1.5 object-contain"
         xmlns="http://www.w3.org/2000/svg"
       >
         <g id="Layer1000">
@@ -73,7 +73,7 @@ export function BinancePayLogo({ size = 28, className = "" }: { size?: number; c
     >
       <svg
         viewBox="0 0 126.61 126.61"
-        className="w-full h-full p-1.5"
+        className="w-full h-full p-2 object-contain"
         xmlns="http://www.w3.org/2000/svg"
       >
         <g fill="#f3ba2f">
@@ -98,7 +98,7 @@ export function BarqLogo({ size = 28, className = "" }: { size?: number; classNa
     >
       <svg
         viewBox="0 0 100 100"
-        className="w-full h-full p-1.5"
+        className="w-full h-full p-2 object-contain"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -129,7 +129,7 @@ export function BankLogo({ size = 28, className = "" }: { size?: number; classNa
     >
       <svg
         viewBox="0 0 640 640"
-        className="w-full h-full p-1.5"
+        className="w-full h-full p-2 object-contain"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
@@ -151,7 +151,7 @@ export function TikTokCoinsLogo({ size = 28, className = "" }: { size?: number; 
     >
       <svg
         viewBox="0 0 640 640"
-        className="w-full h-full p-1.5"
+        className="w-full h-full p-2 object-contain"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
