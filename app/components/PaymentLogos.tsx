@@ -129,26 +129,23 @@ export function BarqLogo({ size = 28, className = "" }: { size?: number; classNa
   );
 }
 
-// 5. Official Bank Transfer Logo Icon (Streamline Kameleon Duo-tone)
+// 5. Official Bank Transfer Logo Icon
 export function BankLogo({ size = 28, className = "" }: { size?: number; className?: string }) {
   return (
     <div
-      className={`relative inline-flex items-center justify-center shrink-0 rounded-xl bg-gradient-to-br from-[#1e293b] to-[#0f172a] border border-cyan-500/30 shadow-md shadow-cyan-900/30 overflow-hidden ${className}`}
+      className={`relative inline-flex items-center justify-center shrink-0 rounded-xl bg-gradient-to-br from-[#0284c7] to-[#0369a1] border border-cyan-400/40 shadow-md shadow-cyan-900/40 overflow-hidden ${className}`}
       style={{ width: size, height: size }}
-      title="Bank Transfer"
+      title="Bank Transfer / التحويل البنكي"
     >
       <svg
-        viewBox="0 0 48 48"
-        className="w-full h-full p-1"
+        viewBox="0 0 640 640"
+        className="w-full h-full p-1.5"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <path fill="#e0f2fe" d="M23.9979 47.9997c13.2548 0 23.9999 -10.745 23.9999 -23.9998C47.9978 10.7451 37.2527 0 23.9979 0S-0.00195312 10.7451 -0.00195312 23.9999 10.7431 47.9997 23.9979 47.9997Z" strokeWidth="1" />
-        <path fill="#0284c7" d="M37.9613 20.5087v1.7455H10.0342v-1.7455l13.9635 -8.7272 13.9636 8.7272Z" strokeWidth="1" />
-        <path fill="#0284c7" d="M11.7803 36.2179v-1.7455h24.4362v1.7455H11.7803Z" strokeWidth="1" />
-        <path fill="#38bdf8" d="M18.3255 22.2544h-4.3636v12.2181h4.3636V22.2544Z" strokeWidth="1" />
-        <path fill="#38bdf8" d="M26.18 22.2544h-4.3636v12.2181H26.18V22.2544Z" strokeWidth="1" />
-        <path fill="#38bdf8" d="M34.0345 22.2544h-4.3636v12.2181h4.3636V22.2544Z" strokeWidth="1" />
-        <path fill="#0284c7" d="M37.9613 36.2178H10.0342v1.7454h27.9271v-1.7454Z" strokeWidth="1" />
+        <path
+          fill="#ffffff"
+          d="M335.9 84.2C326.1 78.6 314 78.6 304.1 84.2L80.1 212.2C67.5 219.4 61.3 234.2 65 248.2C68.7 262.2 81.5 272 96 272L128 272L128 480L128 480L76.8 518.4C68.7 524.4 64 533.9 64 544C64 561.7 78.3 576 96 576L544 576C561.7 576 576 561.7 576 544C576 533.9 571.3 524.4 563.2 518.4L512 480L512 272L544 272C558.5 272 571.2 262.2 574.9 248.2C578.6 234.2 572.4 219.4 559.8 212.2L335.8 84.2zM464 272L464 480L400 480L400 272L464 272zM352 272L352 480L288 480L288 272L352 272zM240 272L240 480L176 480L176 272L240 272zM320 160C337.7 160 352 174.3 352 192C352 209.7 337.7 224 320 224C302.3 224 288 209.7 288 192C288 174.3 302.3 160 320 160z"
+        />
       </svg>
     </div>
   );
