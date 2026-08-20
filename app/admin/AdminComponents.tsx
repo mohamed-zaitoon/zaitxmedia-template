@@ -3928,12 +3928,10 @@ export function ManualServicesTab() {
   const save = async () => {
     setBusy(true);
     const sanitizedServices = svcs.map((s) => {
-      const linkedCoins = s.id === "tiktok_hidden_w" ? 13_000 : s.id === "tiktok_hidden_m" ? 26_000 : 0;
-      const automaticEgp = linkedCoins > 0 && tiers.length > 0
-        ? calculateTikTokPriceEgp(linkedCoins, tiers, usdRate)
-        : 0;
+      const linkedCoins = 0;
+      const automaticEgp = 0;
 
-      const isAutoLocked = linkedCoins > 0 && tiers.length > 0;
+      const isAutoLocked = false;
 
       if (isAutoLocked) {
         return {
@@ -4524,12 +4522,10 @@ function TonPriceTrackerCard({ usdRate }: { usdRate: number }) {
                 {/* Items in Category rendered in wide multi-column grid */}
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(440px, 1fr))", gap: 12 }}>
                   {items.map(({ service: s, index: i }) => {
-                  const linkedCoins = s.id === "tiktok_hidden_w" ? 13_000 : s.id === "tiktok_hidden_m" ? 26_000 : 0;
-                  const automaticEgp = linkedCoins > 0 && tiers.length > 0
-                    ? calculateTikTokPriceEgp(linkedCoins, tiers, usdRate)
-                    : 0;
+                  const linkedCoins = 0;
+                  const automaticEgp = 0;
 
-                  const isAutoLocked = linkedCoins > 0 && tiers.length > 0;
+                  const isAutoLocked = false;
 
                   const displayEgp = isAutoLocked
                     ? automaticEgp

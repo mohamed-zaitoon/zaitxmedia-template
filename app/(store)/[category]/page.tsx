@@ -272,15 +272,6 @@ export default function CategoryPage() {
   const gp = (n: number) =>
     getTikTokPricePer1000(n, tiers, tiktokUsdRate);
   const manualServicePrice = (id: string, fallbackEgp: number) => {
-    const linkedCoinQuantity = id === "tiktok_hidden_w"
-      ? 13_000
-      : id === "tiktok_hidden_m"
-        ? 26_000
-        : 0;
-    if (linkedCoinQuantity > 0 && tiers.length > 0 && tiktokUsdRate > 0) {
-      return calculateTikTokPriceEgp(linkedCoinQuantity, tiers, tiktokUsdRate);
-    }
-
     const service = manualSvcs[id];
     if (service) return calculateManualServicePriceEgp(service, tiktokUsdRate, globalDiscountConfig);
     return fallbackEgp;
