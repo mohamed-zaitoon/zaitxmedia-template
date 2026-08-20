@@ -125,12 +125,12 @@ export default function AppHeader() {
 
   const showBackButton = pathname !== "/" && pathname !== "/admin";
   const desktopLinks = [
-    { href: "/", label: "الرئيسية", icon: Home },
-    { href: "/tiktok", label: "تيك توك", icon: Zap },
-    { href: "/games", label: "شحن الألعاب", icon: Gamepad2 },
-    { href: "/facebook", label: "فيسبوك", icon: Zap },
-    { href: "/instagram", label: "إنستجرام", icon: Zap },
-    { href: "/other", label: "أخرى", icon: Boxes },
+    { href: "/", label: "الرئيسية", icon: <Home size={18} className="text-cyan-400 shrink-0" /> },
+    { href: "/tiktok", label: "تيك توك", icon: <TikTokOfficialLogo size={20} /> },
+    { href: "/games", label: "شحن الألعاب", icon: <PubgOfficialLogo size={20} /> },
+    { href: "/facebook", label: "فيسبوك", icon: <FacebookOfficialLogo size={20} /> },
+    { href: "/instagram", label: "إنستجرام", icon: <InstagramOfficialLogo size={20} /> },
+    { href: "/other", label: "أخرى", icon: <Boxes size={18} className="text-emerald-400 shrink-0" /> },
   ];
 
   const [mobileBottomSheetOpen, setMobileBottomSheetOpen] = useState(false);
@@ -263,19 +263,18 @@ export default function AppHeader() {
         <div className="site-container flex h-14 items-center justify-center gap-2">
           {desktopLinks.map((item) => {
             const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
-            const Icon = item.icon;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl border px-5 text-sm font-bold transition-all ${
+                className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl border px-4 sm:px-5 text-sm font-bold transition-all ${
                   active
-                    ? "border-primary/30 bg-primary/15 text-primary shadow-sm shadow-primary/10"
-                    : "border-transparent text-muted-foreground hover:border-white/10 hover:bg-white/5 hover:text-white"
+                    ? "border-cyan-400/40 bg-cyan-500/15 text-cyan-300 shadow-sm shadow-cyan-500/10"
+                    : "border-transparent text-slate-300 hover:border-white/10 hover:bg-white/5 hover:text-white"
                 }`}
               >
-                <Icon size={15} />
-                {item.label}
+                {item.icon}
+                <span>{item.label}</span>
               </Link>
             );
           })}

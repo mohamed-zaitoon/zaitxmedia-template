@@ -904,10 +904,10 @@ export default function RechargePage() {
                             <button
                               type="button"
                               onClick={() => copyToClipboard(selected.number, "تم نسخ رقم تحويل انستاباي بنجاح 📋")}
-                              className="rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 p-2.5 text-emerald-300 border border-emerald-500/40 shrink-0 cursor-pointer text-xs font-bold flex items-center gap-1.5"
+                              className="rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 p-2.5 text-emerald-300 border border-emerald-500/40 shrink-0 cursor-pointer"
+                              title="نسخ رقم التحويل"
                             >
-                              <Copy size={16} />
-                              <span>نسخ</span>
+                              <Copy size={18} />
                             </button>
                           </div>
                         )}
@@ -1021,10 +1021,10 @@ export default function RechargePage() {
                               <button
                                 type="button"
                                 onClick={copyWalletDetails}
-                                className="rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 p-2.5 text-cyan-300 border border-cyan-500/40 shrink-0 cursor-pointer text-xs font-bold flex items-center gap-1.5"
+                                className="rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 p-2.5 text-cyan-300 border border-cyan-500/40 shrink-0 cursor-pointer"
+                                title="نسخ رقم التحويل"
                               >
-                                {copied ? <CheckCircle size={16} className="animate-bounce" /> : <Copy size={16} />}
-                                <span>نسخ</span>
+                                {copied ? <CheckCircle size={18} className="animate-bounce" /> : <Copy size={18} />}
                               </button>
                             </div>
                           </div>
