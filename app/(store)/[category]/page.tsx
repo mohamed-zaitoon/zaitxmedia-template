@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Coins, Send, ShoppingCart } from "lucide-react";
+import { Coins, Send, ShoppingCart, AlertCircle, Info } from "lucide-react";
 import { SiTiktok, SiFacebook, SiInstagram } from "react-icons/si";
 import { Boxes, Gamepad2 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -471,6 +471,10 @@ export default function CategoryPage() {
         min,
         max,
         appCategory: "tiktok",
+        instructions: manualSvcs["tiktok_coins_calc"]?.instructions || manualSvcs["tiktok_coins"]?.instructions || "",
+        alertNote: manualSvcs["tiktok_coins_calc"]?.alertNote || manualSvcs["tiktok_coins"]?.alertNote || "",
+        categoryInstructions: categoryInstructions["شحن عملات تيك توك"] || categoryInstructions["شحن العملات"] || categoryInstructions["تيك توك"] || categoryInstructions["tiktok"] || "",
+        categoryAlert: categoryAlerts["شحن عملات تيك توك"] || categoryAlerts["شحن العملات"] || categoryAlerts["تيك توك"] || categoryAlerts["tiktok"] || "",
       },
       ...displayServices,
     ];
@@ -581,16 +585,54 @@ export default function CategoryPage() {
                   </div>
                 </div>
                 <div className="mt-4">
+                  {(() => {
+                    const coinsSvc = displayServices.find((s: any) => s.service === "tiktok_coins_calc");
+                    const alertText = coinsSvc?.alertNote || coinsSvc?.notice || coinsSvc?.categoryAlert || categoryAlerts["شحن عملات تيك توك"] || categoryAlerts["تيك توك"] || "";
+                    const instrText = coinsSvc?.instructions || coinsSvc?.shippingInstructions || coinsSvc?.categoryInstructions || categoryInstructions["شحن عملات تيك توك"] || categoryInstructions["تيك توك"] || "";
+                    return (
+                      <div className="space-y-4 mb-4">
+                        {alertText && (
+                          <div className="bg-gradient-to-br from-amber-950/70 via-amber-900/35 to-slate-950 border-2 border-amber-500/60 text-amber-100 p-5 md:p-6 rounded-2xl text-right shadow-[0_0_30px_rgba(245,158,11,0.25)] relative overflow-hidden backdrop-blur-md">
+                            <div className="flex items-center gap-3 text-amber-400 font-black text-base md:text-lg mb-2.5">
+                              <AlertCircle size={24} className="text-amber-400 shrink-0 animate-pulse" />
+                              <span>⚠️ تنبيه وملاحظة هامة جداً:</span>
+                            </div>
+                            <div className="leading-relaxed whitespace-pre-line text-sm md:text-base text-amber-100 font-bold pr-1">
+                              {alertText}
+                            </div>
+                          </div>
+                        )}
+
+                        {instrText && (
+                          <div className="bg-gradient-to-br from-cyan-950/70 via-cyan-900/35 to-slate-950 border-2 border-cyan-500/60 text-cyan-100 p-5 md:p-6 rounded-2xl text-right shadow-[0_0_30px_rgba(6,182,212,0.25)] relative overflow-hidden backdrop-blur-md">
+                            <div className="flex items-center gap-3 text-cyan-400 font-black text-base md:text-lg mb-2.5">
+                              <Info size={24} className="text-cyan-400 shrink-0" />
+                              <span>📋 تعليمات الشحن وتطبيق الطلب:</span>
+                            </div>
+                            <div className="leading-relaxed whitespace-pre-line text-sm md:text-base text-slate-100 font-bold pr-1">
+                              {instrText}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+
                   <button
                     type="button"
                     disabled={!ok}
                     className="w-full min-h-[52px] py-4 px-6 rounded-2xl flex items-center justify-center gap-2.5 font-black text-base text-slate-950 transition-all shadow-xl hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600"
                     onClick={() => {
+                      const coinsSvc = displayServices.find((s: any) => s.service === "tiktok_coins_calc");
                       setCheckoutService({
                         id: "tiktok_coins",
                         name: "شحن عملات تيك توك",
                         price_egp: Number(price),
-                        price: Number(price)
+                        price: Number(price),
+                        instructions: coinsSvc?.instructions || "",
+                        alertNote: coinsSvc?.alertNote || "",
+                        categoryInstructions: coinsSvc?.categoryInstructions || categoryInstructions["شحن عملات تيك توك"] || "",
+                        categoryAlert: coinsSvc?.categoryAlert || categoryAlerts["شحن عملات تيك توك"] || "",
                       });
                     }}
                   >

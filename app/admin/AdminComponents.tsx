@@ -3852,6 +3852,15 @@ export function ManualServicesTab() {
             desc: "سعر ترويج فيسبوك",
           },
           {
+            id: "tiktok_coins_calc",
+            name: "شحن عملات تيك توك",
+            category: "شحن عملات تيك توك",
+            price: "0",
+            min: "100",
+            max: "2500000",
+            desc: "تعليمات وتنبيهات شحن عملات تيك توك",
+          },
+          {
             id: "tiktok_superfan",
             name: "سوبر فان - شهري",
             category: "اشتراكات",
@@ -4446,6 +4455,7 @@ function TonPriceTrackerCard({ usdRate }: { usdRate: number }) {
             if (s.id === "tiktok_promo") catName = "ترويج تيك توك";
             else if (s.id === "instagram_promo") catName = "ترويج انستجرام";
             else if (s.id === "facebook_promo") catName = "ترويج فيسبوك";
+            else if (s.id === "tiktok_coins_calc" || s.id === "tiktok_coins") catName = "شحن عملات تيك توك";
             if (!grouped[catName]) grouped[catName] = [];
             grouped[catName].push({ service: s, index: idx });
           });
