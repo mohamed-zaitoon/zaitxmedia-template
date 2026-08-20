@@ -338,24 +338,6 @@ export default function CheckoutModal({
               <ShoppingBag size={40} color="#38bdf8" style={{ margin: "0 auto 12px" }} />
               <h2 style={{ color: "#fff", margin: "0 0 20px 0", fontSize: 20 }}>تأكيد الطلب</h2>
 
-              {(service?.alertNote || service?.notice || service?.categoryAlert) && (
-                <div style={{ background: "rgba(251,191,36,0.1)", border: "1px solid rgba(251,191,36,0.3)", padding: 12, borderRadius: 12, marginBottom: 16, textAlign: "right" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#fbbf24", fontWeight: "bold", fontSize: 13, marginBottom: 4 }}>
-                    <AlertCircle size={16} /> ⚠️ تنبيه وملاحظة هامة:
-                  </div>
-                  <div style={{ color: "#fef08a", fontSize: 12, lineHeight: 1.5, whiteSpace: "pre-line" }}>{service.alertNote || service.notice || service.categoryAlert}</div>
-                </div>
-              )}
-
-              {(service?.instructions || service?.shippingInstructions || service?.categoryInstructions) && (
-                <div style={{ background: "rgba(56,189,248,0.1)", border: "1px solid rgba(56,189,248,0.3)", padding: 12, borderRadius: 12, marginBottom: 16, textAlign: "right" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#38bdf8", fontWeight: "bold", fontSize: 13, marginBottom: 4 }}>
-                    <Info size={16} /> 📋 تعليمات الشحن وتطبيق الطلب:
-                  </div>
-                  <div style={{ color: "#e0f2fe", fontSize: 12, lineHeight: 1.5, whiteSpace: "pre-line" }}>{service.instructions || service.shippingInstructions || service.categoryInstructions}</div>
-                </div>
-              )}
-
               {isTikTokCoins ? (
                 <div style={{ background: "#0a0a0a", borderRadius: 12, padding: 16, marginBottom: 20, border: "1px solid #1a1a1a", textAlign: "right" }}>
                   <h3 style={{ color: "#fff", fontSize: 16, margin: "0 0 12px 0" }}>اختر طريقة الشحن:</h3>
@@ -541,6 +523,31 @@ export default function CheckoutModal({
                 </div>
               )}
               
+              {/* ⚠️ التنبيهات والتعليمات فوق زر الدفع مباشرة */}
+              {(service?.alertNote || service?.notice || service?.categoryAlert) && (
+                <div className="bg-gradient-to-br from-amber-950/70 via-amber-900/35 to-slate-950 border-2 border-amber-500/60 text-amber-100 p-4 md:p-5 rounded-2xl text-right mb-4 shadow-[0_0_25px_rgba(245,158,11,0.22)] relative overflow-hidden backdrop-blur-md">
+                  <div className="flex items-center gap-2.5 text-amber-400 font-black text-base mb-2">
+                    <AlertCircle size={22} className="text-amber-400 shrink-0 animate-pulse" />
+                    <span>⚠️ تنبيه وملاحظة هامة جداً:</span>
+                  </div>
+                  <div className="leading-relaxed whitespace-pre-line text-sm text-amber-100 font-bold pr-1">
+                    {service.alertNote || service.notice || service.categoryAlert}
+                  </div>
+                </div>
+              )}
+
+              {(service?.instructions || service?.shippingInstructions || service?.categoryInstructions) && (
+                <div className="bg-gradient-to-br from-cyan-950/70 via-cyan-900/35 to-slate-950 border-2 border-cyan-500/60 text-cyan-100 p-4 md:p-5 rounded-2xl text-right mb-4 shadow-[0_0_25px_rgba(6,182,212,0.22)] relative overflow-hidden backdrop-blur-md">
+                  <div className="flex items-center gap-2.5 text-cyan-400 font-black text-base mb-2">
+                    <Info size={22} className="text-cyan-400 shrink-0" />
+                    <span>📋 تعليمات الشحن وتطبيق الطلب:</span>
+                  </div>
+                  <div className="leading-relaxed whitespace-pre-line text-sm text-slate-100 font-bold pr-1">
+                    {service.instructions || service.shippingInstructions || service.categoryInstructions}
+                  </div>
+                </div>
+              )}
+
               <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
                 {canAfford ? (
                   <Button

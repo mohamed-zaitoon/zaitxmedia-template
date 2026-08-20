@@ -630,24 +630,6 @@ export default function ServicesPanel({
               <>
                 {selectedService && (
                   <div className="mb-6 px-1">
-                    {(selectedService.alertNote || selectedService.notice || selectedService.categoryAlert) && (
-                      <div className="bg-amber-500/10 border border-amber-500/35 text-amber-200 text-xs font-bold p-4 rounded-2xl text-right mb-4 flex items-start gap-3 shadow-lg">
-                        <AlertCircle size={20} className="text-amber-400 shrink-0 mt-0.5" />
-                        <div>
-                          <strong className="block text-amber-400 font-black text-sm mb-1">⚠️ تنبيه وملاحظة هامة جداً:</strong>
-                          <span className="leading-relaxed whitespace-pre-line text-amber-200/90">{selectedService.alertNote || selectedService.notice || selectedService.categoryAlert}</span>
-                        </div>
-                      </div>
-                    )}
-                    {(selectedService.instructions || selectedService.shippingInstructions || selectedService.categoryInstructions) && (
-                      <div className="bg-cyan-500/10 border border-cyan-500/35 text-cyan-200 text-xs font-bold p-4.5 rounded-2xl text-right mb-4 shadow-lg space-y-1.5">
-                        <div className="flex items-center gap-2 text-cyan-400 font-black text-sm mb-1">
-                          <Info size={18} className="shrink-0" />
-                          <span>📋 تعليمات الشحن وتطبيق الطلب:</span>
-                        </div>
-                        <p className="leading-relaxed whitespace-pre-line text-slate-200 font-bold">{selectedService.instructions || selectedService.shippingInstructions || selectedService.categoryInstructions}</p>
-                      </div>
-                    )}
                     {selectedService.description && (
                       <div className="bg-background/50 border border-border/80 p-5 rounded-2xl text-right text-sm text-muted-foreground leading-relaxed mb-4 px-5 py-4 shadow-inner">
                         📋 {selectedService.description}
@@ -882,6 +864,34 @@ export default function ServicesPanel({
                 </div>
 
                 <div className="mt-4 px-1">
+                  {selectedService && (
+                    <div className="space-y-4 mb-5">
+                      {(selectedService.alertNote || selectedService.notice || selectedService.categoryAlert) && (
+                        <div className="bg-gradient-to-br from-amber-950/70 via-amber-900/35 to-slate-950 border-2 border-amber-500/60 text-amber-100 p-5 md:p-6 rounded-2xl text-right shadow-[0_0_30px_rgba(245,158,11,0.25)] relative overflow-hidden backdrop-blur-md">
+                          <div className="flex items-center gap-3 text-amber-400 font-black text-base md:text-lg mb-2.5">
+                            <AlertCircle size={24} className="text-amber-400 shrink-0 animate-pulse" />
+                            <span>⚠️ تنبيه وملاحظة هامة جداً:</span>
+                          </div>
+                          <div className="leading-relaxed whitespace-pre-line text-sm md:text-base text-amber-100 font-bold pr-1">
+                            {selectedService.alertNote || selectedService.notice || selectedService.categoryAlert}
+                          </div>
+                        </div>
+                      )}
+
+                      {(selectedService.instructions || selectedService.shippingInstructions || selectedService.categoryInstructions) && (
+                        <div className="bg-gradient-to-br from-cyan-950/70 via-cyan-900/35 to-slate-950 border-2 border-cyan-500/60 text-cyan-100 p-5 md:p-6 rounded-2xl text-right shadow-[0_0_30px_rgba(6,182,212,0.25)] relative overflow-hidden backdrop-blur-md">
+                          <div className="flex items-center gap-3 text-cyan-400 font-black text-base md:text-lg mb-2.5">
+                            <Info size={24} className="text-cyan-400 shrink-0" />
+                            <span>📋 تعليمات الشحن وتطبيق الطلب:</span>
+                          </div>
+                          <div className="leading-relaxed whitespace-pre-line text-sm md:text-base text-slate-100 font-bold pr-1">
+                            {selectedService.instructions || selectedService.shippingInstructions || selectedService.categoryInstructions}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <button
                     type="button"
                     className={`w-full min-h-[56px] py-4 px-6 flex items-center justify-center gap-2.5 font-black text-lg text-slate-950 transition-all shadow-xl hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
