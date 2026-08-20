@@ -82,17 +82,22 @@ export function InstaPayLogo({ size = 28, className = "" }: { size?: number; cla
 export function BinancePayLogo({ size = 28, className = "" }: { size?: number; className?: string }) {
   return (
     <div
-      className={`relative inline-flex items-center justify-center shrink-0 rounded-xl bg-[#F0B90B] shadow-md shadow-amber-500/30 overflow-hidden ${className}`}
+      className={`relative inline-flex items-center justify-center shrink-0 rounded-xl bg-[#181A20] border border-[#f3ba2f]/40 shadow-md shadow-amber-500/20 overflow-hidden ${className}`}
       style={{ width: size, height: size }}
       title="Binance Pay"
     >
       <svg
-        viewBox="0 0 24 24"
+        viewBox="0 0 126.61 126.61"
         className="w-full h-full p-1.5"
-        fill="#181A20"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <path d="M12 2L8.5 5.5L12 9L15.5 5.5L12 2ZM5.5 8.5L2 12L5.5 15.5L9 12L5.5 8.5ZM18.5 8.5L15 12L18.5 15.5L22 12L18.5 8.5ZM12 15L8.5 18.5L12 22L15.5 18.5L12 15ZM12 10.5L9.5 13L12 15.5L14.5 13L12 10.5Z" />
+        <g fill="#f3ba2f">
+          <path d="m38.73 53.2 24.59-24.58 24.6 24.6 14.3-14.31-38.9-38.91-38.9 38.9z" />
+          <path d="m0 63.31 14.3-14.31 14.31 14.31-14.31 14.3z" />
+          <path d="m38.73 73.41 24.59 24.59 24.6-24.6 14.31 14.29-38.9 38.91-38.91-38.88z" />
+          <path d="m98 63.31 14.3-14.31 14.31 14.3-14.31 14.32z" />
+          <path d="m77.83 63.3-14.51-14.52-10.73 10.73-1.24 1.23-2.54 2.54 14.51 14.5 14.51-14.47z" />
+        </g>
       </svg>
     </div>
   );
