@@ -219,18 +219,7 @@ export default function AppHeader() {
             </Link>
           )}
 
-          {user && user.role === "admin" && (
-            <a
-              href="https://admin.zaitxmedia.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden md:inline-flex bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 text-xs font-bold h-9 px-3 rounded-xl items-center gap-1.5 border border-cyan-500/30 transition-all shrink-0 no-underline"
-              title="لوحة الإدارة"
-            >
-              <span className="text-sm">⚙️</span>
-              <span>الإدارة</span>
-            </a>
-          )}
+
 
           {user && (
             <button
@@ -384,20 +373,7 @@ export default function AppHeader() {
                     <Package size={16} className="text-amber-400 shrink-0" />
                     <span className="truncate">طلباتي</span>
                   </Link>
-                  {user.role === "admin" && (
-                    <a
-                      href="https://admin.zaitxmedia.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => setMobileBottomSheetOpen(false)}
-                      className="col-span-2 h-10 px-3 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 text-xs font-bold flex items-center justify-between transition-all"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <span className="text-sm">⚙️</span>
-                        <span>لوحة الإدارة</span>
-                      </div>
-                    </a>
-                  )}
+
                 </div>
               </div>
             )}
