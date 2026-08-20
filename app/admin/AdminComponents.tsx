@@ -4145,7 +4145,28 @@ export function ManualServicesTab() {
       return;
     }
 
-    listText += `\n🔗 ملاحظة هامة:\nتعتبر هذه القائمة لفترة مؤقتة، ونرجو منكم التعامل المباشر عبر موقعنا الرسمي لسهولة وسرعة الطلب والمتابعة:\n🌐 https://zaitxmedia.com`;
+    const currentCatInstructions = categoryInstructions[categoryTitle] || categoryInstructions[categoryTitle.replace(/^خدمة\s*/, "")] || "";
+    const currentCatAlerts = categoryAlerts[categoryTitle] || categoryAlerts[categoryTitle.replace(/^خدمة\s*/, "")] || "";
+
+    const allInstructions = [
+      currentCatInstructions,
+      ...items.map((it: any) => it.instructions).filter(Boolean),
+    ].filter(Boolean);
+
+    const allAlerts = [
+      currentCatAlerts,
+      ...items.map((it: any) => it.alertNote).filter(Boolean),
+    ].filter(Boolean);
+
+    if (allAlerts.length > 0) {
+      listText += `\n\n⚠️ تنبيه هام وملاحظات:\n${Array.from(new Set(allAlerts)).join("\n")}`;
+    }
+
+    if (allInstructions.length > 0) {
+      listText += `\n\n📋 تعليمات الشحن وتطبيق الطلب:\n${Array.from(new Set(allInstructions)).join("\n")}`;
+    }
+
+    listText += `\n\n🔗 ملاحظة هامة:\nتعتبر هذه القائمة لفترة مؤقتة، ونرجو منكم التعامل المباشر عبر موقعنا الرسمي لسهولة وسرعة الطلب والمتابعة:\n🌐 https://zaitxmedia.com`;
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(listText).catch(console.error);
