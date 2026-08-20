@@ -3,40 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZAITX MEDIA | Digital Storefront & Multi-Currency Platform</title>
+    <title>ZaitXMedia Platform | Multi-Country Storefront Engine</title>
     <link rel="icon" type="image/png" href="logo.png">
     <style>
-        :root { --primary: #f59e0b; --bg: #060a12; --surface: #0f172a; --text: #e2e8f0; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; line-height: 1.6; }
-        .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; text-align: center; }
-        .logo-container { display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
-        .app-icon { width: 60px; height: 60px; margin-right: 15px; border-radius: 12px; }
-        .logo-text { font-size: 3rem; font-weight: bold; background: linear-gradient(45deg, #f59e0b, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
-        .badges img { margin: 5px; height: 25px; }
-        .hero-text { font-size: 1.2rem; color: #94a3b8; margin-bottom: 30px; }
+        :root { 
+            --primary: #00e676; 
+            --bg: #121212; 
+            --surface: #1e1e1e; 
+            --text: #e0e0e0; 
+        }
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text); 
+            margin: 0; 
+            line-height: 1.6; 
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 60px 20px; 
+            text-align: center; 
+        }
+        .logo-container { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            margin-bottom: 15px; 
+        }
+        .app-icon { 
+            width: 60px; 
+            height: 60px; 
+            margin-right: 15px; 
+            border-radius: 12px; 
+            object-fit: cover;
+        }
+        .logo-text { 
+            font-size: 2.8rem; 
+            font-weight: 800; 
+            background: linear-gradient(45deg, #00e676, #2979ff); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            margin: 0; 
+            letter-spacing: -0.5px;
+        }
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 25px;
+        }
+        .badges img { 
+            height: 24px; 
+            border-radius: 4px;
+        }
+        .hero-text { 
+            font-size: 1.15rem; 
+            color: #b0b0b0; 
+            margin-bottom: 35px; 
+            max-width: 680px;
+            margin-left: auto;
+            margin-right: auto;
+        }
         
         .btn-download {
-            display: inline-block; cursor: pointer;
-            background: var(--primary); color: #000;
-            padding: 15px 40px; font-size: 1.2rem; font-weight: bold;
-            text-decoration: none; border-radius: 50px;
-            transition: transform 0.2s, box-shadow 0.2s, background 0.2s; margin-bottom: 40px; border: none;
+            display: inline-block; 
+            cursor: pointer;
+            background: var(--primary); 
+            color: #000;
+            padding: 15px 42px; 
+            font-size: 1.15rem; 
+            font-weight: 700;
+            text-decoration: none; 
+            border-radius: 50px;
+            transition: transform 0.2s, box-shadow 0.2s, background 0.2s; 
+            margin-bottom: 40px; 
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 230, 118, 0.2);
         }
-        .btn-download:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3); }
-        .btn-download:disabled { background: #555; cursor: wait; transform: none; box-shadow: none; color: #aaa; }
+        .btn-download:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 10px 25px rgba(0, 230, 118, 0.4); 
+        }
+        .btn-download:disabled { 
+            background: #555; 
+            cursor: wait; 
+            transform: none; 
+            box-shadow: none; 
+            color: #aaa; 
+        }
 
-        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; text-align: left; margin-top: 40px; }
-        .feature-card { background: var(--surface); padding: 20px; border-radius: 12px; border-left: 4px solid var(--primary); }
-        .feature-title { font-weight: bold; color: #fff; margin-bottom: 10px; display: block; }
-        footer { margin-top: 60px; font-size: 0.9rem; color: #666; }
-        a { color: var(--primary); text-decoration: none; }
+        .features-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
+            gap: 20px; 
+            text-align: left; 
+            margin-top: 40px; 
+        }
+        .feature-card { 
+            background: var(--surface); 
+            padding: 22px; 
+            border-radius: 12px; 
+            border-left: 4px solid var(--primary); 
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-2px);
+        }
+        .feature-title { 
+            font-weight: 700; 
+            color: #fff; 
+            margin-bottom: 8px; 
+            display: block; 
+            font-size: 1.05rem;
+        }
+        .feature-desc {
+            color: #a0a0a0;
+            font-size: 0.95rem;
+            margin: 0;
+            line-height: 1.5;
+        }
+        footer { 
+            margin-top: 60px; 
+            font-size: 0.95rem; 
+            color: #666; 
+        }
+        footer p { margin: 6px 0; }
+        a { 
+            color: var(--primary); 
+            text-decoration: none; 
+            transition: opacity 0.2s;
+        }
+        a:hover { opacity: 0.85; text-decoration: underline; }
     </style>
     <script>
         async function openOrDownload() {
             var btn = document.getElementById('actionBtn');
             var originalText = btn.innerHTML;
             
-            btn.innerHTML = "⏳ Opening ZAITX MEDIA Store...";
+            btn.innerHTML = "⏳ Redirecting to Store...";
             btn.disabled = true;
 
             var repoOwner = "mohamed-zaitoon";
@@ -75,43 +182,43 @@
 
     <div class="container">
         <div class="logo-container">
-            <img src="logo.png" alt="ZAITX MEDIA Icon" class="app-icon" onerror="this.style.display='none'">
-            <h1 class="logo-text">ZAITX MEDIA</h1>
+            <img src="https://zaitxmedia.com/favicon.ico" alt="ZaitXMedia Icon" class="app-icon" onerror="this.style.display='none'">
+            <h1 class="logo-text">ZaitXMedia</h1>
         </div>
         
         <div class="badges">
             <img src="https://img.shields.io/badge/Production-zaitxmedia.com-f59e0b?style=flat-square&logo=vercel" alt="Production">
-            <img src="https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=nextdotjs" alt="Next.js">
-            <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript" alt="TypeScript">
+            <img src="https://img.shields.io/badge/Next.js-15.5-black?style=flat-square&logo=nextdotjs" alt="Next.js">
+            <img src="https://img.shields.io/badge/TypeScript-5.0-3178C6?style=flat-square&logo=typescript" alt="TypeScript">
             <img src="https://img.shields.io/badge/Firebase-Firestore-FFCA28?style=flat-square&logo=firebase" alt="Firebase">
-            <img src="https://img.shields.io/badge/TailwindCSS-3-06B6D4?style=flat-square&logo=tailwindcss" alt="TailwindCSS">
+            <img src="https://img.shields.io/badge/Python-3.11-3776AB?style=flat-square&logo=python" alt="Python">
         </div>
 
         <p class="hero-text">
-            State-of-the-Art Digital Storefront & Multi-Currency Platform.<br>
-            Luxury Gold & Obsidian Dark Design • Real-time Geolocation • Security Auditor.
+            State-of-the-art digital storefront, TikTok coin pricing engine, and automated multi-country payment management platform.<br>
+            Powered by <strong>Next.js 15, Firestore & Python Microservices</strong>.
         </p>
 
         <button id="actionBtn" onclick="openOrDownload()" class="btn-download">
-            🚀 Open Store / Download
+            🚀 Open Store / Demo
         </button>
 
         <div class="features-grid">
             <div class="feature-card">
-                <span class="feature-title">🔣 Multi-Currency System</span>
-                Real-time currency mapping for EGP (£), SAR (﷼), and USD ($).
+                <span class="feature-title">✨ System-Wide Routing</span>
+                <p class="feature-desc">Dynamic country manager & isolated payment methods (Vodafone Cash, InstaPay, Barq, Bank Transfer).</p>
             </div>
             <div class="feature-card">
-                <span class="feature-title">📍 Physical Geolocation</span>
-                Verifies actual user physical IP location and rejects unauthorized mismatches.
+                <span class="feature-title">🚀 Smart Pricing Engine</span>
+                <p class="feature-desc">Real-time currency exchange calculation, profit margins & TikTok coin package tiers.</p>
             </div>
             <div class="feature-card">
-                <span class="feature-title">🐍 Security Auditor</span>
-                Automated HMAC SHA-256 webhook verification & environment security checks.
+                <span class="feature-title">⚡ Security Auditor</span>
+                <p class="feature-desc">Automated HMAC SHA-256 webhook validation & zero unthrottled console logs in production.</p>
             </div>
             <div class="feature-card">
-                <span class="feature-title">👑 VIP Control Panel</span>
-                Full admin control over site colors, announcement banners, icons, badges & payment gateways.
+                <span class="feature-title">🛡️ VIP Control Panel</span>
+                <p class="feature-desc">Full admin control over site theme colors, header banners, category icons & payment gateways.</p>
             </div>
         </div>
 
