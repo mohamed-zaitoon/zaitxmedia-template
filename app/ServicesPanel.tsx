@@ -291,41 +291,77 @@ export default function ServicesPanel({
     );
   }, [filteredServices, selectedServiceId]);
 
+  const isTikTokCoins = selectedService?.name?.includes("عملات") && (selectedService?.name?.includes("تيك توك") || selectedService?.name?.includes("تيك تيك"));
+  const isSecretSub = selectedService?.name?.includes("اشتراك مخفي") || selectedService?.name?.includes("سوبر فان") || (selectedService?.name?.includes("اشتراك") && (selectedService?.category === "اشتراكات" || selectedService?.name?.includes("تيك توك") || selectedService?.name?.includes("تيك تيك")));
+  const isGame = tabInfo?.id === "games";
+  const isJaco = selectedService?.name?.includes("JACO") || selectedService?.name?.includes("جاكو") || selectedService?.category?.includes("JACO") || selectedService?.category?.includes("جاكو");
+  const isChatGPT = selectedService?.name?.toLowerCase().includes("chatgpt") || selectedService?.category?.toLowerCase().includes("chatgpt") || selectedService?.category?.includes("شات جي بي تي") || selectedCat?.toLowerCase().includes("chatgpt");
+
   const activeInstructions = useMemo(() => {
     if (!selectedService) return "";
-    return (
+    const explicitInst =
       selectedService.instructions ||
       selectedService.shippingInstructions ||
       selectedService.categoryInstructions ||
       categoryInstructions[selectedService.category] ||
       categoryInstructions[selectedService.name] ||
+      categoryInstructions[selectedService.service] ||
+      categoryInstructions[selectedService.id] ||
+      categoryInstructions[selectedCat] ||
       categoryInstructions[tabInfo?.id] ||
       categoryInstructions[tabInfo?.label] ||
       categoryInstructions[selectedService.appCategory] ||
-      ""
-    );
-  }, [selectedService, categoryInstructions, tabInfo]);
+      "";
+
+    if (explicitInst) return explicitInst;
+
+    if (isChatGPT) {
+      return `1- أدخل بريد حساب جوجل (Google Email) الخاص بك والمُراد تفعيل اشتراك ChatGPT Plus عليه.\n2- أدخل كلمة المرور الخاصة بالحساب في الخانة المخصصة.\n3- تأكد من صحة الحساب وكلمة المرور، ثم اضغط على زر إتمام الدفع والطلب.\n4- يقوم الفريق المختص بتسجيل الدخول وتفعيل اشتراك ChatGPT Plus رسميًا وآمنًا 100%، وتنبيهك فور الانتهاء.`;
+    }
+    if (isJaco) {
+      return `1- افتح تطبيق JACO واذهب إلى ملفك الشخصي لنقل أو نسخ اسم المستخدم (Username / @يوزر).\n2- ضع اسم المستخدم الخاص بك في الخانة المخصصة هنا.\n3- اختر كمية عملات جاكو التي ترغب في شحنها لدعم البثوث والهدايا وميزات VIP.\n4- اضغط على زر إتمام الدفع والطلب، ويتم التسليم فوراً وبأمان 100%.`;
+    }
+    if (isGame || selectedService?.category?.includes("PUBG") || selectedService?.name?.includes("ببجي")) {
+      return `1- أدخل رقم الآيدي الخاص بك في اللعبة (Player ID / UID) في الخانة المخصصة.\n2- اختر فئة أو كمية الشحن المطلوبة.\n3- اضغط على زر إتمام الدفع والطلب.\n4- يتم التسليم فوري وآمن 100% خلال 1 إلى 5 دقائق.`;
+    }
+    if (isTikTokCoins) {
+      return `1- أدخل يوزر حسابك أو رابط الحساب المراد شحنه.\n2- اختر كمية عملات تيك توك المطلوبة للحاسبة.\n3- اضغط على زر إتمام الدفع والطلب.\n4- يتم الشحن فورياً عبر نظام المعالجة الآمن.`;
+    }
+    return "";
+  }, [selectedService, categoryInstructions, tabInfo, selectedCat, isChatGPT, isJaco, isGame, isTikTokCoins]);
 
   const activeAlert = useMemo(() => {
     if (!selectedService) return "";
-    return (
+    const explicitAlert =
       selectedService.alertNote ||
       selectedService.notice ||
       selectedService.categoryAlert ||
       categoryAlerts[selectedService.category] ||
       categoryAlerts[selectedService.name] ||
+      categoryAlerts[selectedService.service] ||
+      categoryAlerts[selectedService.id] ||
+      categoryAlerts[selectedCat] ||
       categoryAlerts[tabInfo?.id] ||
       categoryAlerts[tabInfo?.label] ||
       categoryAlerts[selectedService.appCategory] ||
-      ""
-    );
-  }, [selectedService, categoryAlerts, tabInfo]);
+      "";
 
-  const isTikTokCoins = selectedService?.name?.includes("عملات") && (selectedService?.name?.includes("تيك توك") || selectedService?.name?.includes("تيك تيك"));
-  const isSecretSub = selectedService?.name?.includes("اشتراك مخفي") || selectedService?.name?.includes("سوبر فان") || (selectedService?.name?.includes("اشتراك") && (selectedService?.category === "اشتراكات" || selectedService?.name?.includes("تيك توك") || selectedService?.name?.includes("تيك تيك")));
-  const isGame = tabInfo?.id === "games";
-  const isJaco = selectedService?.name?.includes("JACO") || selectedService?.name?.includes("جاكو") || selectedService?.category?.includes("JACO") || selectedService?.category?.includes("جاكو");
-  const isChatGPT = selectedService?.name?.toLowerCase().includes("chatgpt") || selectedService?.category?.toLowerCase().includes("chatgpt") || selectedService?.category?.includes("شات جي بي تي");
+    if (explicitAlert) return explicitAlert;
+
+    if (isChatGPT) {
+      return `1- يرجى إدخال حساب جوجل (Google Account) الرئيسي المربوط به التطبيق وليس حساب ChatGPT مستقل.\n2- يرجى تعطيل التحقق بخطوتين (2-Step Verification) أو تزويدنا برمز التحقق لمنع التأخير.\n3- لا يمكن إلغاء الطلب أو استرداد المبلغ بعد إرسال البيانات وإكمال عملية التفعيل.\n4- نضمن مسح كافة سجلات تسجيل الدخول والأمان فور انتهاء التفعيل وتأكيد اشتراكك.`;
+    }
+    if (isJaco) {
+      return `1- لا يمكن إلغاء الطلب أو استرداد المبلغ بأي شكل من الأشكال بعد إرسال الطلب، نظراً لأن المعالجة يتم تنفيذها إلكترونياً وفورياً.\n2- يرجى التأكد من كتابة اسم المستخدم (JACO Username / اليوزر) بدقة شديدة لتجنب الشحن لحساب آخر أو التأخير.\n3- هذا الشحن مخصص لجميع الحسابات على الخادم الدولي.\n4- تظهر عملات جاكو مباشرة في حسابك داخل التطبيق فور اكتمال الدفع والطلب.`;
+    }
+    if (isGame || selectedService?.category?.includes("PUBG") || selectedService?.name?.includes("ببجي")) {
+      return `1- لا يمكن إلغاء الطلب أو استرداد المبلغ بأي شكل من الأشكال بعد إرسال الطلب، نظراً لأن المعالجة يتم تنفيذها إلكترونياً وفورياً.\n2- هذا الشحن مخصص فقط للخادم الدولي (Global Server).\n3- يرجى التأكد من كتابة الآيدي (Player ID / UID) بدقة شديدة لمنع أي تأخير في تسليم الطلب.`;
+    }
+    if (isTikTokCoins) {
+      return `1- لا يمكن إلغاء الطلب أو استرداد المبلغ بأي شكل من الأشكال بعد إرسال الطلب.\n2- يرجى التأكد من كتابة يوزر الحساب أو الرابط بدقة شديدة لتجنب التأخير.\n3- تظهر العملات مباشرة في حسابك داخل تطبيق تيك توك.`;
+    }
+    return "";
+  }, [selectedService, categoryAlerts, tabInfo, selectedCat, isChatGPT, isJaco, isGame, isTikTokCoins]);
   const isTelegram = selectedService?.name?.includes("Telegram") || selectedService?.name?.includes("تليجرام") || selectedService?.category?.includes("Telegram") || selectedService?.category?.includes("تليجرام");
   const isPromo = selectedService?.name?.includes("ترويج") || selectedService?.category?.includes("ترويج");
   const isTikTokPromo = isPromo && (selectedService?.appCategory === "tiktok" || selectedService?.service === "tiktok_promo" || selectedService?.name?.includes("تيك توك"));
