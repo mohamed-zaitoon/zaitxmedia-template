@@ -3410,7 +3410,7 @@ export function CalculatorTab() {
   }
 
   return (
-    <div style={{ maxWidth: 800 }}>
+    <div style={{ width: "100%", maxWidth: 1400, margin: "0 auto" }}>
       <Card title="🧮 حاسبة أرباح تيك توك">
         <div style={{ display: "grid", gap: 20 }}>
           <div
@@ -3657,7 +3657,7 @@ export function ExternalCustomerCalculatorTab() {
   };
 
   return (
-    <div style={{ maxWidth: 800 }}>
+    <div style={{ width: "100%", maxWidth: 1400, margin: "0 auto" }}>
       <Card title="🧮 حاسبة كل خدمات الموقع لعملاء الخارج">
         <div style={{ display: "grid", gap: 20 }}>
           <div>
@@ -4286,7 +4286,7 @@ function TonPriceTrackerCard({ usdRate }: { usdRate: number }) {
 }
 
   return (
-    <div style={{ maxWidth: 720 }}>
+    <div style={{ width: "100%", maxWidth: 1400, margin: "0 auto" }}>
       <TonPriceTrackerCard usdRate={usdRate} />
 
       <Card title="⚡ أسعار وباقات الألعاب والخدمات اليدوية">
@@ -4453,8 +4453,9 @@ function TonPriceTrackerCard({ usdRate }: { usdRate: number }) {
                   </div>
                 </div>
 
-                {/* Items in Category */}
-                {items.map(({ service: s, index: i }) => {
+                {/* Items in Category rendered in wide multi-column grid */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(440px, 1fr))", gap: 12 }}>
+                  {items.map(({ service: s, index: i }) => {
                   const linkedCoins = s.id === "tiktok_hidden_w" ? 13_000 : s.id === "tiktok_hidden_m" ? 26_000 : 0;
                   const automaticEgp = linkedCoins > 0 && tiers.length > 0
                     ? calculateTikTokPriceEgp(linkedCoins, tiers, usdRate)
@@ -4706,6 +4707,7 @@ function TonPriceTrackerCard({ usdRate }: { usdRate: number }) {
                     </div>
                   );
                 })}
+                </div>
               </div>
             );
           });
