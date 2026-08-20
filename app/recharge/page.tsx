@@ -742,16 +742,19 @@ export default function RechargePage() {
         ) : (
           <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-4 sm:p-5 shadow-xl space-y-4">
             {/* Live USD / SAR Exchange Rate Banner */}
-            <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 shadow-sm" dir="rtl">
               {isSarCurrency ? (
                 <>
                   <div className="flex items-center gap-2">
                     <span className="text-base">🇸🇦</span>
                     <span className="text-xs sm:text-sm font-bold text-slate-200">سعر الريال لدينا:</span>
                   </div>
-                  <strong className="text-sm sm:text-base font-black text-emerald-400">
-                    1 ﷼ = {validSarRate.toFixed(2)} ج.م
-                  </strong>
+                  <div className="flex items-center gap-1.5 text-sm sm:text-base font-black text-emerald-400">
+                    <span className="font-mono" dir="ltr">1 ﷼</span>
+                    <span>=</span>
+                    <span className="font-mono" dir="ltr">{validSarRate.toFixed(2)}</span>
+                    <span>ج.م</span>
+                  </div>
                 </>
               ) : (
                 <>
@@ -759,9 +762,12 @@ export default function RechargePage() {
                     <span className="text-base">💵</span>
                     <span className="text-xs sm:text-sm font-bold text-slate-200">سعر الدولار لدينا:</span>
                   </div>
-                  <strong className="text-sm sm:text-base font-black text-emerald-400">
-                    1$ = {(rates.usd || 54.55).toFixed(2)} ج.م
-                  </strong>
+                  <div className="flex items-center gap-1.5 text-sm sm:text-base font-black text-emerald-400">
+                    <span className="font-mono" dir="ltr">1$</span>
+                    <span>=</span>
+                    <span className="font-mono" dir="ltr">{(rates.usd || 54.55).toFixed(2)}</span>
+                    <span>ج.م</span>
+                  </div>
                 </>
               )}
             </div>
