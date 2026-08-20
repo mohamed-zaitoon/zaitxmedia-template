@@ -402,14 +402,42 @@ export default function RechargePage() {
     // Attempt to launch InstaPay app directly
     window.location.href = targetUrl;
 
-    // Wait 0.001 seconds (1ms) to verify if the app opened or is missing
+    // Wait 2.5 seconds (2500ms) to verify if the app opened or is missing
     window.setTimeout(() => {
       window.removeEventListener("pagehide", handleAppLaunchDetect);
       window.removeEventListener("blur", handleAppLaunchDetect);
       if (!appOpened && document.visibilityState === "visible") {
         toast.error("تطبيق InstaPay غير مثبت على جهازك ⚠️");
       }
-    }, 1);
+    }, 2500);
+  };
+
+  const handleOpenVodafoneApp = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (typeof window === "undefined") return;
+
+    const num = selected?.number || selected?.link || "";
+    const cleanNum = num.replace(/\D/g, "");
+    const targetUrl = cleanNum ? `tel:*9*7*${cleanNum}#` : "tel:*9#";
+    let appOpened = false;
+
+    const handleAppLaunchDetect = () => {
+      appOpened = true;
+    };
+
+    window.addEventListener("pagehide", handleAppLaunchDetect, { once: true });
+    window.addEventListener("blur", handleAppLaunchDetect, { once: true });
+
+    window.location.href = targetUrl;
+
+    // Wait 2.5 seconds (2500ms) to verify if the app/dialer opened or is missing
+    window.setTimeout(() => {
+      window.removeEventListener("pagehide", handleAppLaunchDetect);
+      window.removeEventListener("blur", handleAppLaunchDetect);
+      if (!appOpened && document.visibilityState === "visible") {
+        toast.error("تعذر فتح كود تحويل فودافون كاش على جهازك ⚠️");
+      }
+    }, 2500);
   };
 
   const activeMatchingWallets = useMemo(() => {
@@ -1013,6 +1041,14 @@ export default function RechargePage() {
                       </div>
                     ) : (
                       <>
+                        <button
+                          type="button"
+                          onClick={handleOpenVodafoneApp}
+                          className="inline-flex md:hidden h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-red-700 font-black text-white text-xs transition-all shadow-md active:scale-95 cursor-pointer whitespace-nowrap mb-2"
+                        >
+                          <Zap size={16} className="fill-white shrink-0" />
+                          <span>التحويل المباشر كود فودافون كاش (*9#)</span>
+                        </button>
                         {(selected.number || selected.link) && (
                           <div className="space-y-1.5">
                             <span className="block text-xs font-bold text-cyan-400">📱 رقم تحويل المحفظة الإلكترونية:</span>
