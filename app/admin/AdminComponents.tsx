@@ -1403,12 +1403,15 @@ export function PricingTab() {
   const [symbolsBusy, setSymbolsBusy] = useState(false);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
+  const [tiktokInstructions, setTiktokInstructions] = useState("");
+  const [tiktokAlert, setTiktokAlert] = useState("");
 
   useEffect(() => {
     Promise.all([
       fetchAdminData("tiers"),
       fetchAdminData("settings/pricing"),
-    ]).then(([tiersResult, pricingResult]) => {
+      fetchAdminData("settings/manual_services"),
+    ]).then(([tiersResult, pricingResult, manualServicesResult]) => {
       const rate = Number(
         pricingResult.data?.usd_rate || pricingResult.data?.tiktok_usd_rate || 0,
       );
@@ -1418,6 +1421,16 @@ export function PricingTab() {
       setSymbolEgp(cs.egp || cs.EGP || "£");
       setSymbolSar(cs.sar || cs.SAR || "﷼");
       setSymbolUsd(cs.usd || cs.USD || "$");
+
+      const msData = manualServicesResult?.data || {};
+      const catInst = msData.categoryInstructions || {};
+      const catAlerts = msData.categoryAlerts || {};
+      setTiktokInstructions(
+        catInst["شحن عملات تيك توك"] || catInst["عملات تيك توك"] || catInst["tiktok_coins"] || ""
+      );
+      setTiktokAlert(
+        catAlerts["شحن عملات تيك توك"] || catAlerts["عملات تيك توك"] || catAlerts["tiktok_coins"] || ""
+      );
 
       const data: any[] = (tiersResult.items || []).map((tier: any) => ({
         ...tier,
@@ -1453,17 +1466,47 @@ export function PricingTab() {
 
   const save = async () => {
     setBusy(true);
-    await writeAdminData({ action: "saveTiers", tiers });
-    const result = await fetchAdminData("tiers");
-    const data: any[] = (result.items || []).map((tier: any) => ({
-      ...tier,
-      pricePer1000Usd: tier.price_per_1000_usd,
-    }));
-    data.sort((a, b) => Number(a.min) - Number(b.min));
-    setTiers(data);
-    setMsg("✅ تم حفظ الشرائح");
-    setBusy(false);
-    setTimeout(() => setMsg(""), 3000);
+    try {
+      await writeAdminData({ action: "saveTiers", tiers });
+      
+      const msSnap = await getDoc(doc(db, "settings", "manual_services"));
+      const msData = msSnap.exists() ? msSnap.data() : {};
+      const currentInst = msData.categoryInstructions || {};
+      const currentAlerts = msData.categoryAlerts || {};
+
+      const updatedInst = {
+        ...currentInst,
+        "شحن عملات تيك توك": tiktokInstructions,
+        "عملات تيك توك": tiktokInstructions,
+        "tiktok_coins": tiktokInstructions,
+      };
+      const updatedAlerts = {
+        ...currentAlerts,
+        "شحن عملات تيك توك": tiktokAlert,
+        "عملات تيك توك": tiktokAlert,
+        "tiktok_coins": tiktokAlert,
+      };
+
+      await setDoc(doc(db, "settings", "manual_services"), {
+        categoryInstructions: updatedInst,
+        categoryAlerts: updatedAlerts,
+      }, { merge: true });
+
+      const result = await fetchAdminData("tiers");
+      const data: any[] = (result.items || []).map((tier: any) => ({
+        ...tier,
+        pricePer1000Usd: tier.price_per_1000_usd,
+      }));
+      data.sort((a, b) => Number(a.min) - Number(b.min));
+      setTiers(data);
+      setMsg("✅ تم حفظ الشرائح والتعليمات والتنبيهات");
+      toast.success("تم حفظ الشرائح والتعليمات والتنبيهات لعملات تيك توك! 📋");
+    } catch (e: any) {
+      toast.error(e?.message || "حدث خطأ أثناء الحفظ");
+    } finally {
+      setBusy(false);
+      setTimeout(() => setMsg(""), 3000);
+    }
   };
 
   const handleDelete = async (i: number, id: string) => {
@@ -1819,7 +1862,39 @@ export function PricingTab() {
             </div>
           </div>
         ))}
-      <FloatingSaveBar onClick={save} busy={busy} label="حفظ جدول الشرائح" msg={msg} />
+
+        {/* 📋 قسم تعليمات وتنبيهات عملات تيك توك مباشرة داخل صفحة الأسعار */}
+        <div className="mt-8 pt-6 border-t border-slate-800 space-y-6">
+          <div className="bg-slate-900/90 p-5 rounded-2xl border border-cyan-500/20 shadow-lg">
+            <label className="block text-sm font-bold text-cyan-300 mb-2 flex items-center gap-2">
+              <span>📋</span>
+              <span>تعليمات وتطبيق الطلب لشحن عملات تيك توك (تظهر للعملاء في أعلى الحاسبة)</span>
+            </label>
+            <textarea
+              rows={4}
+              value={tiktokInstructions}
+              onChange={(e) => setTiktokInstructions(e.target.value)}
+              placeholder="أدخل تعليمات الشحن لعملات تيك توك... مثال:&#10;1- أدخل يوزر حسابك أو رابط الحساب المراد شحنه.&#10;2- اختر كمية عملات تيك توك المطلوبة.&#10;3- اضغط على زر إتمام الدفع والطلب."
+              className="w-full rounded-xl border border-slate-700 bg-slate-950 p-4 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 transition-all font-mono leading-relaxed"
+            />
+          </div>
+
+          <div className="bg-slate-900/90 p-5 rounded-2xl border border-amber-500/20 shadow-lg">
+            <label className="block text-sm font-bold text-amber-300 mb-2 flex items-center gap-2">
+              <span>⚠️</span>
+              <span>التنبيهات والملاحظات الهامة لشحن عملات تيك توك (تظهر للعملاء في أسفل الحاسبة فوق زر الدفع)</span>
+            </label>
+            <textarea
+              rows={4}
+              value={tiktokAlert}
+              onChange={(e) => setTiktokAlert(e.target.value)}
+              placeholder="أدخل التنبيهات والملاحظات لعملات تيك توك... مثال:&#10;1- لا يمكن إلغاء الطلب أو استرداد المبلغ بأي شكل من الأشكال بعد إرسال الطلب.&#10;2- يرجى التأكد من كتابة يوزر الحساب بدقة شديدة لتجنب التأخير.&#10;3- تظهر العملات مباشرة في حسابك داخل تطبيق تيك توك."
+              className="w-full rounded-xl border border-slate-700 bg-slate-950 p-4 text-sm text-amber-200 placeholder-slate-500 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 transition-all font-mono leading-relaxed"
+            />
+          </div>
+        </div>
+
+      <FloatingSaveBar onClick={save} busy={busy} label="حفظ الشرائح والتعليمات" msg={msg} />
     </Card>
     </div>
   );

@@ -35,13 +35,61 @@
     --bg-secondary: #f1f5f9;
     --bg-tertiary: #e2e8f0;
     --bg-elevated: #ffffff;
-    --bg-card: rgba(255, 255, 255, 0.95);
+    --bg-card: #ffffff;
     --border-primary: #cbd5e1;
     --border-accent: rgba(245, 158, 11, 0.4);
     --text-primary: #0f172a;
-    --text-secondary: #475569;
+    --text-secondary: #334155;
     --text-muted: #64748b;
-    --header-bg: rgba(255, 255, 255, 0.92);
+    --header-bg: rgba(255, 255, 255, 0.95);
+  }
+
+  body {
+    background-color: #f8fafc !important;
+    color: #0f172a !important;
+    background-image:
+      radial-gradient(circle at 85% -10%, rgba(6, 182, 212, 0.08), transparent 32rem),
+      radial-gradient(circle at -10% 35%, rgba(245, 158, 11, 0.08), transparent 30rem) !important;
+  }
+
+  .glass-panel-modern,
+  .glass-card-glow,
+  .bg-slate-900\/90,
+  .bg-slate-900\/80,
+  .bg-slate-950,
+  .bg-\[\#060a12\],
+  .bg-\[\#070a12\],
+  .bg-\[\#0c1220\],
+  .bg-\[\#131c2e\],
+  .bg-slate-900 {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
+  }
+
+  .text-slate-100, .text-slate-200, .text-slate-300 {
+    color: #0f172a !important;
+  }
+
+  .text-slate-400, .text-slate-500, .text-muted-foreground {
+    color: #475569 !important;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="email"],
+  textarea,
+  select {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+  }
+
+  select option {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
   }
 }
 
