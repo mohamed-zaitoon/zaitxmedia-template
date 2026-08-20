@@ -46,17 +46,11 @@ const getAppCat = (cat: string, name: string, isFazer?: boolean) => {
   )
     return "tiktok";
   if (
-    c.includes("chatgpt") ||
-    c.includes("gpt") ||
-    c.includes("جي بي تي") ||
-    c.includes("برامج") ||
-    c.includes("برمجيات") ||
-    c.includes("تطبيقات") ||
-    c.includes("أخرى") ||
-    c.includes("اخري")
-  )
-    return "other";
-  if (
+    c.includes("efootball") ||
+    c.includes("pes") ||
+    c.includes("بيس") ||
+    c.includes("إي فوتبول") ||
+    c.includes("اي فوتبول") ||
     c.includes("pubg") ||
     c.includes("ببجي") ||
     c.includes("فري فاير") ||
@@ -85,6 +79,17 @@ const getAppCat = (cat: string, name: string, isFazer?: boolean) => {
     c.includes("شحن الألعاب")
   )
     return "games";
+  if (
+    c.includes("chatgpt") ||
+    c.includes("gpt") ||
+    c.includes("جي بي تي") ||
+    c.includes("برامج") ||
+    c.includes("برمجيات") ||
+    c.includes("تطبيقات") ||
+    c.includes("أخرى") ||
+    c.includes("اخري")
+  )
+    return "other";
   if (c.includes("facebook") || c.includes("فيسبوك") || c.includes("فيس بوك"))
     return "facebook";
   if (c.includes("instagram") || c.includes("انستجرام") || c.includes("انستا"))
