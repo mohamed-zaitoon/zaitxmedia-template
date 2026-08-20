@@ -24,7 +24,7 @@ export default function CustomWalletSelect({ value, onChange, options }: CustomW
   const [isOpen, setIsOpen] = useState(false);
 
   const getOptionLabel = (w: WalletOption) => {
-    if (w.type === "vodafone") return "فودافون كاش / محفظه الكترونية";
+    if (w.type === "vodafone") return "محفظة إلكترونية (فودافون كاش - اتصالات كاش - أورنج كاش - وي باي)";
     if (w.type === "instapay") return "انستاباي (InstaPay)";
     if (w.type === "barq") return "برق (Barq)";
     if (w.type === "bank") return "تحويل بنكي (Bank Transfer)";

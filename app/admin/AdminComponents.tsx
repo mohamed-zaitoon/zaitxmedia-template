@@ -2050,7 +2050,7 @@ export function WalletsTab() {
             value={w.type || "vodafone"}
             title="اختر وسيلة الدفع"
             options={[
-              { value: "vodafone", label: "فودافون كاش / محفظه الكترونية" },
+              { value: "vodafone", label: "محفظة إلكترونية (فودافون كاش - اتصالات كاش - أورنج كاش - وي باي)" },
               { value: "instapay", label: "انستاباي (InstaPay)" },
               { value: "barq", label: "برق (Barq - السعودية)" },
               { value: "bank", label: "حساب بنكي (Bank Transfer)" },
@@ -2242,7 +2242,7 @@ export function WalletsTab() {
           
           <div className="flex items-center gap-2 flex-wrap">
             {[
-              { id: "vodafone", label: "📱 فودافون كاش / المحافظ" },
+              { id: "vodafone", label: "📱 محفظة إلكترونية (فودافون - اتصالات - أورنج - وي)" },
               { id: "instapay", label: "⚡ انستاباي InstaPay" },
               { id: "barq", label: "✨ برق Barq" },
               { id: "bank", label: "🏦 تحويل بنكي Bank" },

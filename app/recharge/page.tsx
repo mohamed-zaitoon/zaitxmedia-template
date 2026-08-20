@@ -764,7 +764,10 @@ export default function RechargePage() {
                     <span className="text-xs sm:text-sm font-bold text-slate-200">سعر الدولار لدينا:</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-sm sm:text-base font-black text-emerald-400">
-                    <span className="font-mono font-bold" dir="rtl">1$</span>
+                    <span className="inline-flex items-center gap-0.5 font-mono font-bold" dir="rtl">
+                      <span dir="ltr">1</span>
+                      <span>$</span>
+                    </span>
                     <span className="text-slate-400 font-normal">=</span>
                     <span className="font-mono font-bold" dir="ltr">{(rates.usd || 54.55).toFixed(2)}</span>
                     <span className="font-sans font-bold">ج.م</span>
@@ -794,7 +797,7 @@ export default function RechargePage() {
                   <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-center text-xs font-bold text-amber-400 space-y-2">
                     <div className="text-sm font-black flex items-center justify-center gap-2">
                       <ShieldAlert size={18} />
-                      وسيلة الإيداع هذه ({selected.type === "vodafone" ? "فودافون كاش / محفظه الكترونية" : selected.type === "instapay" ? "InstaPay" : selected.type === "barq" ? "برق" : selected.type === "binance_pay" || selected.type === "binance" ? "Binance Pay" : "التحويل البنكي"}) غير متاحة حالياً.
+                      وسيلة الإيداع هذه ({selected.type === "vodafone" ? "محفظة إلكترونية (فودافون كاش - اتصالات كاش - أورنج كاش - وي باي)" : selected.type === "instapay" ? "InstaPay" : selected.type === "barq" ? "برق" : selected.type === "binance_pay" || selected.type === "binance" ? "Binance Pay" : "التحويل البنكي"}) غير متاحة حالياً.
                     </div>
                     <p className="text-[11px] text-muted-foreground/90 font-medium">
                       يرجى اختيار وسيلة إيداع أخرى متاحة من القائمة أعلاه.
@@ -893,17 +896,18 @@ export default function RechargePage() {
                           <span>التحويل المباشر من InstaPay</span>
                         </button>
                         {selected.number && (
-                          <div className="hidden md:flex text-xs bg-background/80 p-3 rounded-lg border border-border justify-between items-center gap-2">
-                            <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                              <span className="text-[10px] text-muted-foreground font-semibold">📱 رقم تحويل إنستاباي:</span>
-                              <strong className="font-mono text-xs text-foreground break-all" dir="ltr">{selected.number}</strong>
+                          <div className="flex text-xs bg-slate-950/90 p-3.5 rounded-xl border border-emerald-500/40 justify-between items-center gap-3 shadow-md">
+                            <div className="flex flex-col gap-1 min-w-0 flex-1">
+                              <span className="text-[11px] text-emerald-400 font-bold">📱 رقم تحويل إنستاباي:</span>
+                              <strong className="font-mono text-lg sm:text-xl font-black text-emerald-300 break-all tracking-wider" dir="ltr">{selected.number}</strong>
                             </div>
                             <button
                               type="button"
                               onClick={() => copyToClipboard(selected.number, "تم نسخ رقم تحويل انستاباي بنجاح 📋")}
-                              className="rounded-lg bg-primary/15 hover:bg-primary/25 p-2 text-primary shrink-0 cursor-pointer"
+                              className="rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 p-2.5 text-emerald-300 border border-emerald-500/40 shrink-0 cursor-pointer text-xs font-bold flex items-center gap-1.5"
                             >
-                              <Copy size={14} />
+                              <Copy size={16} />
+                              <span>نسخ</span>
                             </button>
                           </div>
                         )}
@@ -1010,16 +1014,17 @@ export default function RechargePage() {
                     ) : (
                       <>
                         {(selected.number || selected.link) && (
-                          <div className="space-y-1">
-                            <span className="block text-[10px] font-bold text-slate-300">📱 رقم التحويل:</span>
-                            <div className="flex items-center justify-between gap-2 bg-background p-3 rounded-lg border border-border" dir="ltr">
-                              <strong className="break-all font-mono text-sm text-emerald-400">{selected.number || selected.link}</strong>
+                          <div className="space-y-1.5">
+                            <span className="block text-xs font-bold text-cyan-400">📱 رقم تحويل المحفظة الإلكترونية:</span>
+                            <div className="flex items-center justify-between gap-3 bg-[#081220] p-3.5 rounded-xl border border-cyan-500/40 shadow-md" dir="ltr">
+                              <strong className="break-all font-mono text-lg sm:text-xl font-black text-amber-400 tracking-wider">{selected.number || selected.link}</strong>
                               <button
                                 type="button"
                                 onClick={copyWalletDetails}
-                                className="rounded-lg bg-primary/15 hover:bg-primary/25 p-2 text-primary shrink-0 cursor-pointer"
+                                className="rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 p-2.5 text-cyan-300 border border-cyan-500/40 shrink-0 cursor-pointer text-xs font-bold flex items-center gap-1.5"
                               >
-                                {copied ? <CheckCircle size={16} className="animate-bounce" /> : <Copy size={14} />}
+                                {copied ? <CheckCircle size={16} className="animate-bounce" /> : <Copy size={16} />}
+                                <span>نسخ</span>
                               </button>
                             </div>
                           </div>
