@@ -750,10 +750,9 @@ export default function RechargePage() {
                     <span className="text-xs sm:text-sm font-bold text-slate-200">سعر الريال لدينا:</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-sm sm:text-base font-black text-emerald-400">
-                    <span className="font-mono" dir="ltr">1 ﷼</span>
+                    <bdi className="font-mono">1 ﷼</bdi>
                     <span>=</span>
-                    <span className="font-mono" dir="ltr">{validSarRate.toFixed(2)}</span>
-                    <span>ج.م</span>
+                    <bdi className="font-mono">{validSarRate.toFixed(2)} ج.م</bdi>
                   </div>
                 </>
               ) : (
@@ -763,10 +762,9 @@ export default function RechargePage() {
                     <span className="text-xs sm:text-sm font-bold text-slate-200">سعر الدولار لدينا:</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-sm sm:text-base font-black text-emerald-400">
-                    <span className="font-mono" dir="ltr">1$</span>
+                    <bdi className="font-mono">1$</bdi>
                     <span>=</span>
-                    <span className="font-mono" dir="ltr">{(rates.usd || 54.55).toFixed(2)}</span>
-                    <span>ج.م</span>
+                    <bdi className="font-mono">{(rates.usd || 54.55).toFixed(2)} ج.م</bdi>
                   </div>
                 </>
               )}
