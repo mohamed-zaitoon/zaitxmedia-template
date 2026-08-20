@@ -101,6 +101,8 @@ import CartDrawer from './components/CartDrawer';
 
 import ContentProtection from './components/ContentProtection';
 
+import { SiteAppearanceProvider } from './context/SiteAppearanceContext';
+
 export default function RootLayout({
   children,
 }: {
@@ -121,17 +123,19 @@ export default function RootLayout({
           <ContentProtection />
           <Providers>
             <AuthProvider>
-              <ThemeProvider>
-                <CurrencyProvider>
-                  <CartProvider>
-                    <SiteAvailabilityGate>
-                      <CountryBlocker>{children}</CountryBlocker>
-                    </SiteAvailabilityGate>
-                    <CartDrawer />
-                    <Toaster position="top-center" richColors />
-                  </CartProvider>
-                </CurrencyProvider>
-              </ThemeProvider>
+              <SiteAppearanceProvider>
+                <ThemeProvider>
+                  <CurrencyProvider>
+                    <CartProvider>
+                      <SiteAvailabilityGate>
+                        <CountryBlocker>{children}</CountryBlocker>
+                      </SiteAvailabilityGate>
+                      <CartDrawer />
+                      <Toaster position="top-center" richColors />
+                    </CartProvider>
+                  </CurrencyProvider>
+                </ThemeProvider>
+              </SiteAppearanceProvider>
             </AuthProvider>
           </Providers>
         </body>

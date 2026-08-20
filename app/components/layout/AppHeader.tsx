@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useAuth } from "@/app/lib/auth-context";
 import { useCurrency, Currency } from "@/app/lib/currency-context";
 import { useCart } from "@/app/lib/cart-context";
+import { useSiteAppearance } from "@/app/context/SiteAppearanceContext";
 import { ServiceBrandLogo, TikTokOfficialLogo, FacebookOfficialLogo, InstagramOfficialLogo, PubgOfficialLogo } from "../ServiceLogos";
 
 function CurrencyDropdown({
@@ -80,6 +81,7 @@ export default function AppHeader() {
   const { user, signOutUser } = useAuth();
   const { selectedCurrency, setSelectedCurrency, rates, symbols } = useCurrency();
   const { cartCount, setIsCartOpen } = useCart();
+  const { appearance } = useSiteAppearance();
   const [balanceUsd, setBalanceUsd] = useState(Number(user?.balance) || 0);
 
   const isSaudi = user?.country_code === "SA";
@@ -136,20 +138,38 @@ export default function AppHeader() {
   const [mobileBottomSheetOpen, setMobileBottomSheetOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-white/[0.07] bg-[#060a13]/85 shadow-[0_12px_35px_rgba(0,0,0,.22)] backdrop-blur-2xl">
-      <div className="centered-app-frame flex h-[68px] min-w-0 items-center justify-between">
-        
-        {/* Right Side: Logo & Back Button */}
-        <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
-          {showBackButton && (
-            <button 
-              onClick={() => router.push("/")}
-              className="bg-white/5 hover:bg-white/10 text-foreground inline-flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-xl transition-colors border border-transparent hover:border-white/10 shrink-0"
-              aria-label="العودة للمتجر"
-            >
-              <ArrowRight className="shrink-0 w-4 h-4 md:w-[18px] md:h-[18px]" />
-            </button>
+    <>
+      {appearance.announcement?.enabled && appearance.announcement?.text && (
+        <div
+          style={{
+            background: appearance.announcement.bg || "#0284c7",
+            color: appearance.announcement.color || "#ffffff",
+          }}
+          className="w-full py-2 px-4 text-center text-xs md:text-sm font-black shadow-md flex items-center justify-center gap-2 relative z-[60]"
+        >
+          <Sparkles size={16} className="shrink-0 animate-pulse" />
+          {appearance.announcement.link ? (
+            <a href={appearance.announcement.link} className="underline hover:opacity-90">
+              {appearance.announcement.text}
+            </a>
+          ) : (
+            <span>{appearance.announcement.text}</span>
           )}
+        </div>
+      )}
+      <header className="sticky top-0 z-50 w-full border-b border-white/[0.07] bg-[#060a13]/85 shadow-[0_12px_35px_rgba(0,0,0,.22)] backdrop-blur-2xl">
+        <div className="centered-app-frame flex h-[68px] min-w-0 items-center justify-between">
+          {/* Right Side: Logo & Back Button */}
+          <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+            {showBackButton && (
+              <button 
+                onClick={() => router.push("/")}
+                className="bg-white/5 hover:bg-white/10 text-foreground inline-flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-xl transition-colors border border-transparent hover:border-white/10 shrink-0"
+                aria-label="العودة للمتجر"
+              >
+                <ArrowRight className="shrink-0 w-4 h-4 md:w-[18px] md:h-[18px]" />
+              </button>
+            )}
           <Link href="/" className="flex items-center gap-2 md:gap-3 no-underline">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -399,5 +419,6 @@ export default function AppHeader() {
         document.body
       )}
     </header>
+    </>
   );
 }

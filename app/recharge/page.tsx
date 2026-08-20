@@ -15,9 +15,12 @@ import { calculateTikTokCoinsFromEgp, calculateTikTokPriceEgp } from "@/lib/pric
 import CustomWalletSelect from "@/app/components/CustomWalletSelect";
 import PaymentMethodLogo from "@/app/components/PaymentLogos";
 
+import { useSiteAppearance } from "@/app/context/SiteAppearanceContext";
+
 export default function RechargePage() {
   const { user, loading } = useAuth();
   const { rates, selectedCurrency, symbols } = useCurrency();
+  const { paymentGateways } = useSiteAppearance();
   const [wallets, setWallets] = useState<any[]>([]);
   const [method, setMethod] = useState("vodafone");
   const [amount, setAmount] = useState("");

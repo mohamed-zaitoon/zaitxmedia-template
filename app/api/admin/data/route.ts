@@ -10,6 +10,9 @@ const readableDocuments = new Set([
   "settings/pricing",
   "settings/site",
   "settings/manual_services",
+  "settings/site_appearance",
+  "settings/payment_gateways",
+  "settings/category_icons",
 ]);
 
 export async function GET(request: Request) {
@@ -348,6 +351,36 @@ export async function POST(request: Request) {
       }
 
       await batch.commit();
+      return NextResponse.json({ success: true });
+    }
+    if (body.action === "saveSiteAppearance") {
+      await adminDb.collection("settings").doc("site_appearance").set(
+        {
+          ...(body.appearance || {}),
+          updatedAt: FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+      return NextResponse.json({ success: true });
+    }
+    if (body.action === "saveCategoryIcons") {
+      await adminDb.collection("settings").doc("category_icons").set(
+        {
+          icons: body.icons || {},
+          updatedAt: FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+      return NextResponse.json({ success: true });
+    }
+    if (body.action === "savePaymentGateways") {
+      await adminDb.collection("settings").doc("payment_gateways").set(
+        {
+          gateways: body.gateways || {},
+          updatedAt: FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
       return NextResponse.json({ success: true });
     }
     if (body.action === "deleteTier" && typeof body.id === "string") {

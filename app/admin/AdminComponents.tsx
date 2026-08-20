@@ -61,6 +61,10 @@ import {
   Filter,
   EyeOff,
   Menu,
+  Palette,
+  CreditCard,
+  Image as ImageIcon,
+  Sparkles,
 } from "lucide-react";
 import Swal from "sweetalert2";
 import { FinancialTab } from "./FinancialTab";
@@ -101,6 +105,7 @@ const tabs = [
   { id: "recharges", label: "طلبات الشحن", icon: <DollarSign size={16} /> },
   { id: "sms_review", label: "مراجعة SMS", icon: <Phone size={16} /> },
   { id: "manual_svcs", label: "الخدمات اليدوية", icon: <Zap size={16} /> },
+  { id: "site_appearance", label: "مظهر وطرق الدفع", icon: <Palette size={16} /> },
   { id: "financial", label: "المالية والتغطية", icon: <TrendingUp size={16} /> },
 ];
 
@@ -329,6 +334,7 @@ export default function AdminPage() {
         {activeTab === "recharges" && <RechargesTab />}
         {activeTab === "sms_review" && <SmsReviewTab />}
         {activeTab === "manual_svcs" && <ManualServicesTab />}
+        {activeTab === "site_appearance" && <SiteAppearanceTab />}
         {activeTab === "financial" && <FinancialTab />}
         </div>
       </div>
@@ -5590,6 +5596,461 @@ export function RechargesTab() {
             </table>
           </div>
         )}
+      </Card>
+    </div>
+  );
+}
+
+// ─── Site Appearance, Category Icons & Payment Methods Control Tab ───────────
+
+export function SiteAppearanceTab() {
+  const [appearance, setAppearance] = useState<any>({
+    primaryColor: "#38bdf8",
+    themePreset: "cyan",
+    siteTitle: "ZAITX MEDIA",
+    announcement: {
+      enabled: false,
+      text: "",
+      bg: "#0284c7",
+      color: "#ffffff",
+      link: "",
+    },
+  });
+
+  const [categoryIcons, setCategoryIcons] = useState<Record<string, any>>({
+    tiktok: { iconType: "brand", badgeText: "🔥 الأكثر مبيعاً", badgeColor: "#ff0050" },
+    games: { iconType: "brand", badgeText: "🎮 ألعاب فورية", badgeColor: "#38bdf8" },
+    facebook: { iconType: "brand", badgeText: "👍 ترويج وسرعة", badgeColor: "#1877f2" },
+    instagram: { iconType: "brand", badgeText: "📸 مشاهدات وفولورز", badgeColor: "#e1306c" },
+    other: { iconType: "brand", badgeText: "📦 خدمات متنوعة", badgeColor: "#10b981" },
+  });
+
+  const [paymentGateways, setPaymentGateways] = useState<Record<string, any>>({
+    vodafone: {
+      enabled: true,
+      name: "فودافون كاش (Vodafone Cash)",
+      numberOrAccount: "01000000000",
+      instructions: "قم بتحويل المبلغ إلى الرقم الموضح أعلاه ثم ادخل رقم المحول منه للتأكيد.",
+      iconUrl: "",
+    },
+    instapay: {
+      enabled: true,
+      name: "إنستا باي (InstaPay)",
+      numberOrAccount: "zaitxmedia@instapay",
+      instructions: "قم بالتحويل المباشر عبر تطبيق إنستا باي إلى اسم المستخدم أعلاه.",
+      iconUrl: "",
+    },
+    barq: {
+      enabled: true,
+      name: "تحويل برق (SAR)",
+      numberOrAccount: "SA0000000000000000000000",
+      instructions: "قم بالتحويل عبر تطبيق برق بالريال السعودي.",
+      iconUrl: "",
+    },
+    binance_pay: {
+      enabled: true,
+      name: "باينانس باي (Binance Pay - USD)",
+      numberOrAccount: "BINANCE_PAY_ID",
+      instructions: "قم بالمسح أو التحويل عبر Binance Pay بدولار USDT.",
+      iconUrl: "",
+    },
+  });
+
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  useEffect(() => {
+    Promise.all([
+      fetchAdminData("settings/site_appearance"),
+      fetchAdminData("settings/category_icons"),
+      fetchAdminData("settings/payment_gateways"),
+    ])
+      .then(([appRes, iconRes, gateRes]) => {
+        if (appRes.exists && appRes.data) {
+          setAppearance((prev: any) => ({ ...prev, ...appRes.data }));
+        }
+        if (iconRes.exists && iconRes.data?.icons) {
+          setCategoryIcons((prev: any) => ({ ...prev, ...iconRes.data.icons }));
+        }
+        if (gateRes.exists && gateRes.data?.gateways) {
+          setPaymentGateways((prev: any) => ({ ...prev, ...gateRes.data.gateways }));
+        }
+      })
+      .catch(console.error);
+  }, []);
+
+  const saveAll = async () => {
+    setBusy(true);
+    try {
+      await writeAdminData({ action: "saveSiteAppearance", appearance });
+      await writeAdminData({ action: "saveCategoryIcons", icons: categoryIcons });
+      await writeAdminData({ action: "savePaymentGateways", gateways: paymentGateways });
+      setMsg("✅ تم حفظ إعدادات المظهر، الأيقونات، وطرق الدفع بنجاح!");
+    } catch (e: any) {
+      setMsg(`❌ حدث خطأ أثناء الحفظ: ${e.message}`);
+    } finally {
+      setBusy(false);
+      setTimeout(() => setMsg(""), 3500);
+    }
+  };
+
+  return (
+    <div style={{ width: "100%", maxWidth: 1400, margin: "0 auto" }}>
+      <FloatingSaveBar onClick={saveAll} busy={busy} label="💾 حفظ إعدادات المظهر وطرق الدفع" msg={msg} />
+
+      {/* Section 1: Colors & Announcement Banner */}
+      <Card title="🎨 ألوان الموقع وشريط التنبيهات العلوي">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 16 }}>
+          <div>
+            <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#38bdf8", marginBottom: 6 }}>
+              اللون الأساسي للموقع (Primary Theme Color):
+            </label>
+            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+              <input
+                type="color"
+                value={appearance.primaryColor || "#38bdf8"}
+                onChange={(e) => setAppearance({ ...appearance, primaryColor: e.target.value })}
+                style={{ width: 50, height: 42, borderRadius: 8, border: "none", cursor: "pointer", background: "none" }}
+              />
+              <input
+                type="text"
+                value={appearance.primaryColor || "#38bdf8"}
+                onChange={(e) => setAppearance({ ...appearance, primaryColor: e.target.value })}
+                style={{ ...inp, flex: 1, fontWeight: 700, fontFamily: "monospace" }}
+              />
+            </div>
+            <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
+              {["#38bdf8", "#fbbf24", "#10b981", "#a855f7", "#f43f5e", "#2563eb"].map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setAppearance({ ...appearance, primaryColor: c })}
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: "50%",
+                    background: c,
+                    border: appearance.primaryColor === c ? "2px solid #fff" : "1px solid rgba(255,255,255,0.2)",
+                    cursor: "pointer",
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#38bdf8", marginBottom: 6 }}>
+              عنوان الموقع الأساسي (Site Title):
+            </label>
+            <input
+              type="text"
+              value={appearance.siteTitle || "ZAITX MEDIA"}
+              onChange={(e) => setAppearance({ ...appearance, siteTitle: e.target.value })}
+              style={{ ...inp, width: "100%", fontWeight: 700 }}
+              placeholder="مثال: ZAITX MEDIA"
+            />
+          </div>
+        </div>
+
+        {/* Header Announcement Banner */}
+        <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: "#fbbf24" }}>
+              📢 شريط الإعلانات والتنبيهات العلوي في رأس الموقع:
+            </span>
+            <button
+              type="button"
+              onClick={() =>
+                setAppearance({
+                  ...appearance,
+                  announcement: {
+                    ...appearance.announcement,
+                    enabled: !appearance.announcement?.enabled,
+                  },
+                })
+              }
+              style={{
+                padding: "6px 14px",
+                borderRadius: 8,
+                background: appearance.announcement?.enabled ? "rgba(16,185,129,0.2)" : "rgba(239,68,68,0.2)",
+                border: appearance.announcement?.enabled ? "1px solid rgba(16,185,129,0.4)" : "1px solid rgba(239,68,68,0.4)",
+                color: appearance.announcement?.enabled ? "#34d399" : "#f87171",
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              {appearance.announcement?.enabled ? "🟢 الإعلان مفعّل ومكتوب" : "⏸️ الإعلان معطّل"}
+            </button>
+          </div>
+
+          {appearance.announcement?.enabled && (
+            <div style={{ background: "#0a1322", padding: 14, borderRadius: 12, border: "1px solid rgba(251,191,36,0.3)" }}>
+              <div style={{ marginBottom: 10 }}>
+                <label style={{ display: "block", fontSize: 12, color: "#aaa", marginBottom: 4 }}>نص الإعلان (Announcement Text):</label>
+                <input
+                  type="text"
+                  value={appearance.announcement?.text || ""}
+                  onChange={(e) =>
+                    setAppearance({
+                      ...appearance,
+                      announcement: { ...appearance.announcement, text: e.target.value },
+                    })
+                  }
+                  style={{ ...inp, width: "100%", fontSize: 13, fontWeight: 700 }}
+                  placeholder="مثال: 🔥 عرض خاص: خصم 20% على جميع باقات تيك توك لفترة محدودة!"
+                />
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
+                <div>
+                  <label style={{ display: "block", fontSize: 11, color: "#aaa", marginBottom: 4 }}>لون خلفية الشريط:</label>
+                  <input
+                    type="color"
+                    value={appearance.announcement?.bg || "#0284c7"}
+                    onChange={(e) =>
+                      setAppearance({
+                        ...appearance,
+                        announcement: { ...appearance.announcement, bg: e.target.value },
+                      })
+                    }
+                    style={{ width: "100%", height: 36, borderRadius: 8, cursor: "pointer", background: "none" }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontSize: 11, color: "#aaa", marginBottom: 4 }}>رابط عند النقر (اختياري):</label>
+                  <input
+                    type="text"
+                    value={appearance.announcement?.link || ""}
+                    onChange={(e) =>
+                      setAppearance({
+                        ...appearance,
+                        announcement: { ...appearance.announcement, link: e.target.value },
+                      })
+                    }
+                    style={{ ...inp, width: "100%", fontSize: 11 }}
+                    placeholder="https://zaitxmedia.com/tiktok"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </Card>
+
+      {/* Section 2: Category Icons & Badges */}
+      <Card title="🏷️ أيقونات وشارات الأقسام والخدمات">
+        <div style={{ fontSize: 12, color: "#aaa", marginBottom: 16 }}>
+          يمكنك تخصيص الأيقونة، الشارة المكتوبة (Badge)، ولون الوهج لكل قسم في المتجر:
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 14 }}>
+          {[
+            { id: "tiktok", name: "تيك توك (TikTok)" },
+            { id: "games", name: "قسم الألعاب (Games)" },
+            { id: "facebook", name: "فيسبوك (Facebook)" },
+            { id: "instagram", name: "انستجرام (Instagram)" },
+            { id: "other", name: "أخرى / اشتراكات (Other)" },
+          ].map((cat) => {
+            const conf = categoryIcons[cat.id] || {};
+            return (
+              <div
+                key={cat.id}
+                style={{
+                  background: "#0c1424",
+                  border: "1px solid #1e2d4a",
+                  padding: 14,
+                  borderRadius: 14,
+                }}
+              >
+                <div style={{ fontWeight: 700, fontSize: 14, color: "#38bdf8", marginBottom: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span>📌 {cat.name}</span>
+                  {conf.badgeText && (
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 900,
+                        padding: "2px 8px",
+                        borderRadius: 6,
+                        background: conf.badgeColor || "#38bdf8",
+                        color: "#000",
+                      }}
+                    >
+                      {conf.badgeText}
+                    </span>
+                  )}
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: 11, color: "#aaa", marginBottom: 2 }}>الشارة المكتوبة (Badge Text):</label>
+                    <input
+                      type="text"
+                      value={conf.badgeText || ""}
+                      onChange={(e) =>
+                        setCategoryIcons({
+                          ...categoryIcons,
+                          [cat.id]: { ...conf, badgeText: e.target.value },
+                        })
+                      }
+                      style={{ ...inp, width: "100%", fontSize: 12 }}
+                      placeholder="مثال: 🔥 الأكثر مبيعاً"
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: 11, color: "#aaa", marginBottom: 2 }}>لون الشارة (Badge Color):</label>
+                    <input
+                      type="color"
+                      value={conf.badgeColor || "#38bdf8"}
+                      onChange={(e) =>
+                        setCategoryIcons({
+                          ...categoryIcons,
+                          [cat.id]: { ...conf, badgeColor: e.target.value },
+                        })
+                      }
+                      style={{ width: "100%", height: 32, borderRadius: 6, cursor: "pointer", background: "none" }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: 11, color: "#aaa", marginBottom: 2 }}>رابط أيقونة مخصصة (صورة / SVG):</label>
+                    <input
+                      type="text"
+                      value={conf.customUrl || ""}
+                      onChange={(e) =>
+                        setCategoryIcons({
+                          ...categoryIcons,
+                          [cat.id]: { ...conf, customUrl: e.target.value, iconType: e.target.value ? "custom_url" : "brand" },
+                        })
+                      }
+                      style={{ ...inp, width: "100%", fontSize: 11 }}
+                      placeholder="https://example.com/icon.png"
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+
+      {/* Section 3: Payment Gateways & Icons */}
+      <Card title="💳 إدارة وطرق وأيقونات الدفع">
+        <div style={{ fontSize: 12, color: "#aaa", marginBottom: 16 }}>
+          تأكيد وإدارة أرقام المحافظ، بيانات الحسابات، الأيقونات والتفعيل لكل طريقة دفع:
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 14 }}>
+          {[
+            { id: "vodafone", title: "فودافون كاش" },
+            { id: "instapay", title: "إنستا باي (InstaPay)" },
+            { id: "barq", title: "تحويل برق (SAR)" },
+            { id: "binance_pay", title: "باينانس باي (Binance Pay)" },
+          ].map((gw) => {
+            const conf = paymentGateways[gw.id] || { enabled: true, name: gw.title, numberOrAccount: "", instructions: "" };
+            return (
+              <div
+                key={gw.id}
+                style={{
+                  background: conf.enabled ? "#0a1424" : "#1a0f14",
+                  border: conf.enabled ? "1px solid rgba(56,189,248,0.3)" : "1px solid rgba(239,68,68,0.4)",
+                  padding: 14,
+                  borderRadius: 14,
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                  <span style={{ fontWeight: 700, fontSize: 14, color: "#fff" }}>💳 {gw.title}</span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setPaymentGateways({
+                        ...paymentGateways,
+                        [gw.id]: { ...conf, enabled: !conf.enabled },
+                      })
+                    }
+                    style={{
+                      padding: "4px 10px",
+                      borderRadius: 8,
+                      background: conf.enabled ? "rgba(16,185,129,0.2)" : "rgba(239,68,68,0.2)",
+                      border: conf.enabled ? "1px solid rgba(16,185,129,0.4)" : "1px solid rgba(239,68,68,0.4)",
+                      color: conf.enabled ? "#34d399" : "#f87171",
+                      fontSize: 11,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                    }}
+                  >
+                    {conf.enabled ? "🟢 مفعّلة" : "⏸️ معطّلة"}
+                  </button>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: 11, color: "#aaa", marginBottom: 2 }}>اسم طريقة الدفع المعروض:</label>
+                    <input
+                      type="text"
+                      value={conf.name || ""}
+                      onChange={(e) =>
+                        setPaymentGateways({
+                          ...paymentGateways,
+                          [gw.id]: { ...conf, name: e.target.value },
+                        })
+                      }
+                      style={{ ...inp, width: "100%", fontSize: 12, fontWeight: 700 }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: 11, color: "#38bdf8", fontWeight: 700, marginBottom: 2 }}>رقم المحفظة / اسم الحساب / الآي بان:</label>
+                    <input
+                      type="text"
+                      value={conf.numberOrAccount || ""}
+                      onChange={(e) =>
+                        setPaymentGateways({
+                          ...paymentGateways,
+                          [gw.id]: { ...conf, numberOrAccount: e.target.value },
+                        })
+                      }
+                      style={{ ...inp, width: "100%", fontSize: 12, fontWeight: 700, color: "#38bdf8", fontFamily: "monospace" }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: 11, color: "#aaa", marginBottom: 2 }}>تعليمات التحويل للعميل:</label>
+                    <textarea
+                      rows={2}
+                      value={conf.instructions || ""}
+                      onChange={(e) =>
+                        setPaymentGateways({
+                          ...paymentGateways,
+                          [gw.id]: { ...conf, instructions: e.target.value },
+                        })
+                      }
+                      style={{ ...inp, width: "100%", fontSize: 11, minHeight: 48 }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: 11, color: "#aaa", marginBottom: 2 }}>رابط شعار/أيقونة مخصصة (اختياري):</label>
+                    <input
+                      type="text"
+                      value={conf.iconUrl || ""}
+                      onChange={(e) =>
+                        setPaymentGateways({
+                          ...paymentGateways,
+                          [gw.id]: { ...conf, iconUrl: e.target.value },
+                        })
+                      }
+                      style={{ ...inp, width: "100%", fontSize: 11 }}
+                      placeholder="https://example.com/vodafone.png"
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </Card>
     </div>
   );
