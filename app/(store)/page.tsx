@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, BadgeCheck, Bell, Boxes, Check, ChevronLeft, Gamepad2, PackageCheck, ShoppingBag, Sparkles, Wallet, WalletCards, Zap } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "../lib/auth-context";
+import { TikTokOfficialLogo, FacebookOfficialLogo, InstagramOfficialLogo, PubgOfficialLogo } from "../components/ServiceLogos";
 
 export default function LandingPage() {
   const [isAdminHost, setIsAdminHost] = useState<boolean | null>(null);
@@ -41,35 +42,35 @@ export default function LandingPage() {
       title: "شحن تيك توك",
       description: "عملات وخدمات تيك توك بتنفيذ سريع وآمن",
       color: "from-pink-500/20 to-cyan-400/10",
-      icon: Sparkles,
+      icon: <TikTokOfficialLogo size={32} />,
     },
     {
       href: "/games",
       title: "شحن الألعاب",
       description: "اشحن ألعابك المفضلة بأفضل الأسعار",
       color: "from-amber-500/20 to-orange-400/10",
-      icon: Gamepad2,
+      icon: <PubgOfficialLogo size={32} />,
     },
     {
       href: "/facebook",
       title: "خدمات فيسبوك",
       description: "حلول نمو وتفاعل لحسابات وصفحات فيسبوك",
       color: "from-blue-500/20 to-sky-400/10",
-      icon: ShoppingBag,
+      icon: <FacebookOfficialLogo size={32} />,
     },
     {
       href: "/instagram",
       title: "خدمات إنستجرام",
       description: "متابعون وتفاعل وخدمات حسابات إنستجرام",
       color: "from-fuchsia-500/20 to-purple-400/10",
-      icon: Zap,
+      icon: <InstagramOfficialLogo size={32} />,
     },
     {
       href: "/other",
       title: "أخرى",
       description: "برامج وخدمات رقمية متنوعة",
       color: "from-emerald-500/20 to-teal-400/10",
-      icon: Boxes,
+      icon: <Boxes size={28} className="text-emerald-400" />,
     },
   ];
 
@@ -118,7 +119,6 @@ export default function LandingPage() {
               </div>
               <div className="grid grid-cols-2 gap-4 sm:gap-5">
                 {categories.map((category, index) => {
-                  const Icon = category.icon;
                   const accents = ["text-pink-400 bg-pink-400/15 border-pink-400/20", "text-amber-400 bg-amber-400/15 border-amber-400/20", "text-blue-400 bg-blue-400/15 border-blue-400/20", "text-fuchsia-400 bg-fuchsia-400/15 border-fuchsia-400/20", "text-emerald-400 bg-emerald-400/15 border-emerald-400/20"];
                   return (
                     <Link
@@ -127,7 +127,7 @@ export default function LandingPage() {
                       className="group rounded-2xl border border-white/10 bg-white/[0.04] p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/50 hover:bg-white/[0.08] hover:shadow-lg hover:shadow-cyan-500/10 flex flex-col justify-between"
                     >
                       <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl border ${accents[index]} shadow-sm`}>
-                        <Icon size={20} />
+                        {category.icon}
                       </div>
                       <div className="space-y-2">
                         <strong className="block text-base font-bold text-white leading-snug">{category.title}</strong>
@@ -164,7 +164,6 @@ export default function LandingPage() {
         </div>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
           {categories.map((category, index) => {
-            const Icon = category.icon;
             const gradients = [
               "from-pink-500/15 via-slate-900/70 to-cyan-500/10",
               "from-amber-500/15 via-slate-900/70 to-orange-500/8",
@@ -176,7 +175,7 @@ export default function LandingPage() {
             return (
               <Link key={category.href} href={category.href} className={`group relative min-h-[270px] overflow-hidden rounded-3xl border border-white/[0.075] bg-gradient-to-br ${gradients[index]} p-7 transition duration-300 hover:-translate-y-1.5 hover:border-primary/30 hover:shadow-2xl hover:shadow-black/30`}>
                 <span className="absolute left-5 top-5 text-6xl font-black text-white/[0.025]">0{index + 1}</span>
-                <div className={`mb-12 flex h-13 w-13 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.055] ${iconColors[index]}`}><Icon size={24} /></div>
+                <div className="mb-12 flex h-13 w-13 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.055]">{category.icon}</div>
                 <h4 className="text-xl font-black text-white">{category.title}</h4>
                 <p className="mt-3 text-sm leading-7 text-slate-400">{category.description}</p>
                 <span className="mt-6 inline-flex items-center gap-2 text-sm font-black text-primary">عرض الخدمات <ArrowLeft size={16} className="transition group-hover:-translate-x-1.5" /></span>

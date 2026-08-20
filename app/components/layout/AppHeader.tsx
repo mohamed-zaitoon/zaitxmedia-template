@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useAuth } from "@/app/lib/auth-context";
 import { useCurrency, Currency } from "@/app/lib/currency-context";
 import { useCart } from "@/app/lib/cart-context";
+import { ServiceBrandLogo, TikTokOfficialLogo, FacebookOfficialLogo, InstagramOfficialLogo, PubgOfficialLogo } from "../ServiceLogos";
 
 function CurrencyDropdown({
   selectedCurrency,
@@ -343,26 +344,23 @@ export default function AppHeader() {
               <span className="text-[11px] font-bold text-slate-400 px-1 block">الأقسام الرئيسية:</span>
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  { href: "/", label: "الرئيسية", icon: Home },
-                  { href: "/tiktok", label: "تيك توك", icon: Zap },
-                  { href: "/games", label: "شحن الألعاب", icon: Gamepad2 },
-                  { href: "/facebook", label: "فيسبوك", icon: Zap },
-                  { href: "/instagram", label: "إنستجرام", icon: Zap },
-                  { href: "/other", label: "أخرى", icon: Boxes },
-                ].map((link) => {
-                  const Icon = link.icon;
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setMobileBottomSheetOpen(false)}
-                      className="h-10 px-3 rounded-lg bg-slate-900/90 hover:bg-slate-800/80 border border-slate-800/80 text-slate-200 text-xs font-bold flex items-center gap-2.5 transition-all"
-                    >
-                      <Icon size={16} className="text-cyan-400 shrink-0" />
-                      <span className="truncate">{link.label}</span>
-                    </Link>
-                  );
-                })}
+                  { href: "/", label: "الرئيسية", icon: <Home size={18} className="text-cyan-400 shrink-0" /> },
+                  { href: "/tiktok", label: "تيك توك", icon: <TikTokOfficialLogo size={20} /> },
+                  { href: "/games", label: "شحن الألعاب", icon: <PubgOfficialLogo size={20} /> },
+                  { href: "/facebook", label: "فيسبوك", icon: <FacebookOfficialLogo size={20} /> },
+                  { href: "/instagram", label: "إنستجرام", icon: <InstagramOfficialLogo size={20} /> },
+                  { href: "/other", label: "أخرى", icon: <Boxes size={18} className="text-cyan-400 shrink-0" /> },
+                ].map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileBottomSheetOpen(false)}
+                    className="h-10 px-3 rounded-lg bg-slate-900/90 hover:bg-slate-800/80 border border-slate-800/80 text-slate-200 text-xs font-bold flex items-center gap-2.5 transition-all"
+                  >
+                    {link.icon}
+                    <span className="truncate">{link.label}</span>
+                  </Link>
+                ))}
               </div>
             </div>
 

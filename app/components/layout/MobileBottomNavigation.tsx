@@ -2,46 +2,46 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Gamepad2, Boxes } from "lucide-react";
-import { SiTiktok, SiFacebook, SiInstagram } from "react-icons/si";
+import { Home, Boxes } from "lucide-react";
 import { useDevicePlatform } from "@/app/lib/useDevicePlatform";
+import { TikTokOfficialLogo, FacebookOfficialLogo, InstagramOfficialLogo, PubgOfficialLogo } from "../ServiceLogos";
 
 const menu = [
   {
     id: "home",
     label: "الرئيسية",
-    icon: <Home size={19} />,
+    icon: <Home size={19} className="text-sky-400" />,
     color: "#38bdf8",
     href: "/",
   },
   {
     id: "tiktok",
     label: "تيك توك",
-    icon: <SiTiktok size={18} />,
+    icon: <TikTokOfficialLogo size={22} />,
     color: "#ff0050",
   },
   {
     id: "games",
     label: "ألعاب",
-    icon: <Gamepad2 size={19} />,
+    icon: <PubgOfficialLogo size={22} />,
     color: "#f39c12",
   },
   {
     id: "facebook",
     label: "فيسبوك",
-    icon: <SiFacebook size={18} />,
+    icon: <FacebookOfficialLogo size={22} />,
     color: "#1877f2",
   },
   {
     id: "instagram",
-    label: "انستجرام",
-    icon: <SiInstagram size={18} />,
+    label: "إنستجرام",
+    icon: <InstagramOfficialLogo size={22} />,
     color: "#e1306c",
   },
   {
     id: "other",
     label: "أخرى",
-    icon: <Boxes size={19} />,
+    icon: <Boxes size={19} className="text-emerald-400" />,
     color: "#10b981",
   },
 ];

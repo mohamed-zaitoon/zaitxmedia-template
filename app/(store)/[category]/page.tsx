@@ -97,35 +97,37 @@ const tn = (s: string) =>
     .replace(/[٠-٩]/g, (d) => "٠١٢٣٤٥٦٧٨٩".indexOf(d).toString())
     .replace(/[^\d.]/g, "");
 
+import { TikTokOfficialLogo, FacebookOfficialLogo, InstagramOfficialLogo, PubgOfficialLogo } from "../../components/ServiceLogos";
+
 const menu = [
   {
     id: "tiktok",
     label: "تيك توك",
-    icon: <SiTiktok size={18} />,
+    icon: <TikTokOfficialLogo size={20} />,
     color: "#ff0050",
   },
   {
     id: "games",
     label: "شحن ألعاب",
-    icon: <Gamepad2 size={18} />,
+    icon: <PubgOfficialLogo size={20} />,
     color: "#f39c12",
   },
   {
     id: "facebook",
     label: "فيسبوك",
-    icon: <SiFacebook size={18} />,
+    icon: <FacebookOfficialLogo size={20} />,
     color: "#1877f2",
   },
   {
     id: "instagram",
-    label: "انستجرام",
-    icon: <SiInstagram size={18} />,
+    label: "إنستجرام",
+    icon: <InstagramOfficialLogo size={20} />,
     color: "#e1306c",
   },
   {
     id: "other",
     label: "أخرى",
-    icon: <Boxes size={18} />,
+    icon: <Boxes size={18} className="text-emerald-400" />,
     color: "#10b981",
   },
 ];

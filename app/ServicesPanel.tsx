@@ -23,6 +23,8 @@ import {
 } from "@/lib/pricing/manual-service";
 import { isGlobalUsdDiscountActive } from "@/lib/pricing/pricing-discount";
 import { grossDepositRequiredForNet, getMethodFeePercent } from "@/lib/money/wallet";
+import { ServiceBrandLogo, TikTokOfficialLogo, FacebookOfficialLogo, InstagramOfficialLogo, PubgOfficialLogo, ChatGptOfficialLogo } from "./components/ServiceLogos";
+import { TikTokCoinsLogo } from "./components/PaymentLogos";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
 
@@ -156,27 +158,30 @@ function CustomDropdown({ options, value, onChange, placeholder, isOpen: externa
                   dir="rtl"
                 >
                   <span className="flex items-center justify-between gap-3">
-                    <span className="min-w-0 flex-1">
-                      <bdi
-                        dir="auto"
-                        className={`block whitespace-normal break-words text-right leading-relaxed text-sm ${
-                          o.value === value
-                            ? "font-black text-cyan-300"
-                            : "font-bold text-foreground"
-                        }`}
-                        style={{ unicodeBidi: "plaintext" }}
-                      >
-                        {o.label}
-                      </bdi>
-                      {o.desc && (
+                    <span className="flex items-center gap-3 min-w-0 flex-1">
+                      <ServiceBrandLogo serviceKey={o.label || o.value} size={24} />
+                      <div className="min-w-0 flex-1">
                         <bdi
                           dir="auto"
-                          className="mt-1 block text-xs leading-relaxed text-muted-foreground/80 font-normal"
+                          className={`block whitespace-normal break-words text-right leading-relaxed text-sm ${
+                            o.value === value
+                              ? "font-black text-cyan-300"
+                              : "font-bold text-foreground"
+                          }`}
                           style={{ unicodeBidi: "plaintext" }}
                         >
-                          {o.desc}
+                          {o.label}
                         </bdi>
-                      )}
+                        {o.desc && (
+                          <bdi
+                            dir="auto"
+                            className="mt-1 block text-xs leading-relaxed text-muted-foreground/80 font-normal"
+                            style={{ unicodeBidi: "plaintext" }}
+                          >
+                            {o.desc}
+                          </bdi>
+                        )}
+                      </div>
                     </span>
                     {o.price && (
                       <span
@@ -525,15 +530,18 @@ export default function ServicesPanel({
         }}
       >
         <h2
+          className="text-xl md:text-2xl font-black flex items-center gap-3"
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            margin: 0,
             color: tabInfo?.color || "#fff",
+            margin: 0,
           }}
         >
-          {tabInfo?.icon} {tabInfo?.label}
+          {isTikTokCoins ? (
+            <TikTokCoinsLogo size={32} />
+          ) : (
+            <ServiceBrandLogo serviceKey={selectedCat || tabInfo?.id || tabInfo?.label || ""} size={32} />
+          )}
+          <span>{tabInfo?.label || tabInfo?.title}</span>
         </h2>
       </motion.div>
 
@@ -711,8 +719,15 @@ export default function ServicesPanel({
 
                 {(!isFixedPackage || isPromo) && (
                   <div className="mb-6 text-right px-1">
-                    <label className="block text-muted-foreground font-semibold text-sm mb-2.5 pr-2 pl-2">
-                      {isPromo ? "الكمية المطلوبة (وحدة)" : "الكمية المطلوبة"}
+                    <label className="flex items-center gap-2 text-muted-foreground font-semibold text-sm mb-2.5 pr-2 pl-2">
+                      {isTikTokCoins ? (
+                        <>
+                          <TikTokCoinsLogo size={20} />
+                          <span className="text-amber-400 font-bold">كمية العملات المطلوبة</span>
+                        </>
+                      ) : (
+                        <span>{isPromo ? "الكمية المطلوبة (وحدة)" : "الكمية المطلوبة"}</span>
+                      )}
                     </label>
                     <input
                       type="number"
