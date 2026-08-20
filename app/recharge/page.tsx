@@ -741,15 +741,29 @@ export default function RechargePage() {
           </div>
         ) : (
           <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-4 sm:p-5 shadow-xl space-y-4">
-            {/* Live USD Exchange Rate Banner */}
+            {/* Live USD / SAR Exchange Rate Banner */}
             <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 shadow-sm">
-              <div className="flex items-center gap-2">
-                <span className="text-base">💵</span>
-                <span className="text-xs sm:text-sm font-bold text-slate-200">سعر الدولار لدينا:</span>
-              </div>
-              <strong className="font-mono text-sm sm:text-base font-black text-emerald-400" dir="ltr">
-                {(rates.usd || 54.55).toFixed(2)} ج.م = 1$
-              </strong>
+              {isSarCurrency ? (
+                <>
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">🇸🇦</span>
+                    <span className="text-xs sm:text-sm font-bold text-slate-200">سعر الريال لدينا:</span>
+                  </div>
+                  <strong className="font-mono text-sm sm:text-base font-black text-emerald-400" dir="ltr">
+                    {validSarRate.toFixed(2)} ج.م = 1 ﷼
+                  </strong>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">💵</span>
+                    <span className="text-xs sm:text-sm font-bold text-slate-200">سعر الدولار لدينا:</span>
+                  </div>
+                  <strong className="font-mono text-sm sm:text-base font-black text-emerald-400" dir="ltr">
+                    {(rates.usd || 54.55).toFixed(2)} ج.م = 1$
+                  </strong>
+                </>
+              )}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
@@ -938,8 +952,17 @@ export default function RechargePage() {
                           </button>
                         </div>
                         <div className="flex items-center justify-between bg-emerald-500/10 px-3 py-2 rounded-xl border border-emerald-500/25 text-xs">
-                          <span className="text-slate-300 font-bold">💵 سعر الدولار لدينا:</span>
-                          <strong className="text-emerald-400 font-mono font-black" dir="ltr">{(rates.usd || 54.55).toFixed(2)} ج.م = 1$</strong>
+                          {isSarCurrency ? (
+                            <>
+                              <span className="text-slate-300 font-bold">🇸🇦 سعر الريال لدينا:</span>
+                              <strong className="text-emerald-400 font-mono font-black" dir="ltr">{validSarRate.toFixed(2)} ج.م = 1 ﷼</strong>
+                            </>
+                          ) : (
+                            <>
+                              <span className="text-slate-300 font-bold">💵 سعر الدولار لدينا:</span>
+                              <strong className="text-emerald-400 font-mono font-black" dir="ltr">{(rates.usd || 54.55).toFixed(2)} ج.م = 1$</strong>
+                            </>
+                          )}
                         </div>
                         {binancePayDetails && (
                           <div className="bg-slate-950/90 p-3 rounded-xl border border-slate-800 space-y-2 text-xs">
@@ -1007,6 +1030,19 @@ export default function RechargePage() {
                             </div>
                           </div>
                         )}
+                        <div className="flex items-center justify-between bg-emerald-500/10 px-3 py-2 rounded-xl border border-emerald-500/25 text-xs">
+                          {isSarCurrency ? (
+                            <>
+                              <span className="text-slate-300 font-bold">🇸🇦 سعر الريال لدينا:</span>
+                              <strong className="text-emerald-400 font-mono font-black" dir="ltr">{validSarRate.toFixed(2)} ج.م = 1 ﷼</strong>
+                            </>
+                          ) : (
+                            <>
+                              <span className="text-slate-300 font-bold">💵 سعر الدولار لدينا:</span>
+                              <strong className="text-emerald-400 font-mono font-black" dir="ltr">{(rates.usd || 54.55).toFixed(2)} ج.م = 1$</strong>
+                            </>
+                          )}
+                        </div>
                       </>
                     )}
                   </div>
@@ -1083,12 +1119,19 @@ export default function RechargePage() {
                     <span>الحد الأدنى: <strong className="text-foreground">{minimumInCurrency} {currencySymbol}</strong></span>
                     <span>الحد الأقصى: <strong className="text-foreground">{maximumInCurrency} {currencySymbol}</strong></span>
                   </div>
-                  {isBinancePay && (
-                    <div className="flex items-center justify-between bg-cyan-500/10 px-3 py-2 rounded-xl border border-cyan-500/20 text-xs mt-1.5">
-                      <span className="text-slate-300 font-bold">💵 سعر الدولار لدينا:</span>
-                      <strong className="text-cyan-400 font-mono font-black" dir="ltr">{(rates.usd || 54.55).toFixed(2)} ج.م = 1$</strong>
-                    </div>
-                  )}
+                  <div className="flex items-center justify-between bg-cyan-500/10 px-3 py-2 rounded-xl border border-cyan-500/20 text-xs mt-1.5">
+                    {isSarCurrency ? (
+                      <>
+                        <span className="text-slate-300 font-bold">🇸🇦 سعر الريال لدينا:</span>
+                        <strong className="text-cyan-400 font-mono font-black" dir="ltr">{validSarRate.toFixed(2)} ج.م = 1 ﷼</strong>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-slate-300 font-bold">💵 سعر الدولار لدينا:</span>
+                        <strong className="text-cyan-400 font-mono font-black" dir="ltr">{(rates.usd || 54.55).toFixed(2)} ج.م = 1$</strong>
+                      </>
+                    )}
+                  </div>
                   {amount && !amountWithinLimits && (
                     <p className="text-xs font-bold text-red-400 bg-red-500/10 p-2.5 rounded-lg border border-red-500/20">
                       أدخل مبلغًا بين {minimumInCurrency} و{maximumInCurrency} {currencySymbol}
