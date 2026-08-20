@@ -13,6 +13,7 @@ import { calculateDepositFee } from "@/lib/deposit-fees";
 import { isolateLtr } from "@/app/lib/bidi";
 import { calculateTikTokCoinsFromEgp, calculateTikTokPriceEgp } from "@/lib/pricing/tiktok";
 import CustomWalletSelect from "@/app/components/CustomWalletSelect";
+import PaymentMethodLogo from "@/app/components/PaymentLogos";
 
 export default function RechargePage() {
   const { user, loading } = useAuth();
@@ -803,7 +804,10 @@ export default function RechargePage() {
                   <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5 flex flex-col gap-2.5 shadow-sm">
                     {selected.type === "bank" ? (
                       <>
-                        <span className="block text-xs font-bold text-slate-300">بيانات التحويل البنكي:</span>
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <PaymentMethodLogo type="bank" size={24} />
+                          <span className="text-xs font-bold text-slate-200">بيانات التحويل البنكي:</span>
+                        </div>
                         {selected.bankName && (
                           <div className="text-xs bg-background/80 p-3 rounded-lg border border-border flex justify-between items-center gap-2">
                             <div className="flex flex-col gap-0.5 min-w-0 flex-1">
@@ -876,7 +880,10 @@ export default function RechargePage() {
                       </>
                     ) : selected.type === "instapay" ? (
                       <div className="flex flex-col gap-2.5">
-                        <span className="block text-xs font-bold text-slate-300">بيانات تحويل إنستاباي (InstaPay)</span>
+                        <div className="flex items-center gap-2">
+                          <PaymentMethodLogo type="instapay" size={24} />
+                          <span className="text-xs font-bold text-slate-200">بيانات تحويل إنستاباي (InstaPay)</span>
+                        </div>
                         <button
                           type="button"
                           onClick={handleOpenInstaPayApp}
@@ -950,7 +957,10 @@ export default function RechargePage() {
                       </div>
                     ) : (selected.type === "binance_pay" || selected.type === "binance") ? (
                       <div className="flex flex-col gap-2.5">
-                        <span className="block text-xs font-bold text-amber-400">وسيلة الدفع: Binance Pay 🟡</span>
+                        <div className="flex items-center gap-2">
+                          <PaymentMethodLogo type="binance_pay" size={24} />
+                          <span className="text-xs font-bold text-amber-400">وسيلة الدفع: Binance Pay</span>
+                        </div>
                         <div className="text-xs bg-slate-900/90 p-3 rounded-xl border border-amber-500/30 flex justify-between items-center gap-2 shadow-sm">
                           <div className="flex flex-col gap-0.5 min-w-0 flex-1">
                             <span className="text-[10px] text-amber-400 font-bold">🟡 Binance Pay ID الخاص بحسابنا:</span>

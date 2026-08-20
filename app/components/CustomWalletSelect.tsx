@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { ChevronDown, Check, Zap, Wallet, Building2, AlertCircle, Sparkles } from "lucide-react";
+import { ChevronDown, Check, AlertCircle, Wallet } from "lucide-react";
+import PaymentMethodLogo from "@/app/components/PaymentLogos";
 
 export interface WalletOption {
   type: string;
@@ -32,12 +33,7 @@ export default function CustomWalletSelect({ value, onChange, options }: CustomW
   };
 
   const getOptionIcon = (type: string) => {
-    if (type === "vodafone") return <Wallet className="text-red-400 shrink-0" size={24} />;
-    if (type === "instapay") return <Zap className="text-amber-400 fill-amber-400/20 shrink-0" size={24} />;
-    if (type === "barq") return <Sparkles className="text-emerald-400 shrink-0" size={24} />;
-    if (type === "bank") return <Building2 className="text-cyan-400 shrink-0" size={24} />;
-    if (type === "binance_pay" || type === "binance") return <Sparkles className="text-yellow-400 fill-yellow-400/20 shrink-0" size={24} />;
-    return <Wallet className="text-primary shrink-0" size={24} />;
+    return <PaymentMethodLogo type={type} size={32} />;
   };
 
   const selectedOption = options.find((w) => w.type === value) || options[0];
