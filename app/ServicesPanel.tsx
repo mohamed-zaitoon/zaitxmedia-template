@@ -9,6 +9,7 @@ import {
   Search,
   X,
   ShoppingCart,
+  Info,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
@@ -629,6 +630,24 @@ export default function ServicesPanel({
               <>
                 {selectedService && (
                   <div className="mb-6 px-1">
+                    {(selectedService.alertNote || selectedService.notice || selectedService.categoryAlert) && (
+                      <div className="bg-amber-500/10 border border-amber-500/35 text-amber-200 text-xs font-bold p-4 rounded-2xl text-right mb-4 flex items-start gap-3 shadow-lg">
+                        <AlertCircle size={20} className="text-amber-400 shrink-0 mt-0.5" />
+                        <div>
+                          <strong className="block text-amber-400 font-black text-sm mb-1">⚠️ تنبيه وملاحظة هامة جداً:</strong>
+                          <span className="leading-relaxed whitespace-pre-line text-amber-200/90">{selectedService.alertNote || selectedService.notice || selectedService.categoryAlert}</span>
+                        </div>
+                      </div>
+                    )}
+                    {(selectedService.instructions || selectedService.shippingInstructions || selectedService.categoryInstructions) && (
+                      <div className="bg-cyan-500/10 border border-cyan-500/35 text-cyan-200 text-xs font-bold p-4.5 rounded-2xl text-right mb-4 shadow-lg space-y-1.5">
+                        <div className="flex items-center gap-2 text-cyan-400 font-black text-sm mb-1">
+                          <Info size={18} className="shrink-0" />
+                          <span>📋 تعليمات الشحن وتطبيق الطلب:</span>
+                        </div>
+                        <p className="leading-relaxed whitespace-pre-line text-slate-200 font-bold">{selectedService.instructions || selectedService.shippingInstructions || selectedService.categoryInstructions}</p>
+                      </div>
+                    )}
                     {selectedService.description && (
                       <div className="bg-background/50 border border-border/80 p-5 rounded-2xl text-right text-sm text-muted-foreground leading-relaxed mb-4 px-5 py-4 shadow-inner">
                         📋 {selectedService.description}

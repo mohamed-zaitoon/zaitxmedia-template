@@ -338,6 +338,24 @@ export default function CheckoutModal({
               <ShoppingBag size={40} color="#38bdf8" style={{ margin: "0 auto 12px" }} />
               <h2 style={{ color: "#fff", margin: "0 0 20px 0", fontSize: 20 }}>تأكيد الطلب</h2>
 
+              {(service?.alertNote || service?.notice || service?.categoryAlert) && (
+                <div style={{ background: "rgba(251,191,36,0.1)", border: "1px solid rgba(251,191,36,0.3)", padding: 12, borderRadius: 12, marginBottom: 16, textAlign: "right" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#fbbf24", fontWeight: "bold", fontSize: 13, marginBottom: 4 }}>
+                    <AlertCircle size={16} /> ⚠️ تنبيه وملاحظة هامة:
+                  </div>
+                  <div style={{ color: "#fef08a", fontSize: 12, lineHeight: 1.5, whiteSpace: "pre-line" }}>{service.alertNote || service.notice || service.categoryAlert}</div>
+                </div>
+              )}
+
+              {(service?.instructions || service?.shippingInstructions || service?.categoryInstructions) && (
+                <div style={{ background: "rgba(56,189,248,0.1)", border: "1px solid rgba(56,189,248,0.3)", padding: 12, borderRadius: 12, marginBottom: 16, textAlign: "right" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#38bdf8", fontWeight: "bold", fontSize: 13, marginBottom: 4 }}>
+                    <Info size={16} /> 📋 تعليمات الشحن وتطبيق الطلب:
+                  </div>
+                  <div style={{ color: "#e0f2fe", fontSize: 12, lineHeight: 1.5, whiteSpace: "pre-line" }}>{service.instructions || service.shippingInstructions || service.categoryInstructions}</div>
+                </div>
+              )}
+
               {isTikTokCoins ? (
                 <div style={{ background: "#0a0a0a", borderRadius: 12, padding: 16, marginBottom: 20, border: "1px solid #1a1a1a", textAlign: "right" }}>
                   <h3 style={{ color: "#fff", fontSize: 16, margin: "0 0 12px 0" }}>اختر طريقة الشحن:</h3>

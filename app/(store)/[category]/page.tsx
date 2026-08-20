@@ -151,6 +151,8 @@ export default function CategoryPage() {
   const [tiers, setTiers] = useState<any[]>([]);
   const [manual, setManual] = useState<any[]>([]);
   const [manualSvcs, setManualSvcs] = useState<any>({});
+  const [categoryInstructions, setCategoryInstructions] = useState<Record<string, string>>({});
+  const [categoryAlerts, setCategoryAlerts] = useState<Record<string, string>>({});
   const [pricingSettings, setPricingSettings] = useState<any>(null);
   const [globalDiscountConfig, setGlobalDiscountConfig] = useState<{ enabled: boolean; discountPercent: number; maxDiscountUsd?: number; expiresAt?: string | null }>({ enabled: false, discountPercent: 0, expiresAt: null });
   const [loaded, setLoaded] = useState(false);
@@ -183,12 +185,17 @@ export default function CategoryPage() {
     };
 
     const applyManualServices = (s: any) => {
-      if (s.exists() && s.data().services) {
-        const map: any = {};
-        s.data().services.forEach((sv: any) => {
-          map[sv.id] = sv;
-        });
-        setManualSvcs(map);
+      if (s.exists() && s.data()) {
+        const d = s.data();
+        if (d.categoryInstructions) setCategoryInstructions(d.categoryInstructions);
+        if (d.categoryAlerts) setCategoryAlerts(d.categoryAlerts);
+        if (d.services) {
+          const map: any = {};
+          d.services.forEach((sv: any) => {
+            map[sv.id] = sv;
+          });
+          setManualSvcs(map);
+        }
       }
     };
 
@@ -436,6 +443,8 @@ export default function CategoryPage() {
         min_quantity: Number(s.min || 1),
         max_quantity: Number(s.max || 1),
         appCategory: getAppCat(s.category || "", s.name || ""),
+        categoryInstructions: categoryInstructions[s.category || ""] || categoryInstructions[getAppCat(s.category || "", s.name || "")] || "",
+        categoryAlert: categoryAlerts[s.category || ""] || categoryAlerts[getAppCat(s.category || "", s.name || "")] || "",
       })),
   ];
 

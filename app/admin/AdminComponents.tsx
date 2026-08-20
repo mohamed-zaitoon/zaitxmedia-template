@@ -3779,6 +3779,8 @@ export function ManualServicesTab() {
   const [usdRate, setUsdRate] = useState(0);
   const [depositFeePercent, setDepositFeePercent] = useState(0.5);
   const [tiers, setTiers] = useState<TikTokPricingTier[]>([]);
+  const [categoryInstructions, setCategoryInstructions] = useState<Record<string, string>>({});
+  const [categoryAlerts, setCategoryAlerts] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
   useEffect(() => {
@@ -3796,6 +3798,10 @@ export function ManualServicesTab() {
       setTiers((tiersResult.items || []).sort(
         (a: TikTokPricingTier, b: TikTokPricingTier) => Number(a.min) - Number(b.min),
       ));
+      if (servicesResult.exists && servicesResult.data) {
+        if (servicesResult.data.categoryInstructions) setCategoryInstructions(servicesResult.data.categoryInstructions);
+        if (servicesResult.data.categoryAlerts) setCategoryAlerts(servicesResult.data.categoryAlerts);
+      }
       const services =
         servicesResult.exists && servicesResult.data.services
           ? servicesResult.data.services
@@ -3952,12 +3958,14 @@ export function ManualServicesTab() {
     await writeAdminData({
       action: "saveManualServices",
       services: sanitizedServices,
+      categoryInstructions,
+      categoryAlerts,
     });
     setSvcs(sanitizedServices.map((s) => ({
       ...s,
       priceUsd: s.price_usd || s.priceUsd,
     })));
-    setMsg("✅ تم حفظ باقات الألعاب والخدمات اليدوية بنجاح");
+    setMsg("✅ تم حفظ باقات الألعاب والخدمات والتعليمات والتنبيهات بنجاح");
     setBusy(false);
     setTimeout(() => setMsg(""), 3000);
   };
@@ -4450,6 +4458,36 @@ function TonPriceTrackerCard({ usdRate }: { usdRate: number }) {
                     >
                       📋 استخراج أسعار خدمة {catName} بالكامل
                     </button>
+                  </div>
+                </div>
+
+                {/* Category Level Shipping Instructions & Alert Banner */}
+                <div style={{ background: "#0a1424", border: "1px solid rgba(56,189,248,0.25)", padding: 12, borderRadius: 12, marginBottom: 12 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 10 }}>
+                    <div>
+                      <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#38bdf8", marginBottom: 4 }}>
+                        📋 تعليمات الشحن والتكليف لقسم ({catName}):
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={categoryInstructions[catName] || ""}
+                        onChange={(e) => setCategoryInstructions({ ...categoryInstructions, [catName]: e.target.value })}
+                        style={{ ...inp, width: "100%", fontSize: 12, minHeight: 54, padding: 8 }}
+                        placeholder="أدخل تعليمات الشحن الموجهة للعميل (مثال: أدخل آي دي الحساب بشكل صحيح وتأكد من الخروج من الحساب أثناء الشحن)..."
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#fbbf24", marginBottom: 4 }}>
+                        ⚠️ التنبيهات والملاحظات الهامة لقسم ({catName}):
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={categoryAlerts[catName] || ""}
+                        onChange={(e) => setCategoryAlerts({ ...categoryAlerts, [catName]: e.target.value })}
+                        style={{ ...inp, width: "100%", fontSize: 12, minHeight: 54, padding: 8, color: "#fbbf24" }}
+                        placeholder="أدخل التنبيهات والملاحظات الهامة (مثال: يستغرق الشحن من 5 إلى 15 دقيقة، لا تقم بتغيير الباسورد أو يوزر الحساب أثناء تنفيذ الطلب)..."
+                      />
+                    </div>
                   </div>
                 </div>
 

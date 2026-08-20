@@ -325,6 +325,8 @@ export async function POST(request: Request) {
       const batch = adminDb.batch();
       batch.set(adminDb.collection("settings").doc("manual_services"), {
         services,
+        ...(body.categoryInstructions ? { categoryInstructions: body.categoryInstructions } : {}),
+        ...(body.categoryAlerts ? { categoryAlerts: body.categoryAlerts } : {}),
         updatedAt: FieldValue.serverTimestamp(),
       }, { merge: true });
 
