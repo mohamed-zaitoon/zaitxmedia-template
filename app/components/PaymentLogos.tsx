@@ -8,27 +8,22 @@ interface PaymentLogoProps {
   className?: string;
 }
 
-// 1. Official Vodafone Cash Logo Icon
+// 1. Official Vodafone Cash / Electronic Wallet Logo Icon
 export function VodafoneLogo({ size = 28, className = "" }: { size?: number; className?: string }) {
   return (
     <div
-      className={`relative inline-flex items-center justify-center shrink-0 rounded-xl bg-[#E60000] shadow-md shadow-red-600/30 overflow-hidden ${className}`}
+      className={`relative inline-flex items-center justify-center shrink-0 rounded-xl bg-gradient-to-br from-[#dc2626] to-[#991b1b] border border-red-500/40 shadow-md shadow-red-900/40 overflow-hidden ${className}`}
       style={{ width: size, height: size }}
-      title="Vodafone Cash"
+      title="Vodafone Cash / المحافظ الإلكترونية"
     >
       <svg
-        viewBox="0 0 100 100"
+        viewBox="0 0 640 640"
         className="w-full h-full p-1.5"
-        fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          d="M50 12C32.327 12 18 26.327 18 44C18 57.886 26.85 69.704 39.262 74.204C37.142 70.82 36 66.862 36 62.6C36 49.345 46.745 38.6 60 38.6C65.044 38.6 69.7 40.16 73.542 42.828C69.04 24.966 52.88 12 50 12Z"
-          fill="white"
-        />
-        <path
-          d="M60 46C50.888 46 43.5 53.388 43.5 62.5C43.5 71.612 50.888 79 60 79C69.112 79 76.5 71.612 76.5 62.5C76.5 53.388 69.112 46 60 46ZM60 70C55.858 70 52.5 66.642 52.5 62.5C52.5 58.358 55.858 55 60 55C64.142 55 67.5 58.358 67.5 62.5C67.5 66.642 64.142 70 60 70Z"
-          fill="white"
+          fill="#ffffff"
+          d="M128 96C92.7 96 64 124.7 64 160L64 448C64 483.3 92.7 512 128 512L512 512C547.3 512 576 483.3 576 448L576 256C576 220.7 547.3 192 512 192L136 192C122.7 192 112 181.3 112 168C112 154.7 122.7 144 136 144L520 144C533.3 144 544 133.3 544 120C544 106.7 533.3 96 520 96L128 96zM480 320C497.7 320 512 334.3 512 352C512 369.7 497.7 384 480 384C462.3 384 448 369.7 448 352C448 334.3 462.3 320 480 320z"
         />
       </svg>
     </div>
