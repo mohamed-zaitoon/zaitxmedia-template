@@ -435,6 +435,8 @@ export default function CategoryPage() {
         price: calculateManualServicePriceEgp(s, tiktokUsdRate, globalDiscountConfig),
         price_egp: calculateManualServicePriceEgp(s, tiktokUsdRate, globalDiscountConfig),
         appCategory: getAppCat(s.category || "", s.name || ""),
+        categoryInstructions: categoryInstructions[s.category || ""] || categoryInstructions[getAppCat(s.category || "", s.name || "")] || categoryInstructions[s.name || ""] || "",
+        categoryAlert: categoryAlerts[s.category || ""] || categoryAlerts[getAppCat(s.category || "", s.name || "")] || categoryAlerts[s.name || ""] || "",
       })),
     ...Object.values(manualSvcs)
       .filter((s: any) => !["tiktok_superfan", "tiktok_hidden_w", "tiktok_hidden_m"].includes(s.id) && !s.disabled && s.status !== "disabled" && s.active !== false)
@@ -584,36 +586,37 @@ export default function CategoryPage() {
                     )}
                   </div>
                 </div>
+                {(() => {
+                  const coinsSvc = displayServices.find((s: any) => s.service === "tiktok_coins_calc");
+                  const instrText = coinsSvc?.instructions || coinsSvc?.shippingInstructions || coinsSvc?.categoryInstructions || categoryInstructions["شحن عملات تيك توك"] || categoryInstructions["تيك توك"] || "";
+                  if (!instrText) return null;
+                  return (
+                    <div className="bg-gradient-to-br from-cyan-950/70 via-cyan-900/35 to-slate-950 border-2 border-cyan-500/60 text-cyan-100 p-5 md:p-6 rounded-2xl text-right my-4 shadow-[0_0_30px_rgba(6,182,212,0.25)] relative overflow-hidden backdrop-blur-md">
+                      <div className="flex items-center gap-3 text-cyan-400 font-black text-base md:text-lg mb-2.5">
+                        <Info size={24} className="text-cyan-400 shrink-0" />
+                        <span>📋 تعليمات الشحن وتطبيق الطلب:</span>
+                      </div>
+                      <div className="leading-relaxed whitespace-pre-line text-sm md:text-base text-slate-100 font-bold pr-1">
+                        {instrText}
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 <div className="mt-4">
                   {(() => {
                     const coinsSvc = displayServices.find((s: any) => s.service === "tiktok_coins_calc");
                     const alertText = coinsSvc?.alertNote || coinsSvc?.notice || coinsSvc?.categoryAlert || categoryAlerts["شحن عملات تيك توك"] || categoryAlerts["تيك توك"] || "";
-                    const instrText = coinsSvc?.instructions || coinsSvc?.shippingInstructions || coinsSvc?.categoryInstructions || categoryInstructions["شحن عملات تيك توك"] || categoryInstructions["تيك توك"] || "";
+                    if (!alertText) return null;
                     return (
-                      <div className="space-y-4 mb-4">
-                        {alertText && (
-                          <div className="bg-gradient-to-br from-amber-950/70 via-amber-900/35 to-slate-950 border-2 border-amber-500/60 text-amber-100 p-5 md:p-6 rounded-2xl text-right shadow-[0_0_30px_rgba(245,158,11,0.25)] relative overflow-hidden backdrop-blur-md">
-                            <div className="flex items-center gap-3 text-amber-400 font-black text-base md:text-lg mb-2.5">
-                              <AlertCircle size={24} className="text-amber-400 shrink-0 animate-pulse" />
-                              <span>⚠️ تنبيه وملاحظة هامة جداً:</span>
-                            </div>
-                            <div className="leading-relaxed whitespace-pre-line text-sm md:text-base text-amber-100 font-bold pr-1">
-                              {alertText}
-                            </div>
-                          </div>
-                        )}
-
-                        {instrText && (
-                          <div className="bg-gradient-to-br from-cyan-950/70 via-cyan-900/35 to-slate-950 border-2 border-cyan-500/60 text-cyan-100 p-5 md:p-6 rounded-2xl text-right shadow-[0_0_30px_rgba(6,182,212,0.25)] relative overflow-hidden backdrop-blur-md">
-                            <div className="flex items-center gap-3 text-cyan-400 font-black text-base md:text-lg mb-2.5">
-                              <Info size={24} className="text-cyan-400 shrink-0" />
-                              <span>📋 تعليمات الشحن وتطبيق الطلب:</span>
-                            </div>
-                            <div className="leading-relaxed whitespace-pre-line text-sm md:text-base text-slate-100 font-bold pr-1">
-                              {instrText}
-                            </div>
-                          </div>
-                        )}
+                      <div className="bg-gradient-to-br from-amber-950/70 via-amber-900/35 to-slate-950 border-2 border-amber-500/60 text-amber-100 p-5 md:p-6 rounded-2xl text-right mb-4 shadow-[0_0_30px_rgba(245,158,11,0.25)] relative overflow-hidden backdrop-blur-md">
+                        <div className="flex items-center gap-3 text-amber-400 font-black text-base md:text-lg mb-2.5">
+                          <AlertCircle size={24} className="text-amber-400 shrink-0 animate-pulse" />
+                          <span>⚠️ تنبيه وملاحظة هامة جداً:</span>
+                        </div>
+                        <div className="leading-relaxed whitespace-pre-line text-sm md:text-base text-amber-100 font-bold pr-1">
+                          {alertText}
+                        </div>
                       </div>
                     );
                   })()}

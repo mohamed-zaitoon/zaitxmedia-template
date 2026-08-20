@@ -346,6 +346,18 @@ export default function CheckoutModal({
               <ShoppingBag size={40} color="#38bdf8" style={{ margin: "0 auto 12px" }} />
               <h2 style={{ color: "#fff", margin: "0 0 20px 0", fontSize: 20 }}>تأكيد الطلب</h2>
 
+              {(service?.instructions || service?.shippingInstructions || service?.categoryInstructions) && (
+                <div className="bg-gradient-to-br from-cyan-950/70 via-cyan-900/35 to-slate-950 border-2 border-cyan-500/60 text-cyan-100 p-4 md:p-5 rounded-2xl text-right mb-4 shadow-[0_0_25px_rgba(6,182,212,0.22)] relative overflow-hidden backdrop-blur-md">
+                  <div className="flex items-center gap-2.5 text-cyan-400 font-black text-base mb-2">
+                    <Info size={22} className="text-cyan-400 shrink-0" />
+                    <span>📋 تعليمات الشحن وتطبيق الطلب:</span>
+                  </div>
+                  <div className="leading-relaxed whitespace-pre-line text-sm text-slate-100 font-bold pr-1">
+                    {service.instructions || service.shippingInstructions || service.categoryInstructions}
+                  </div>
+                </div>
+              )}
+
               {isTikTokCoins ? (
                 <div style={{ background: "#0a0a0a", borderRadius: 12, padding: 16, marginBottom: 20, border: "1px solid #1a1a1a", textAlign: "right" }}>
                   <h3 style={{ color: "#fff", fontSize: 16, margin: "0 0 12px 0" }}>اختر طريقة الشحن:</h3>
@@ -531,7 +543,7 @@ export default function CheckoutModal({
                 </div>
               )}
               
-              {/* ⚠️ التنبيهات والتعليمات فوق زر الدفع مباشرة */}
+              {/* ⚠️ التنبيه فوق زر الدفع مباشرة */}
               {(service?.alertNote || service?.notice || service?.categoryAlert) && (
                 <div className="bg-gradient-to-br from-amber-950/70 via-amber-900/35 to-slate-950 border-2 border-amber-500/60 text-amber-100 p-4 md:p-5 rounded-2xl text-right mb-4 shadow-[0_0_25px_rgba(245,158,11,0.22)] relative overflow-hidden backdrop-blur-md">
                   <div className="flex items-center gap-2.5 text-amber-400 font-black text-base mb-2">
@@ -540,18 +552,6 @@ export default function CheckoutModal({
                   </div>
                   <div className="leading-relaxed whitespace-pre-line text-sm text-amber-100 font-bold pr-1">
                     {service.alertNote || service.notice || service.categoryAlert}
-                  </div>
-                </div>
-              )}
-
-              {(service?.instructions || service?.shippingInstructions || service?.categoryInstructions) && (
-                <div className="bg-gradient-to-br from-cyan-950/70 via-cyan-900/35 to-slate-950 border-2 border-cyan-500/60 text-cyan-100 p-4 md:p-5 rounded-2xl text-right mb-4 shadow-[0_0_25px_rgba(6,182,212,0.22)] relative overflow-hidden backdrop-blur-md">
-                  <div className="flex items-center gap-2.5 text-cyan-400 font-black text-base mb-2">
-                    <Info size={22} className="text-cyan-400 shrink-0" />
-                    <span>📋 تعليمات الشحن وتطبيق الطلب:</span>
-                  </div>
-                  <div className="leading-relaxed whitespace-pre-line text-sm text-slate-100 font-bold pr-1">
-                    {service.instructions || service.shippingInstructions || service.categoryInstructions}
                   </div>
                 </div>
               )}

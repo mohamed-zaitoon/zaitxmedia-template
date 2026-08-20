@@ -26,7 +26,7 @@ import { isGlobalUsdDiscountActive } from "@/lib/pricing/pricing-discount";
 import { grossDepositRequiredForNet, getMethodFeePercent } from "@/lib/money/wallet";
 import { ServiceBrandLogo, TikTokOfficialLogo, FacebookOfficialLogo, InstagramOfficialLogo, PubgOfficialLogo, ChatGptOfficialLogo } from "./components/ServiceLogos";
 import { TikTokCoinsLogo } from "./components/PaymentLogos";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
 
 const getGameBadge = (catName: string) => {
@@ -233,19 +233,18 @@ export default function ServicesPanel({
   const [quantity, setQuantity] = useState("");
   const [showCheckout, setShowCheckout] = useState(false);
   const [globalDiscountConfig, setGlobalDiscountConfig] = useState<{ enabled: boolean; discountPercent: number; maxDiscountUsd?: number; expiresAt?: string | null }>({ enabled: false, discountPercent: 0 });
+  const [categoryInstructions, setCategoryInstructions] = useState<Record<string, string>>({});
+  const [categoryAlerts, setCategoryAlerts] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    getDoc(doc(db, "settings", "pricing")).then((snap) => {
+    const ref = doc(db, "settings", "manual_services");
+    return onSnapshot(ref, (snap) => {
       if (snap.exists()) {
         const data = snap.data();
-        setGlobalDiscountConfig({
-          enabled: Boolean(data?.global_usd_discount_enabled ?? data?.globalUsdDiscountEnabled),
-          discountPercent: Number(data?.global_usd_discount_percent ?? data?.globalUsdDiscountPercent ?? 0),
-          maxDiscountUsd: Number(data?.global_usd_discount_max_amount ?? data?.globalUsdDiscountMaxAmount ?? data?.max_discount_usd ?? data?.maxDiscountUsd ?? 0),
-          expiresAt: data?.global_usd_discount_expires_at ?? data?.globalUsdDiscountExpiresAt ?? null,
-        });
+        if (data.categoryInstructions) setCategoryInstructions(data.categoryInstructions);
+        if (data.categoryAlerts) setCategoryAlerts(data.categoryAlerts);
       }
-    }).catch(console.error);
+    }, console.error);
   }, []);
 
   const activeServices = useMemo(() => {
@@ -288,9 +287,39 @@ export default function ServicesPanel({
 
   const selectedService = useMemo(() => {
     return filteredServices.find(
-      (s: any) => String(s.service) === String(selectedServiceId),
+      (s: any) => String(s.service || s.id) === String(selectedServiceId),
     );
   }, [filteredServices, selectedServiceId]);
+
+  const activeInstructions = useMemo(() => {
+    if (!selectedService) return "";
+    return (
+      selectedService.instructions ||
+      selectedService.shippingInstructions ||
+      selectedService.categoryInstructions ||
+      categoryInstructions[selectedService.category] ||
+      categoryInstructions[selectedService.name] ||
+      categoryInstructions[tabInfo?.id] ||
+      categoryInstructions[tabInfo?.label] ||
+      categoryInstructions[selectedService.appCategory] ||
+      ""
+    );
+  }, [selectedService, categoryInstructions, tabInfo]);
+
+  const activeAlert = useMemo(() => {
+    if (!selectedService) return "";
+    return (
+      selectedService.alertNote ||
+      selectedService.notice ||
+      selectedService.categoryAlert ||
+      categoryAlerts[selectedService.category] ||
+      categoryAlerts[selectedService.name] ||
+      categoryAlerts[tabInfo?.id] ||
+      categoryAlerts[tabInfo?.label] ||
+      categoryAlerts[selectedService.appCategory] ||
+      ""
+    );
+  }, [selectedService, categoryAlerts, tabInfo]);
 
   const isTikTokCoins = selectedService?.name?.includes("عملات") && (selectedService?.name?.includes("تيك توك") || selectedService?.name?.includes("تيك تيك"));
   const isSecretSub = selectedService?.name?.includes("اشتراك مخفي") || selectedService?.name?.includes("سوبر فان") || (selectedService?.name?.includes("اشتراك") && (selectedService?.category === "اشتراكات" || selectedService?.name?.includes("تيك توك") || selectedService?.name?.includes("تيك تيك")));
@@ -630,6 +659,18 @@ export default function ServicesPanel({
               <>
                 {selectedService && (
                   <div className="mb-6 px-1">
+                    {activeInstructions && (
+                      <div className="bg-gradient-to-br from-cyan-950/70 via-cyan-900/35 to-slate-950 border-2 border-cyan-500/60 text-cyan-100 p-5 md:p-6 rounded-2xl text-right mb-4 shadow-[0_0_30px_rgba(6,182,212,0.25)] relative overflow-hidden backdrop-blur-md">
+                        <div className="flex items-center gap-3 text-cyan-400 font-black text-base md:text-lg mb-2.5">
+                          <Info size={24} className="text-cyan-400 shrink-0" />
+                          <span>📋 تعليمات الشحن وتطبيق الطلب:</span>
+                        </div>
+                        <div className="leading-relaxed whitespace-pre-line text-sm md:text-base text-slate-100 font-bold pr-1">
+                          {activeInstructions}
+                        </div>
+                      </div>
+                    )}
+
                     {selectedService.description && (
                       <div className="bg-background/50 border border-border/80 p-5 rounded-2xl text-right text-sm text-muted-foreground leading-relaxed mb-4 px-5 py-4 shadow-inner">
                         📋 {selectedService.description}
@@ -864,31 +905,15 @@ export default function ServicesPanel({
                 </div>
 
                 <div className="mt-4 px-1">
-                  {selectedService && (
-                    <div className="space-y-4 mb-5">
-                      {(selectedService.alertNote || selectedService.notice || selectedService.categoryAlert) && (
-                        <div className="bg-gradient-to-br from-amber-950/70 via-amber-900/35 to-slate-950 border-2 border-amber-500/60 text-amber-100 p-5 md:p-6 rounded-2xl text-right shadow-[0_0_30px_rgba(245,158,11,0.25)] relative overflow-hidden backdrop-blur-md">
-                          <div className="flex items-center gap-3 text-amber-400 font-black text-base md:text-lg mb-2.5">
-                            <AlertCircle size={24} className="text-amber-400 shrink-0 animate-pulse" />
-                            <span>⚠️ تنبيه وملاحظة هامة جداً:</span>
-                          </div>
-                          <div className="leading-relaxed whitespace-pre-line text-sm md:text-base text-amber-100 font-bold pr-1">
-                            {selectedService.alertNote || selectedService.notice || selectedService.categoryAlert}
-                          </div>
-                        </div>
-                      )}
-
-                      {(selectedService.instructions || selectedService.shippingInstructions || selectedService.categoryInstructions) && (
-                        <div className="bg-gradient-to-br from-cyan-950/70 via-cyan-900/35 to-slate-950 border-2 border-cyan-500/60 text-cyan-100 p-5 md:p-6 rounded-2xl text-right shadow-[0_0_30px_rgba(6,182,212,0.25)] relative overflow-hidden backdrop-blur-md">
-                          <div className="flex items-center gap-3 text-cyan-400 font-black text-base md:text-lg mb-2.5">
-                            <Info size={24} className="text-cyan-400 shrink-0" />
-                            <span>📋 تعليمات الشحن وتطبيق الطلب:</span>
-                          </div>
-                          <div className="leading-relaxed whitespace-pre-line text-sm md:text-base text-slate-100 font-bold pr-1">
-                            {selectedService.instructions || selectedService.shippingInstructions || selectedService.categoryInstructions}
-                          </div>
-                        </div>
-                      )}
+                  {activeAlert && (
+                    <div className="bg-gradient-to-br from-amber-950/70 via-amber-900/35 to-slate-950 border-2 border-amber-500/60 text-amber-100 p-5 md:p-6 rounded-2xl text-right mb-5 shadow-[0_0_30px_rgba(245,158,11,0.25)] relative overflow-hidden backdrop-blur-md">
+                      <div className="flex items-center gap-3 text-amber-400 font-black text-base md:text-lg mb-2.5">
+                        <AlertCircle size={24} className="text-amber-400 shrink-0 animate-pulse" />
+                        <span>⚠️ تنبيه وملاحظة هامة جداً:</span>
+                      </div>
+                      <div className="leading-relaxed whitespace-pre-line text-sm md:text-base text-amber-100 font-bold pr-1">
+                        {activeAlert}
+                      </div>
                     </div>
                   )}
 
