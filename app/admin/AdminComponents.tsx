@@ -2126,67 +2126,66 @@ export function WalletsTab() {
               dir="ltr"
             />
           )}
-          {(w.type === "instapay" || w.type === "vodafone" || w.type === "custom") && (
-            <div style={{ display: "flex", gap: 6, alignItems: "center", minWidth: 180, flex: 2 }}>
+          {/* QR Code Upload / Link Input for ALL payment methods */}
+          <div style={{ display: "flex", gap: 6, alignItems: "center", minWidth: 180, flex: 2 }}>
+            <input
+              type="text"
+              value={w.qr || ""}
+              onChange={(e) => upd(actualIndex, "qr", e.target.value)}
+              style={{ ...inp, flex: 1, minWidth: 100 }}
+              placeholder="رابط الـ QR أو ارفع ملف"
+            />
+            <label style={{
+              background: "#333",
+              color: "#fff",
+              padding: "8px 12px",
+              borderRadius: 8,
+              cursor: "pointer",
+              fontSize: 12,
+              fontWeight: "bold",
+              whiteSpace: "nowrap",
+              border: "1px solid #444",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4
+            }}>
+              📁 رفع ملف
               <input
-                type="text"
-                value={w.qr || ""}
-                onChange={(e) => upd(actualIndex, "qr", e.target.value)}
-                style={{ ...inp, flex: 1, minWidth: 100 }}
-                placeholder="رابط الـ QR أو ارفع ملف"
-              />
-              <label style={{
-                background: "#333",
-                color: "#fff",
-                padding: "8px 12px",
-                borderRadius: 8,
-                cursor: "pointer",
-                fontSize: 12,
-                fontWeight: "bold",
-                whiteSpace: "nowrap",
-                border: "1px solid #444",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 4
-              }}>
-                📁 رفع ملف
-                <input
-                  type="file"
-                  accept="image/*"
-                  style={{ display: "none" }}
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    try {
-                      upd(actualIndex, "qr", "جاري الرفع...");
-                      const formData = new FormData();
-                      formData.append("file", file);
-                      
-                      const response = await fetch("/api/admin/upload", {
-                        method: "POST",
-                        body: formData,
-                      });
-                      
-                      if (!response.ok) {
-                        throw new Error(await response.text());
-                      }
-                      
-                      const res = await response.json();
-                      if (res.success && res.url) {
-                        upd(actualIndex, "qr", res.url);
-                      } else {
-                        throw new Error(res.error || "Failed upload");
-                      }
-                    } catch (err) {
-                      console.error(err);
-                      upd(actualIndex, "qr", "");
-                      alert("فشل رفع الملف");
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  try {
+                    upd(actualIndex, "qr", "جاري الرفع...");
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    
+                    const response = await fetch("/api/admin/upload", {
+                      method: "POST",
+                      body: formData,
+                    });
+                    
+                    if (!response.ok) {
+                      throw new Error(await response.text());
                     }
-                  }}
-                />
-              </label>
-            </div>
-          )}
+                    
+                    const res = await response.json();
+                    if (res.success && res.url) {
+                      upd(actualIndex, "qr", res.url);
+                    } else {
+                      throw new Error(res.error || "Failed upload");
+                    }
+                  } catch (err) {
+                    console.error(err);
+                    upd(actualIndex, "qr", "");
+                    alert("فشل رفع الملف");
+                  }
+                }}
+              />
+            </label>
+          </div>
           <input
             type="number"
             value={w.min}

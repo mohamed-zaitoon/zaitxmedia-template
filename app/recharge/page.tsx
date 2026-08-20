@@ -862,6 +862,15 @@ export default function RechargePage() {
                             </button>
                           </div>
                         )}
+                        {selected.qr && (
+                          <div className="hidden md:flex flex-col items-center gap-2 bg-background/90 p-3 rounded-xl border border-border shadow-sm text-center mt-1">
+                            <span className="text-[11px] font-bold text-slate-200">امسح رمز QR للتحويل المباشر:</span>
+                            <div className="bg-white p-2 rounded-xl border border-border flex justify-center items-center shadow-md w-44 h-44 mx-auto">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={selected.qr} alt="Bank QR Code" className="w-full h-full max-w-[160px] max-h-[160px] object-contain rounded-lg" />
+                            </div>
+                          </div>
+                        )}
                       </>
                     ) : selected.type === "instapay" ? (
                       <div className="flex flex-col gap-2.5">
@@ -973,6 +982,15 @@ export default function RechargePage() {
                             <div className="flex items-center justify-between">
                               <span className="text-slate-400 font-semibold">المبلغ بالدولار:</span>
                               <strong className="font-mono text-emerald-400 font-black">${binancePayDetails.amountUsd} USD</strong>
+                            </div>
+                          </div>
+                        )}
+                        {selected.qr && (
+                          <div className="hidden md:flex flex-col items-center gap-2 bg-background/90 p-3 rounded-xl border border-border shadow-sm text-center mt-1">
+                            <span className="text-[11px] font-bold text-slate-200">امسح رمز QR للتحويل المباشر:</span>
+                            <div className="bg-white p-2 rounded-xl border border-border flex justify-center items-center shadow-md w-44 h-44 mx-auto">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={selected.qr} alt="Binance Pay QR Code" className="w-full h-full max-w-[160px] max-h-[160px] object-contain rounded-lg" />
                             </div>
                           </div>
                         )}
