@@ -2127,24 +2127,26 @@ export function WalletsTab() {
             />
           )}
           {/* QR Code Upload / Link Input for ALL payment methods */}
-          <div style={{ display: "flex", gap: 6, alignItems: "center", minWidth: 180, flex: 2 }}>
+          <div style={{ display: "flex", gap: 6, alignItems: "center", minWidth: 240, flex: 2.5, background: "#111827", padding: "4px 8px", borderRadius: 8, border: "1px solid #0284c7" }}>
+            <span style={{ fontSize: 11, fontWeight: "bold", color: "#38bdf8", whiteSpace: "nowrap" }}>📷 QR Code / صورة:</span>
             <input
               type="text"
               value={w.qr || ""}
               onChange={(e) => upd(actualIndex, "qr", e.target.value)}
-              style={{ ...inp, flex: 1, minWidth: 100 }}
+              style={{ ...inp, flex: 1, minWidth: 100, fontSize: 12, height: 34 }}
               placeholder="رابط الـ QR أو ارفع ملف"
+              dir="ltr"
             />
             <label style={{
-              background: "#333",
+              background: "#0284c7",
               color: "#fff",
-              padding: "8px 12px",
-              borderRadius: 8,
+              padding: "7px 12px",
+              borderRadius: 6,
               cursor: "pointer",
               fontSize: 12,
               fontWeight: "bold",
               whiteSpace: "nowrap",
-              border: "1px solid #444",
+              border: "1px solid #0369a1",
               display: "inline-flex",
               alignItems: "center",
               gap: 4
