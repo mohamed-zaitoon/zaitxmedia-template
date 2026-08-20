@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, CheckCircle, AlertCircle, ShoppingBag, Wallet, Info, QrCode } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { db } from "../lib/firebase";
@@ -37,6 +38,11 @@ export default function CheckoutModal({
 }: any) {
   const router = useRouter();
   const { rates, selectedCurrency, symbols } = useCurrency();
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   const isTikTokCoins = service?.name?.includes("عملات") && (service?.name?.includes("تيك توك") || service?.name?.includes("تيك تيك"));
   const isSecretSub = service?.name?.includes("اشتراك مخفي") || service?.name?.includes("سوبر فان") || (service?.name?.includes("اشتراك") && (service?.name?.includes("تيك توك") || service?.name?.includes("تيك تيك") || service?.category === "اشتراكات"));
@@ -220,7 +226,9 @@ export default function CheckoutModal({
     setBusy(false);
   };
 
-  return (
+  if (!mounted || typeof window === "undefined") return null;
+
+  return createPortal(
     <div
       style={{
         position: "fixed",
@@ -229,8 +237,8 @@ export default function CheckoutModal({
         right: 0,
         bottom: 0,
         background: "rgba(0,0,0,0.85)",
-        backdropFilter: "blur(4px)",
-        zIndex: 9999,
+        backdropFilter: "blur(6px)",
+        zIndex: 99999,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -579,6 +587,7 @@ export default function CheckoutModal({
           </Form>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
