@@ -4323,6 +4323,8 @@ function TonPriceTrackerCard({ usdRate }: { usdRate: number }) {
 
   return (
     <div style={{ width: "100%", maxWidth: 1400, margin: "0 auto" }}>
+      <FloatingSaveBar onClick={save} busy={busy} label="💾 حفظ التغييرات والخدمات اليدوية" msg={msg} />
+
       <TonPriceTrackerCard usdRate={usdRate} />
 
       <Card title="⚡ أسعار وباقات الألعاب والخدمات اليدوية">
