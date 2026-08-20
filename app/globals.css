@@ -29,6 +29,22 @@
   --font-mono: "JetBrains Mono", monospace;
 }
 
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg-primary: #f8fafc;
+    --bg-secondary: #f1f5f9;
+    --bg-tertiary: #e2e8f0;
+    --bg-elevated: #ffffff;
+    --bg-card: rgba(255, 255, 255, 0.95);
+    --border-primary: #cbd5e1;
+    --border-accent: rgba(245, 158, 11, 0.4);
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --header-bg: rgba(255, 255, 255, 0.92);
+  }
+}
+
 /* Custom Styled Select Dropdowns Across Entire Site */
 select {
   appearance: none !important;

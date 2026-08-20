@@ -12,6 +12,32 @@
             --surface: #1e1e1e; 
             --text: #e0e0e0; 
         }
+        @media (prefers-color-scheme: light) {
+            :root { 
+                --primary: #059669; 
+                --bg: #f8fafc; 
+                --surface: #ffffff; 
+                --text: #0f172a; 
+            }
+            .hero-text { color: #475569 !important; }
+            .feature-card { 
+                background: var(--surface) !important; 
+                box-shadow: 0 4px 20px rgba(0,0,0,0.06); 
+                border: 1px solid #e2e8f0; 
+                border-left: 4px solid var(--primary) !important; 
+            }
+            .feature-title { color: #0f172a !important; }
+            .feature-desc { color: #475569 !important; }
+            .btn-download { 
+                background: var(--primary) !important; 
+                color: #ffffff !important; 
+                box-shadow: 0 4px 15px rgba(5, 150, 105, 0.25) !important; 
+            }
+            .btn-download:hover { 
+                box-shadow: 0 10px 25px rgba(5, 150, 105, 0.4) !important; 
+            }
+            footer { color: #64748b !important; }
+        }
         * { box-sizing: border-box; }
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
@@ -147,7 +173,7 @@
             btn.disabled = true;
 
             var repoOwner = "mohamed-zaitoon";
-            var repoName = "zaitxmedia-template";
+            var repoName = "zaitxmedia";
             var directUrl = "https://zaitxmedia.com";
 
             try {
@@ -227,7 +253,7 @@
 
         <footer>
             <p>Developed with ❤️ by <a href="https://mohamedzaitoon.com">Mohamed Zaitoon</a></p>
-            <p><a href="https://github.com/mohamed-zaitoon/zaitxmedia-template">View Source on GitHub</a></p>
+            <p><a href="https://github.com/mohamed-zaitoon/zaitxmedia">View Source on GitHub</a></p>
         </footer>
     </div>
 
