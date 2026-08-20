@@ -3809,6 +3809,7 @@ export function ManualServicesTab() {
           {
             id: "tiktok_promo",
             name: "ترويج تيك توك",
+            category: "ترويج تيك توك",
             price: "0.5",
             min: "10",
             max: "50000",
@@ -3817,6 +3818,7 @@ export function ManualServicesTab() {
           {
             id: "instagram_promo",
             name: "ترويج انستجرام",
+            category: "ترويج انستجرام",
             price: "0.5",
             min: "10",
             max: "50000",
@@ -3825,6 +3827,7 @@ export function ManualServicesTab() {
           {
             id: "facebook_promo",
             name: "ترويج فيسبوك",
+            category: "ترويج فيسبوك",
             price: "0.5",
             min: "10",
             max: "50000",
@@ -3833,6 +3836,7 @@ export function ManualServicesTab() {
           {
             id: "tiktok_superfan",
             name: "سوبر فان - شهري",
+            category: "اشتراكات",
             price: "150",
             min: "1",
             max: "1",
@@ -3841,6 +3845,7 @@ export function ManualServicesTab() {
           {
             id: "tiktok_hidden_w",
             name: "اشتراك مخفي - اسبوعي",
+            category: "اشتراكات",
             price: "30",
             min: "1",
             max: "1",
@@ -3849,6 +3854,7 @@ export function ManualServicesTab() {
           {
             id: "tiktok_hidden_m",
             name: "اشتراك مخفي - شهري",
+            category: "اشتراكات",
             price: "100",
             min: "1",
             max: "1",
@@ -3857,6 +3863,7 @@ export function ManualServicesTab() {
         ];
       setSvcs(services.map((service: any) => ({
         ...service,
+        category: service.category || (service.id === "tiktok_promo" ? "ترويج تيك توك" : service.id === "instagram_promo" ? "ترويج انستجرام" : service.id === "facebook_promo" ? "ترويج فيسبوك" : service.id?.startsWith("tiktok_") ? "اشتراكات" : "أخرى"),
         price: service.price || (rate > 0 && service.price_usd ? Math.ceil(((Number(service.price_usd) * rate) - 1e-9) * 100) / 100 : ""),
         // Keep legacy packages tied to their original USD value, using the
         // rate stored when they were created rather than today's rate.
