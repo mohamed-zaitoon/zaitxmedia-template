@@ -3799,8 +3799,20 @@ export function ManualServicesTab() {
         (a: TikTokPricingTier, b: TikTokPricingTier) => Number(a.min) - Number(b.min),
       ));
       if (servicesResult.exists && servicesResult.data) {
-        if (servicesResult.data.categoryInstructions) setCategoryInstructions(servicesResult.data.categoryInstructions);
-        if (servicesResult.data.categoryAlerts) setCategoryAlerts(servicesResult.data.categoryAlerts);
+        const catInst = { ...(servicesResult.data.categoryInstructions || {}) };
+        const catAl = { ...(servicesResult.data.categoryAlerts || {}) };
+        if (catInst.ترويج) {
+          if (!catInst["ترويج تيك توك"]) catInst["ترويج تيك توك"] = catInst.ترويج;
+          if (!catInst["ترويج انستجرام"]) catInst["ترويج انستجرام"] = catInst.ترويج;
+          if (!catInst["ترويج فيسبوك"]) catInst["ترويج فيسبوك"] = catInst.ترويج;
+        }
+        if (catAl.ترويج) {
+          if (!catAl["ترويج تيك توك"]) catAl["ترويج تيك توك"] = catAl.ترويج;
+          if (!catAl["ترويج انستجرام"]) catAl["ترويج انستجرام"] = catAl.ترويج;
+          if (!catAl["ترويج فيسبوك"]) catAl["ترويج فيسبوك"] = catAl.ترويج;
+        }
+        setCategoryInstructions(catInst);
+        setCategoryAlerts(catAl);
       }
       const services =
         servicesResult.exists && servicesResult.data.services
@@ -3947,8 +3959,17 @@ export function ManualServicesTab() {
       const usdStr = usdPrice ? usdPrice.toString() : String(s.priceUsd || s.price_usd || "0");
       const minVal = Number(s.min || s.min_quantity || 1);
       const maxVal = Number(s.max || s.max_quantity || 1);
+      const catName = s.id === "tiktok_promo"
+        ? "ترويج تيك توك"
+        : s.id === "instagram_promo"
+          ? "ترويج انستجرام"
+          : s.id === "facebook_promo"
+            ? "ترويج فيسبوك"
+            : s.category || "أخرى";
+
       return {
         ...s,
+        category: catName,
         min: minVal.toString(),
         max: maxVal.toString(),
         min_quantity: minVal,
@@ -4415,7 +4436,10 @@ function TonPriceTrackerCard({ usdRate }: { usdRate: number }) {
         {(() => {
           const grouped: Record<string, { service: any; index: number }[]> = {};
           svcs.forEach((s, idx) => {
-            const catName = (s.category || "أخرى").trim();
+            let catName = (s.category || "أخرى").trim();
+            if (s.id === "tiktok_promo") catName = "ترويج تيك توك";
+            else if (s.id === "instagram_promo") catName = "ترويج انستجرام";
+            else if (s.id === "facebook_promo") catName = "ترويج فيسبوك";
             if (!grouped[catName]) grouped[catName] = [];
             grouped[catName].push({ service: s, index: idx });
           });
