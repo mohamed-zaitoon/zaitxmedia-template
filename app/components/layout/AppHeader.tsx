@@ -286,125 +286,126 @@ export default function AppHeader() {
         <div className="fixed inset-0 z-[99999999] md:hidden flex flex-col justify-end">
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-slate-950/40 transition-opacity animate-in fade-in duration-200"
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
             onClick={() => setMobileBottomSheetOpen(false)}
           />
 
           {/* Bottom Sheet Container */}
-          <div className="relative w-full max-h-[85vh] bg-slate-950/98 border-t border-cyan-500/40 rounded-t-3xl p-5 shadow-2xl overflow-y-auto space-y-4 z-10 animate-in slide-in-from-bottom duration-300 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {/* Sheet Top Bar Header with Close Button */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-2">
+          <div className="relative w-full max-h-[82vh] bg-slate-950/95 border-t border-slate-800 rounded-t-3xl p-4 shadow-2xl overflow-y-auto space-y-3 z-10 animate-in slide-in-from-bottom duration-300 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" dir="rtl">
+            {/* Sheet Handle Bar */}
+            <div className="w-10 h-1 rounded-full bg-slate-700/60 mx-auto -mt-1 mb-1.5" />
+
+            {/* Sheet Header */}
+            <div className="flex items-center justify-between pb-2 border-b border-slate-800/80">
               <div className="flex items-center gap-2">
                 <Sparkles size={16} className="text-cyan-400" />
-                <span className="text-xs font-black text-slate-300">القائمة والخدمات</span>
+                <span className="text-xs font-bold text-slate-200">القائمة والخدمات</span>
               </div>
               <button
                 type="button"
                 onClick={() => setMobileBottomSheetOpen(false)}
-                className="w-9 h-9 rounded-xl bg-slate-800/80 hover:bg-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition-all cursor-pointer border border-slate-700/50 shrink-0"
+                className="w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition-all cursor-pointer border border-slate-800 shrink-0"
                 aria-label="إغلاق"
               >
-                <X size={18} />
+                <X size={16} />
               </button>
             </div>
 
-            {/* 1. FIRST BUTTON: Recharge Balance */}
+            {/* 1. Top Action Button: Recharge Balance */}
             {user ? (
               <Link
                 href="/recharge"
                 onClick={() => setMobileBottomSheetOpen(false)}
-                className="w-full min-h-[52px] px-5 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-400 text-slate-950 font-extrabold text-sm flex items-center justify-between shadow-lg shadow-amber-500/20 active:scale-[0.99] transition-all"
+                className="w-full h-11 px-4 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-400 font-bold text-xs flex items-center justify-between transition-all"
               >
-                <div className="flex items-center gap-3">
-                  <Wallet size={20} className="fill-slate-950" />
+                <div className="flex items-center gap-2.5">
+                  <Wallet size={18} className="text-amber-400" />
                   <span>⚡ شحن الرصيد</span>
                 </div>
-                <ArrowRight size={16} className="rotate-180" />
+                <ArrowRight size={14} className="rotate-180 text-amber-400" />
               </Link>
             ) : (
               <Link
                 href="/login"
                 onClick={() => setMobileBottomSheetOpen(false)}
-                className="w-full min-h-[52px] px-5 rounded-2xl bg-gradient-to-r from-cyan-400 to-primary text-slate-950 font-extrabold text-sm flex items-center justify-between shadow-lg shadow-cyan-500/20 active:scale-[0.99] transition-all"
+                className="w-full h-11 px-4 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-400 font-bold text-xs flex items-center justify-between transition-all"
               >
-                <div className="flex items-center gap-3">
-                  <LogIn size={20} />
+                <div className="flex items-center gap-2.5">
+                  <LogIn size={18} />
                   <span>تسجيل الدخول / إنشاء حساب</span>
                 </div>
-                <ArrowRight size={16} className="rotate-180" />
+                <ArrowRight size={14} className="rotate-180 text-cyan-400" />
               </Link>
             )}
 
-            {/* 2. Main Navigation Links */}
-            <div className="space-y-2 py-1">
-              <span className="text-[11px] font-bold text-slate-400 px-2 block">الأقسام الرئيسية:</span>
-              {[
-                { href: "/", label: "الرئيسية", icon: Home },
-                { href: "/tiktok", label: "تيك توك", icon: Zap },
-                { href: "/games", label: "شحن الألعاب", icon: Gamepad2 },
-                { href: "/facebook", label: "فيسبوك", icon: Zap },
-                { href: "/instagram", label: "إنستجرام", icon: Zap },
-                { href: "/other", label: "أخرى", icon: Boxes },
-              ].map((link) => {
-                const Icon = link.icon;
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileBottomSheetOpen(false)}
-                    className="w-full min-h-[48px] px-4 rounded-xl bg-slate-900/80 hover:bg-slate-900 border border-slate-800/80 text-slate-200 text-xs font-black flex items-center justify-between transition-all"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Icon size={18} className="text-cyan-400" />
-                      <span>{link.label}</span>
-                    </div>
-                  </Link>
-                );
-              })}
+            {/* 2. Main Navigation Grid */}
+            <div className="space-y-1.5 pt-0.5">
+              <span className="text-[11px] font-bold text-slate-400 px-1 block">الأقسام الرئيسية:</span>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { href: "/", label: "الرئيسية", icon: Home },
+                  { href: "/tiktok", label: "تيك توك", icon: Zap },
+                  { href: "/games", label: "شحن الألعاب", icon: Gamepad2 },
+                  { href: "/facebook", label: "فيسبوك", icon: Zap },
+                  { href: "/instagram", label: "إنستجرام", icon: Zap },
+                  { href: "/other", label: "أخرى", icon: Boxes },
+                ].map((link) => {
+                  const Icon = link.icon;
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setMobileBottomSheetOpen(false)}
+                      className="h-10 px-3 rounded-lg bg-slate-900/90 hover:bg-slate-800/80 border border-slate-800/80 text-slate-200 text-xs font-bold flex items-center gap-2.5 transition-all"
+                    >
+                      <Icon size={16} className="text-cyan-400 shrink-0" />
+                      <span className="truncate">{link.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
 
-            {/* 3. Account Links */}
+            {/* 3. Account Links Grid */}
             {user && (
-              <div className="space-y-2 py-1">
-                <span className="text-[11px] font-bold text-slate-400 px-2 block">الحساب والطلبات:</span>
-                <Link
-                  href="/account"
-                  onClick={() => setMobileBottomSheetOpen(false)}
-                  className="w-full min-h-[48px] px-4 rounded-xl bg-slate-900/80 hover:bg-slate-900 border border-slate-800/80 text-slate-200 text-xs font-black flex items-center justify-between transition-all"
-                >
-                  <div className="flex items-center gap-3">
-                    <User size={18} className="text-amber-400" />
-                    <span>حسابي</span>
-                  </div>
-                </Link>
-                <Link
-                  href="/orders"
-                  onClick={() => setMobileBottomSheetOpen(false)}
-                  className="w-full min-h-[48px] px-4 rounded-xl bg-slate-900/80 hover:bg-slate-900 border border-slate-800/80 text-slate-200 text-xs font-black flex items-center justify-between transition-all"
-                >
-                  <div className="flex items-center gap-3">
-                    <Package size={18} className="text-amber-400" />
-                    <span>طلباتي</span>
-                  </div>
-                </Link>
-                {user.role === "admin" && (
-                  <a
-                    href="https://admin.zaitxmedia.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
+              <div className="space-y-1.5 pt-0.5">
+                <span className="text-[11px] font-bold text-slate-400 px-1 block">الحساب والطلبات:</span>
+                <div className="grid grid-cols-2 gap-2">
+                  <Link
+                    href="/account"
                     onClick={() => setMobileBottomSheetOpen(false)}
-                    className="w-full min-h-[48px] px-4 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 text-xs font-black flex items-center justify-between transition-all"
+                    className="h-10 px-3 rounded-lg bg-slate-900/90 hover:bg-slate-800/80 border border-slate-800/80 text-slate-200 text-xs font-bold flex items-center gap-2.5 transition-all"
                   >
-                    <div className="flex items-center gap-3">
-                      <span>⚙️</span>
-                      <span>لوحة الإدارة</span>
-                    </div>
-                  </a>
-                )}
+                    <User size={16} className="text-amber-400 shrink-0" />
+                    <span className="truncate">حسابي</span>
+                  </Link>
+                  <Link
+                    href="/orders"
+                    onClick={() => setMobileBottomSheetOpen(false)}
+                    className="h-10 px-3 rounded-lg bg-slate-900/90 hover:bg-slate-800/80 border border-slate-800/80 text-slate-200 text-xs font-bold flex items-center gap-2.5 transition-all"
+                  >
+                    <Package size={16} className="text-amber-400 shrink-0" />
+                    <span className="truncate">طلباتي</span>
+                  </Link>
+                  {user.role === "admin" && (
+                    <a
+                      href="https://admin.zaitxmedia.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setMobileBottomSheetOpen(false)}
+                      className="col-span-2 h-10 px-3 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 text-xs font-bold flex items-center justify-between transition-all"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-sm">⚙️</span>
+                        <span>لوحة الإدارة</span>
+                      </div>
+                    </a>
+                  )}
+                </div>
               </div>
             )}
 
-            {/* 4. LAST BUTTON: Logout */}
+            {/* 4. Logout Button */}
             {user && (
               <button
                 type="button"
@@ -412,10 +413,10 @@ export default function AppHeader() {
                   setMobileBottomSheetOpen(false);
                   signOutUser();
                 }}
-                className="w-full min-h-[50px] px-5 rounded-2xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-400 font-extrabold text-xs flex items-center justify-between transition-all cursor-pointer mt-3"
+                className="w-full h-10 px-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/25 text-red-400 font-bold text-xs flex items-center justify-between transition-all cursor-pointer mt-2"
               >
-                <div className="flex items-center gap-2.5">
-                  <LogOut size={18} />
+                <div className="flex items-center gap-2">
+                  <LogOut size={16} />
                   <span>تسجيل الخروج</span>
                 </div>
               </button>
