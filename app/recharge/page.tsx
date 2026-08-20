@@ -652,6 +652,31 @@ export default function RechargePage() {
         <h1 className="mb-3 flex items-center justify-center gap-2 text-lg sm:text-xl font-bold text-primary">
           <Wallet size={22} /> شحن المحفظة
         </h1>
+
+        {/* Live USD / SAR Exchange Rate Banner */}
+        <div className="mx-0 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-emerald-500/35 bg-emerald-500/10 px-4 py-3 shadow-md">
+          {isSarCurrency ? (
+            <>
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🇸🇦</span>
+                <span className="text-xs sm:text-sm font-bold text-slate-100">سعر الريال لدينا:</span>
+              </div>
+              <strong className="font-mono text-sm sm:text-base font-black text-emerald-400" dir="ltr">
+                {validSarRate.toFixed(2)} ج.م = 1 ﷼
+              </strong>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center gap-2">
+                <span className="text-lg">💵</span>
+                <span className="text-xs sm:text-sm font-bold text-slate-100">سعر الدولار لدينا:</span>
+              </div>
+              <strong className="font-mono text-sm sm:text-base font-black text-emerald-400" dir="ltr">
+                {(rates.usd || 54.55).toFixed(2)} ج.م = 1$
+              </strong>
+            </>
+          )}
+        </div>
         {requiredEgp > 0 && !rechargeId && (
           <div className="mx-0 mb-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-center">
             <strong className="block text-emerald-400 text-sm">
