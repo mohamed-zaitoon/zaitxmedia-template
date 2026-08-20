@@ -134,25 +134,26 @@ export function BarqLogo({ size = 28, className = "" }: { size?: number; classNa
   );
 }
 
-// 5. Official Bank Transfer Logo Icon
+// 5. Official Bank Transfer Logo Icon (Streamline Kameleon Duo-tone)
 export function BankLogo({ size = 28, className = "" }: { size?: number; className?: string }) {
   return (
     <div
-      className={`relative inline-flex items-center justify-center shrink-0 rounded-xl bg-gradient-to-br from-[#0891b2] via-[#0e7490] to-[#155e75] border border-cyan-400/40 shadow-md shadow-cyan-900/40 overflow-hidden ${className}`}
+      className={`relative inline-flex items-center justify-center shrink-0 rounded-xl bg-gradient-to-br from-[#1e293b] to-[#0f172a] border border-cyan-500/30 shadow-md shadow-cyan-900/30 overflow-hidden ${className}`}
       style={{ width: size, height: size }}
       title="Bank Transfer"
     >
       <svg
-        viewBox="0 0 24 24"
-        className="w-full h-full p-1.5"
-        fill="none"
-        stroke="white"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        viewBox="0 0 48 48"
+        className="w-full h-full p-1"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3" />
+        <path fill="#e0f2fe" d="M23.9979 47.9997c13.2548 0 23.9999 -10.745 23.9999 -23.9998C47.9978 10.7451 37.2527 0 23.9979 0S-0.00195312 10.7451 -0.00195312 23.9999 10.7431 47.9997 23.9979 47.9997Z" strokeWidth="1" />
+        <path fill="#0284c7" d="M37.9613 20.5087v1.7455H10.0342v-1.7455l13.9635 -8.7272 13.9636 8.7272Z" strokeWidth="1" />
+        <path fill="#0284c7" d="M11.7803 36.2179v-1.7455h24.4362v1.7455H11.7803Z" strokeWidth="1" />
+        <path fill="#38bdf8" d="M18.3255 22.2544h-4.3636v12.2181h4.3636V22.2544Z" strokeWidth="1" />
+        <path fill="#38bdf8" d="M26.18 22.2544h-4.3636v12.2181H26.18V22.2544Z" strokeWidth="1" />
+        <path fill="#38bdf8" d="M34.0345 22.2544h-4.3636v12.2181h4.3636V22.2544Z" strokeWidth="1" />
+        <path fill="#0284c7" d="M37.9613 36.2178H10.0342v1.7454h27.9271v-1.7454Z" strokeWidth="1" />
       </svg>
     </div>
   );
